@@ -1,0 +1,226 @@
+{
+    "PYTHON FC": [
+        {
+            "name": "Bramkarz Python",
+            "position": "GOALKEEPER",
+            "diving": 82,
+            "handling": 78,
+            "kicking": 70,
+            "reflexes": 85,
+            "speed": 55,
+            "positioning": 80
+        },
+        {
+            "name": "Lewy Obrońca Python",
+            "position": "LEFT_BACK",
+            "pace": 85,
+            "shooting": 45,
+            "passing": 70,
+            "dribbling": 65,
+            "defending": 82,
+            "physical": 75
+        },
+        {
+            "name": "Środkowy Obrońca Python 1",
+            "position": "CENTRE_BACK",
+            "pace": 65,
+            "shooting": 35,
+            "passing": 55,
+            "dribbling": 50,
+            "defending": 88,
+            "physical": 90
+        },
+        {
+            "name": "Środkowy Obrońca Python 2",
+            "position": "CENTRE_BACK",
+            "pace": 68,
+            "shooting": 40,
+            "passing": 60,
+            "dribbling": 55,
+            "defending": 85,
+            "physical": 88
+        },
+        {
+            "name": "Prawy Obrońca Python",
+            "position": "RIGHT_BACK",
+            "pace": 82,
+            "shooting": 50,
+            "passing": 68,
+            "dribbling": 62,
+            "defending": 80,
+            "physical": 78
+        },
+        {
+            "name": "Defensywny Pomocnik Python",
+            "position": "CENTRAL_DEFENSIVE_MIDFIELDER",
+            "pace": 70,
+            "shooting": 60,
+            "passing": 78,
+            "dribbling": 70,
+            "defending": 82,
+            "physical": 85
+        },
+        {
+            "name": "Środkowy Pomocnik Python 1",
+            "position": "CENTRAL_MIDFIELDER",
+            "pace": 75,
+            "shooting": 72,
+            "passing": 85,
+            "dribbling": 80,
+            "defending": 60,
+            "physical": 70
+        },
+        {
+            "name": "Środkowy Pomocnik Python 2",
+            "position": "CENTRAL_MIDFIELDER",
+            "pace": 78,
+            "shooting": 75,
+            "passing": 82,
+            "dribbling": 84,
+            "defending": 65,
+            "physical": 72
+        },
+        {
+            "name": "Lewy Skrzydłowy Python",
+            "position": "LEFT_WING",
+            "pace": 90,
+            "shooting": 80,
+            "passing": 75,
+            "dribbling": 88,
+            "defending": 35,
+            "physical": 65
+        },
+        {
+            "name": "Prawy Skrzydłowy Python",
+            "position": "RIGHT_WING",
+            "pace": 88,
+            "shooting": 78,
+            "passing": 76,
+            "dribbling": 85,
+            "defending": 30,
+            "physical": 68
+        },
+        {
+            "name": "Napastnik Python",
+            "position": "STRIKER",
+            "pace": 85,
+            "shooting": 88,
+            "passing": 70,
+            "dribbling": 82,
+            "defending": 35,
+            "physical": 80
+        }
+    ],
+    "CF JAVA": [
+        {
+            "name": "Bramkarz Java",
+            "position": "GOALKEEPER",
+            "diving": 85,
+            "handling": 75,
+            "kicking": 65,
+            "reflexes": 88,
+            "speed": 50,
+            "positioning": 82
+        },
+        {
+            "name": "Lewy Obrońca Java",
+            "position": "LEFT_BACK",
+            "pace": 78,
+            "shooting": 40,
+            "passing": 65,
+            "dribbling": 60,
+            "defending": 80,
+            "physical": 75
+        },
+        {
+            "name": "Środkowy Obrońca Java 1",
+            "position": "CENTRE_BACK",
+            "pace": 62,
+            "shooting": 30,
+            "passing": 60,
+            "dribbling": 45,
+            "defending": 85,
+            "physical": 92
+        },
+        {
+            "name": "Środkowy Obrońca Java 2",
+            "position": "CENTRE_BACK",
+            "pace": 60,
+            "shooting": 32,
+            "passing": 58,
+            "dribbling": 48,
+            "defending": 87,
+            "physical": 90
+        },
+        {
+            "name": "Prawy Obrońca Java",
+            "position": "RIGHT_BACK",
+            "pace": 80,
+            "shooting": 40,
+            "passing": 68,
+            "dribbling": 62,
+            "defending": 80,
+            "physical": 78
+        },
+        {
+            "name": "Lewy Pomocnik Java",
+            "position": "LEFT_MIDFIELDER",
+            "pace": 85,
+            "shooting": 70,
+            "passing": 78,
+            "dribbling": 82,
+            "defending": 50,
+            "physical": 68
+        },
+        {
+            "name": "Środkowy Pomocnik Java",
+            "position": "CENTRAL_MIDFIELDER",
+            "pace": 72,
+            "shooting": 68,
+            "passing": 82,
+            "dribbling": 78,
+            "defending": 70,
+            "physical": 75
+        },
+        {
+            "name": "Ofensywny Pomocnik Java",
+            "position": "CENTRAL_ATTACKING_MIDFIELDER",
+            "pace": 78,
+            "shooting": 80,
+            "passing": 88,
+            "dribbling": 85,
+            "defending": 45,
+            "physical": 65
+        },
+        {
+            "name": "Prawy Pomocnik Java",
+            "position": "RIGHT_MIDFIELDER",
+            "pace": 84,
+            "shooting": 72,
+            "passing": 76,
+            "dribbling": 80,
+            "defending": 52,
+            "physical": 66
+        },
+        {
+            "name": "Środkowy Napastnik Java",
+            "position": "CENTRAL_FORWARD",
+            "pace": 82,
+            "shooting": 84,
+            "passing": 75,
+            "dribbling": 80,
+            "defending": 40,
+            "physical": 78
+        },
+        {
+            "name": "Główny Napastnik Java",
+            "position": "STRIKER",
+            "pace": 88,
+            "shooting": 86,
+            "passing": 65,
+            "dribbling": 84,
+            "defending": 30,
+            "physical": 75
+        }
+    ]
+}
