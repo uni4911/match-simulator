@@ -1,0 +1,10 @@
+{
+    "name":"Lewy obrońca python",
+    "position":"Position.LEFT_BACK",
+    "pace":85,
+    "shooting":45,
+    "passing":70,
+    "dribbling":65,
+    "defending":82,
+    "physical":75
+}
