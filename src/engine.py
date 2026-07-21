@@ -1,8 +1,9 @@
 from __future__ import annotations
 import random 
-from models import Team, FieldPlayer, Goalkeeper
+from src.models import Team, FieldPlayer
 from enum import Enum, auto
 from typing import Optional, Final
+from abc import ABC, abstractmethod
 
 STANDARD_MATCH_LENGTH: Final[int] = 90
 PASS_CHANCE:Final[float] = 0.30
@@ -17,104 +18,86 @@ class MatchState(Enum):
     SHOT_ON_GOAL = auto()
     MATCH_END = auto()
 
-class MatchEngine:
-    def __init__(self):
-        pass
-    
-    def _winner_choose(self, attack: int, defence: int) -> bool:
+class State(ABC):
+
+    @staticmethod
+    def winner_choose(attack: int, defence: int) -> bool:
         if attack + defence <= 0:
             return False
         result = random.randint(1, attack + defence)
         return result <= attack
+    
+    @abstractmethod
+    def execute(self, match: Match) -> 'State':
+        pass
 
-
-    def resolve_kick_off(self, match : Match) -> None:
-        match.current_state = MatchState.MIDFIELD_PLAY
-
-    def resolve_midfield_play(self, match: Match)  -> None:
+class KickOff(State):
+    def execute(self, match: Match) -> 'State':
+        match.current_minute += DEFAULT_MINUTE_MODIFIER
+        return MidfieldPlay()
+    
+class MidfieldPlay(State):
+    def execute(self, match: Match) -> 'State':
         home_midfielder = match.home_team.get_midfielder()
         away_midfielder = match.away_team.get_midfielder()
 
         home_ball_possession_chance = home_midfielder.ball_possession_chance
         away_ball_possession_chance = away_midfielder.ball_take_over_chance
 
-        winner = self._winner_choose(home_ball_possession_chance, away_ball_possession_chance)
-
+        winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
+        match.current_minute += MIDFIELD_PLAY_MINUTE_MODIFIER
         if winner:
             match.player_with_ball = home_midfielder
-            match.current_state = MatchState.HOME_ATTACK
         else:
             match.player_with_ball = away_midfielder
-            match.current_state = MatchState.AWAY_ATTACK
-        
-    
-    def resolve_attack(self, attacking_team: Team, defending_team: Team, match: Match) -> bool:
+
+        return Attack()
+     
+class Attack(State):
+    def execute(self, match: Match) -> 'State':
         attacking_player = match.player_with_ball
-        defending_player = defending_team.get_defender()
+        defending_player = match.away_team.get_defender() if attacking_player in match.home_team.players else match.home_team.get_defender()
 
         attack_score = attacking_player.shooting 
         defence_score = defending_player.defending 
-        winner = self._winner_choose(attack_score, defence_score)
-
+        winner = self.winner_choose(attack_score, defence_score)
+        match.current_minute += DEFAULT_MINUTE_MODIFIER
         if winner:
             if random.random() > PASS_CHANCE:
-                new_attacking_player = attacking_team.get_attacker()
+                new_attacking_player = match.away_team.get_attacker() if attacking_player in match.away_team.players else match.home_team.get_attacker()
                 match.player_with_ball = new_attacking_player
-            match.current_state = MatchState.SHOT_ON_GOAL
-            return True
+            return ShotOnGoal()
         else:
-            match.current_state = MatchState.MIDFIELD_PLAY
-            return False
-    
-    def resolve_shot_on_goal(self,attacking_team: Team, defending_team: Team, match: Match) -> bool | None:
-        goalkeeper = defending_team.get_goalkeeper()
+            return MidfieldPlay()
+        
+class ShotOnGoal(State):
+    def execute(self, match: Match) -> 'State':
+        goalkeeper = match.away_team.get_goalkeeper() if match.player_with_ball in match.home_team.players else match.home_team.get_goalkeeper()
         goalkeeper_score = goalkeeper.goalkeeping_score
         attack_score = match.player_with_ball.shooting 
 
-        winner = self._winner_choose(attack_score, goalkeeper_score)
-
+        winner = self.winner_choose(attack_score, goalkeeper_score)
+        match.current_minute += DEFAULT_MINUTE_MODIFIER
         if winner:
-            match.current_state = MatchState.KICK_OFF
-            return True
+            if match.player_with_ball in match.home_team.players:
+                match.home_score += 1
+            else:
+                match.away_score += 1
+            return KickOff()
         else:
-            match.current_state = MatchState.MIDFIELD_PLAY
-            return False
+           return MidfieldPlay()
+        
+        
+class MatchEngine:
+    def __init__(self):
+        pass
         
     def play_match(self, match : Match) -> None:
         while match.current_minute <= match.max_minute:
+            match.current_state = match.current_state.execute(match)
 
-            match match.current_state:
-                case MatchState.KICK_OFF:
-                    self.resolve_kick_off(match)
-                    match.current_minute += DEFAULT_MINUTE_MODIFIER
-                case MatchState.MIDFIELD_PLAY:
-                    self.resolve_midfield_play(match)
-                    match.current_minute += MIDFIELD_PLAY_MINUTE_MODIFIER
-                case MatchState.HOME_ATTACK:
-                    self.resolve_attack(match.home_team, match.away_team,match)
-                    match.current_minute += DEFAULT_MINUTE_MODIFIER
-                case MatchState.AWAY_ATTACK:
-                    self.resolve_attack(match.away_team, match.home_team,match)
-                    match.current_minute += DEFAULT_MINUTE_MODIFIER
-                case MatchState.SHOT_ON_GOAL:
-                    shooter = match.player_with_ball
-                    if shooter in match.home_team.players:
-                        attacking_team = match.home_team
-                        defending_team = match.away_team
-                    else:
-                        attacking_team = match.away_team
-                        defending_team = match.home_team
-                    
-                    is_goal = self.resolve_shot_on_goal(attacking_team, defending_team, match)
-
-                    if is_goal:
-                        if attacking_team == match.home_team:
-                            match.home_score += 1
-                        else:
-                            match.away_score += 1 
-                    match.current_minute += DEFAULT_MINUTE_MODIFIER
         
-        match.current_state = MatchState.MATCH_END
+    
 
 class Match:
     def __init__(self, home_team: Team, away_team: Team):
@@ -122,7 +105,7 @@ class Match:
         self.away_team :Team = away_team
         self.home_score : int = 0
         self.away_score : int = 0
-        self.current_state : MatchState = MatchState.KICK_OFF
+        self.current_state : 'State' = KickOff()
         self.current_minute :int = 0
         self.max_minute :int = STANDARD_MATCH_LENGTH
         self.player_with_ball :FieldPlayer | None = None

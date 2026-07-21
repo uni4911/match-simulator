@@ -1,4 +1,4 @@
-from models import FieldPlayer, Position, Goalkeeper
+from src.models import FieldPlayer, Position, Goalkeeper
 import pytest
 
 @pytest.mark.parametrize("name , position, pace, shooting, passing, dribbling, defending, physical, overall",

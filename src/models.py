@@ -66,13 +66,13 @@ ATTACKING_POSITIONS = [Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
 MIDFIELD_POSITIONS = [Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER]
 DEFENCE_POSITIONS = [Position.LEFT_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK, Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK]
 class Player:
-    def __init__(self, name : str, position : Position):
+    def __init__(self, name: str, position: Position):
         self.name :str = name
         self.position : Position= position
     
 
 class Team:
-    def __init__(self, name : str, players : list[Player]):
+    def __init__(self, name: str, players: list[Player]):
         self.name : str = name 
         self.players : list[Player] = players
         if len([player for player in self.players if isinstance(player, Goalkeeper)]) != 1:
@@ -97,7 +97,7 @@ class Team:
          return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
 
 class FieldPlayer(Player):
-    def __init__(self, name : str, position : Position, pace : int, shooting : int, passing : int, dribbling : int, defending : int, physical : int):
+    def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int):
         super().__init__(name, position)
         self.pace : int = pace
         self.shooting : int = shooting
@@ -127,7 +127,7 @@ class Goalkeeper(Player):
     REFLEX_MODIFIER: Final[float] = 0.6
     POSITION_MODIFIER: Final[float] = 0.4
 
-    def __init__(self, name : str, diving : int, handling : int, kicking : int, reflexes : int, speed : int, positioning : int):
+    def __init__(self, name: str, diving: int, handling: int, kicking: int, reflexes: int, speed: int, positioning: int):
         super().__init__(name, Position.GOALKEEPER)
         self.diving : int = diving
         self.handling : int = handling

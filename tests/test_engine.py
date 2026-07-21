@@ -1,7 +1,7 @@
 from unittest.mock import patch
-from engine import MatchEngine
+from src.engine import MatchEngine
 
-@patch('engine.random.randint')
+@patch('src.engine.random.randint')
 def test_random_choose(mock_randint):
     mock_randint.return_value = 4
     engine = MatchEngine()
@@ -11,7 +11,7 @@ def test_random_choose(mock_randint):
 
     mock_randint.assert_called_once_with(1,10)
 
-@patch('engine.random.randint')
+@patch('src.engine.random.randint')
 def test_random_choose_edge_case(mock_randint):
     mock_randint.return_value = 4
     engine = MatchEngine()
