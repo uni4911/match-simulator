@@ -4,6 +4,7 @@ from src.models import Team, FieldPlayer
 from enum import Enum, auto
 from typing import Optional, Final
 from abc import ABC, abstractmethod
+from src.commentator import Commentator
 
 STANDARD_MATCH_LENGTH: Final[int] = 90
 PASS_CHANCE:Final[float] = 0.30
@@ -34,6 +35,7 @@ class State(ABC):
 class KickOff(State):
     def execute(self, match: Match) -> 'State':
         match.current_minute += DEFAULT_MINUTE_MODIFIER
+        match.match_events.append(f"{match.current_minute} minute: Match started!")
         return MidfieldPlay()
     
 class MidfieldPlay(State):
@@ -89,16 +91,14 @@ class ShotOnGoal(State):
         
         
 class MatchEngine:
-    def __init__(self):
+    def __init__(self, commentator: Commentator):
+        self.commentator: Commentator = commentator
         pass
         
-    def play_match(self, match : Match) -> None:
+    def play_match(self, match: Match) -> None:
         while match.current_minute <= match.max_minute:
             match.current_state = match.current_state.execute(match)
-
-        
-    
-
+            self.commentator.comment(match)
 class Match:
     def __init__(self, home_team: Team, away_team: Team):
         self.home_team : Team = home_team
@@ -109,3 +109,5 @@ class Match:
         self.current_minute :int = 0
         self.max_minute :int = STANDARD_MATCH_LENGTH
         self.player_with_ball :FieldPlayer | None = None
+        self.match_events: list[str] = [] 
+    

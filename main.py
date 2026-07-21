@@ -1,7 +1,9 @@
 from src.engine import Match, MatchEngine
-from src.models import Team, Position, Goalkeeper, FieldPlayer
+from src.models import Team
 from src.loader import load_file
-    
+from src.commentator import Commentator
+
+commentator = Commentator()    
 
 python_players = load_file('data.json','PYTHON FC')
 java_players = load_file('data.json','CF JAVA')
@@ -10,7 +12,7 @@ team_java = Team("Java United", java_players)
 team_python = Team("FC Python", python_players)
 
 test_match = Match(team_java, team_python)
-engine = MatchEngine()
+engine = MatchEngine(commentator)
 engine.play_match(test_match)
 
 print("--- WYNIK MECZU ---")
