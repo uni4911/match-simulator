@@ -96,6 +96,9 @@ class Team:
     def get_attacker(self) -> Player:
          return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
 
+    def has_player(self, player: Player) -> bool:
+        return player in self.players
+
 class FieldPlayer(Player):
     def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int):
         super().__init__(name, position)

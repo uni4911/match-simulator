@@ -14,7 +14,6 @@ team_python = Team("FC Python", python_players)
 test_match = Match(team_java, team_python)
 engine = MatchEngine(commentator)
 engine.play_match(test_match)
-print(test_match.match_events)
 
 print("--- WYNIK MECZU ---")
 print(f"{test_match.home_team.name}: {test_match.home_score}")

@@ -1,10 +1,11 @@
 from __future__ import annotations
 import random 
-from src.models import Team, FieldPlayer
+from src.models import Team, FieldPlayer, Goalkeeper
 from enum import Enum, auto
 from typing import Optional, Final
 from abc import ABC, abstractmethod
 from src.commentator import Commentator
+from src.events import MatchEvent, Goal, KickoffEvent, ShotSave
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
 PASS_CHANCE:Final[float] = 0.30
@@ -36,26 +37,30 @@ class State(ABC):
         pass
 
 class KickOff(State):
+    def __init__(self, executing_team: Team):
+        self.executing_team: Team = executing_team
+
     def execute(self, match: Match) -> 'State':
+        match.player_with_ball = self.executing_team.get_midfielder()
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
-        match.match_events.append(f"{match.current_second // 60} minute: Match started!")
+        match.match_events.append(KickoffEvent(match.current_second,self.executing_team.name))
         return MidfieldPlay()
     
 class MidfieldPlay(State):
     def execute(self, match: Match) -> 'State':
-        home_midfielder = match.home_team.get_midfielder()
-        away_midfielder = match.away_team.get_midfielder()
+        home_midfielder = match.player_with_ball
+        away_midfielder = match.defending_team.get_midfielder()
 
         home_ball_possession_chance = home_midfielder.ball_possession_chance
         away_ball_possession_chance = away_midfielder.ball_take_over_chance
 
         winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
+        if winner:
+            match.player_with_ball = home_midfielder
+        else:
+            match.player_with_ball = away_midfielder
         if random.random() > ATTACK_CHANCE:
-            if winner:
-                match.player_with_ball = home_midfielder
-            else:
-                match.player_with_ball = away_midfielder
             return Attack()
         else:
             return MidfieldPlay()
@@ -63,7 +68,7 @@ class MidfieldPlay(State):
 class Attack(State):
     def execute(self, match: Match) -> 'State':
         attacking_player = match.player_with_ball
-        defending_player = match.away_team.get_defender() if attacking_player in match.home_team.players else match.home_team.get_defender()
+        defending_player = match.defending_team.get_defender()
 
         attack_score = attacking_player.shooting 
         defence_score = defending_player.defending 
@@ -71,7 +76,7 @@ class Attack(State):
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
         if winner:
             if random.random() > PASS_CHANCE:
-                new_attacking_player = match.away_team.get_attacker() if attacking_player in match.away_team.players else match.home_team.get_attacker()
+                new_attacking_player = match.team_with_ball.get_attacker()
                 match.player_with_ball = new_attacking_player
             return ShotOnGoal()
         else:
@@ -79,7 +84,7 @@ class Attack(State):
         
 class ShotOnGoal(State):
     def execute(self, match: Match) -> 'State':
-        goalkeeper = match.away_team.get_goalkeeper() if match.player_with_ball in match.home_team.players else match.home_team.get_goalkeeper()
+        goalkeeper = match.defending_team.get_goalkeeper()
         goalkeeper_score = int(goalkeeper.goalkeeping_score * GOALKEEPER_SCORE_MODIFIER)
         attack_score = match.player_with_ball.shooting 
 
@@ -87,16 +92,17 @@ class ShotOnGoal(State):
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
         if random.random() < SHOT_ON_GOAL_CHANCE:
             if winner:
-                if match.player_with_ball in match.home_team.players:
-                    match.match_events.append(f"{match.current_second // 60} minute: {match.player_with_ball.name} gets a goal!")
+                match.match_events.append(Goal(match.current_second, match.player_with_ball.name, match.team_with_ball.name))
+                if match.team_with_ball == match.home_team:
                     match.home_score += 1
+                    return KickOff(match.away_team)
                 else:
-                    match.match_events.append(f"{match.current_second // 60} minute: {match.player_with_ball.name} gets a goal!")
                     match.away_score += 1
-                return KickOff()
+                    return KickOff(match.home_team)
             else:
                 return MidfieldPlay()
         else:
+            match.match_events.append(ShotSave(match.current_second,goalkeeper.name,match.team_with_ball.name))
             return MidfieldPlay()
         
         
@@ -115,9 +121,25 @@ class Match:
         self.away_team :Team = away_team
         self.home_score : int = 0
         self.away_score : int = 0
-        self.current_state : 'State' = KickOff()
+        self.current_state : 'State' = KickOff(random.choice([self.home_team,self.away_team]))
         self.current_second :int = 0
         self.max_second :int = STANDARD_MATCH_LENGTH
         self.player_with_ball :FieldPlayer | None = None
-        self.match_events: list[str] = [] 
+        self.match_events: list[MatchEvent] = [] 
+
+    @property
+    def team_with_ball(self) -> Team | None:
+        if self.player_with_ball is None:
+            return None
+        elif self.away_team.has_player(self.player_with_ball):
+            return self.away_team
+        else:
+            return self.home_team
+        
+    @property
+    def defending_team(self) -> Team | None:
+        if self.player_with_ball is None:
+            return None
+        return self.home_team if self.team_with_ball == self.away_team else self.away_team
+
     
