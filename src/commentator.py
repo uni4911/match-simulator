@@ -1,4 +1,8 @@
-from src.engine import Match
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.engine import Match
 
 class Commentator:
     def __init__(self):

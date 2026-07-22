@@ -84,7 +84,7 @@ class Team:
        return self.goalkeeper
 
     def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> Player:
-        weights: list[int] = [weights_dict.get(player.position, default_weight) for player in self.field_players ]          
+        weights: list[int] = [weights_dict.get(player.position, default_weight) for player in self.field_players]          
         return random.choices(self.field_players, weights,k=1)[0]
     
     def get_defender(self) -> Player:
