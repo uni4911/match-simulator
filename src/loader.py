@@ -18,5 +18,5 @@ def load_file(file_name: str, team_name: str) -> list[FieldPlayer|Goalkeeper]:
                 team_players.append(temp_player)
             return team_players
     except FileNotFoundError:
-        print("Data.json doesn't exist")
+        print("data.json doesn't exist")
         raise

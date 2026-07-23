@@ -18,4 +18,12 @@ class ShotSave(MatchEvent):
     goalkeeper: str
     team: str
 
+@dataclass(frozen=True)
+class FoulDuringAttack(MatchEvent):
+    fouling_player: str
+    punishment: str
+    foul_aftermath: str
 
+@dataclass(frozen=True)
+class PenaltyKickGoal(Goal):
+    pass

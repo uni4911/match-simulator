@@ -1,11 +1,11 @@
 from __future__ import annotations
 import random 
-from src.models import Team, FieldPlayer, Goalkeeper
+from src.models import Team, FieldPlayer, Goalkeeper, Player
 from enum import Enum, auto
 from typing import Optional, Final
 from abc import ABC, abstractmethod
 from src.commentator import Commentator
-from src.events import MatchEvent, Goal, KickoffEvent, ShotSave
+from src.events import MatchEvent, Goal, KickoffEvent, ShotSave, FoulDuringAttack, PenaltyKickGoal
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
 PASS_CHANCE:Final[float] = 0.30
@@ -14,6 +14,13 @@ MIN_SECONDS_PASSESD: Final[int] = 5
 MAX_SECONDS_PASSED: Final[int] = 15
 GOALKEEPER_SCORE_MODIFIER: Final[int] = 4
 SHOT_ON_GOAL_CHANCE: Final[float] = 0.3
+FOUL_PUNISHMENTS: Final[str] = ['yellow_card','red_card','normal_foul']
+FOUL_WEIGHTS_DURING_MIDPLAY: Final[float] = [9.5,0.5,90]
+FOUL_WEIGHTS_DURING_ATTACK: Final[float] = [15,1,84]
+FOUL_AFTERMATH_DURING_ATTACK: Final[str] = ['penalty_kick','dangerous_freekick']
+FOUL_AFTERMATH_DURING_ATTACK_WEIGHT: Final[int] = [10,90]
+FOUL_AFTERMATH_DURING_MIDPLAY: Final[str] = ['freekick']
+PENALTY_KICK_MODIFIER: Final[int] = 3
 
 class MatchState(Enum):
     KICK_OFF = auto()
@@ -42,53 +49,52 @@ class KickOff(State):
 
     def execute(self, match: Match) -> 'State':
         match.player_with_ball = self.executing_team.get_midfielder()
-        match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
-        match.match_events.append(KickoffEvent(match.current_second,self.executing_team.name))
+        if match.current_second > 0:
+            match.match_events.append(KickoffEvent(match.current_second,self.executing_team.name))
         return MidfieldPlay()
     
 class MidfieldPlay(State):
     def execute(self, match: Match) -> 'State':
-        home_midfielder = match.player_with_ball
-        away_midfielder = match.defending_team.get_midfielder()
+        attacking_midfielder: FieldPlayer = match.player_with_ball
+        defending_midfielder: FieldPlayer = match.defending_team.get_midfielder()
 
-        home_ball_possession_chance = home_midfielder.ball_possession_chance
-        away_ball_possession_chance = away_midfielder.ball_take_over_chance
+        home_ball_possession_chance: int = attacking_midfielder.ball_possession_chance
+        away_ball_possession_chance: int = defending_midfielder.ball_take_over_chance
 
         winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
         if winner:
-            match.player_with_ball = home_midfielder
+            match.player_with_ball = attacking_midfielder
         else:
-            match.player_with_ball = away_midfielder
+            match.player_with_ball = defending_midfielder
         if random.random() > ATTACK_CHANCE:
             return Attack()
         else:
-            return MidfieldPlay()
-     
+            return MidfieldPlay()   
 class Attack(State):
     def execute(self, match: Match) -> 'State':
-        attacking_player = match.player_with_ball
-        defending_player = match.defending_team.get_defender()
+        attacking_player: FieldPlayer = match.player_with_ball
+        defending_player: FieldPlayer = match.defending_team.get_defender()
 
-        attack_score = attacking_player.shooting 
-        defence_score = defending_player.defending 
-        winner = self.winner_choose(attack_score, defence_score)
+        attack_score: int = attacking_player.shooting 
+        defence_score: int = defending_player.defending 
+        winner: bool = self.winner_choose(attack_score, defence_score)
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
         if winner:
             if random.random() > PASS_CHANCE:
-                new_attacking_player = match.team_with_ball.get_attacker()
+                new_attacking_player: Player = match.team_with_ball.get_attacker()
                 match.player_with_ball = new_attacking_player
-            return ShotOnGoal()
+            return random.choices([ShotOnGoal(),AttackFoul(defending_player)])[0]
         else:
             return MidfieldPlay()
         
 class ShotOnGoal(State):
     def execute(self, match: Match) -> 'State':
-        goalkeeper = match.defending_team.get_goalkeeper()
-        goalkeeper_score = int(goalkeeper.goalkeeping_score * GOALKEEPER_SCORE_MODIFIER)
-        attack_score = match.player_with_ball.shooting 
+        goalkeeper: Goalkeeper = match.defending_team.get_goalkeeper()
+        goalkeeper_score: int = int(goalkeeper.goalkeeping_score * GOALKEEPER_SCORE_MODIFIER)
+        attack_score: int = match.player_with_ball.shooting 
 
-        winner = self.winner_choose(attack_score, goalkeeper_score)
+        winner: bool = self.winner_choose(attack_score, goalkeeper_score)
         match.current_second += random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
         if random.random() < SHOT_ON_GOAL_CHANCE:
             if winner:
@@ -105,7 +111,52 @@ class ShotOnGoal(State):
             match.match_events.append(ShotSave(match.current_second,goalkeeper.name,match.team_with_ball.name))
             return MidfieldPlay()
         
+class AttackFoul(State):
+    def __init__(self,fouling_player: 'Player'):
+        self.fouling_player: 'Player' = fouling_player
         
+    def execute(self, match: Match) -> 'State':      
+        foul_punishment = random.choices(FOUL_PUNISHMENTS,FOUL_WEIGHTS_DURING_ATTACK,k=1)[0]
+        foul_aftermath = random.choices(FOUL_AFTERMATH_DURING_ATTACK,FOUL_AFTERMATH_DURING_ATTACK_WEIGHT,k=1)[0]
+        match.match_events.append(FoulDuringAttack(match.current_second,self.fouling_player.name,foul_punishment, foul_aftermath))
+        return PenaltyKick() if foul_aftermath == 'penalty_kick' else DangerousFreekick()
+
+class PenaltyKick(State):
+    def execute(self, match: Match) -> 'State':
+        goalkeeper: Goalkeeper = match.defending_team.get_goalkeeper()
+        penalty_taker: FieldPlayer  = match.team_with_ball.get_penalty_taker()
+
+        winner = self.winner_choose(penalty_taker.shooting * PENALTY_KICK_MODIFIER, goalkeeper.goalkeeping_score)
+        if winner:
+            match.match_events.append(PenaltyKickGoal(match.current_second, match.player_with_ball.name, match.team_with_ball.name))
+            if match.team_with_ball == match.home_team:
+                match.home_score += 1
+                return KickOff(match.away_team)
+            else:
+                match.away_score += 1
+                return KickOff(match.home_team)
+        else:
+            return random.choices([MidfieldPlay(),Attack()],[80,20],k=1)[0]
+
+class DangerousFreekick(State):
+        
+        def execute(self, match: Match) -> 'State':
+            freekick_taker: FieldPlayer = match.team_with_ball.get_freekick_taker()
+            match.player_with_ball = freekick_taker
+            shoot_or_cross: 'State' = random.choices(['shoot','cross'],[25,75],k=1)[0]
+
+            if shoot_or_cross == 'shoot':
+                return ShotOnGoal()
+            else:
+                if random.random() > PASS_CHANCE:
+                    match.player_with_ball = match.team_with_ball.get_attacker()
+                    return ShotOnGoal()
+                else:
+                    return MidfieldPlay()
+                
+                
+                
+            
 class MatchEngine:
     def __init__(self, commentator: Commentator):
         self.commentator: Commentator = commentator

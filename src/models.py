@@ -80,24 +80,31 @@ class Team:
         self.field_players : list[Player] = [field_player for field_player in self.players if isinstance(field_player, FieldPlayer)]
         self.goalkeeper : Player = next((player for player in self.players if isinstance(player, Goalkeeper)),None) 
         
-    def get_goalkeeper(self) -> Player:
+    def get_goalkeeper(self) -> 'Player':
        return self.goalkeeper
 
-    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> Player:
+    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> 'Player':
         weights: list[int] = [weights_dict.get(player.position, default_weight) for player in self.field_players]          
         return random.choices(self.field_players, weights,k=1)[0]
     
-    def get_defender(self) -> Player:
+    def get_defender(self) -> 'Player':
         return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT)
     
-    def get_midfielder(self) -> Player:
+    def get_midfielder(self) -> 'Player':
         return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT)
     
-    def get_attacker(self) -> Player:
+    def get_attacker(self) -> 'Player':
          return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
 
     def has_player(self, player: Player) -> bool:
         return player in self.players
+
+    def get_penalty_taker(self) -> 'Player':
+        return max(self.field_players, key=lambda player: player.shooting)
+
+    def get_freekick_taker(self) -> 'Player':
+        return max(self.field_players, key=lambda player: player.passing)
+
 
 class FieldPlayer(Player):
     def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int):
