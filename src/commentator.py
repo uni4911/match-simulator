@@ -69,7 +69,7 @@ class Commentator:
         self.last_commented_event: str|None = None
 
     def comment(self, match: Match) -> None:
-        if len(match.match_events)>0:
+        if match.match_events:
             if self.last_commented_event != match.match_events[-1]:
                 self.last_commented_event = match.match_events[-1]
 

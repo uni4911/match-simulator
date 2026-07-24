@@ -65,46 +65,92 @@ DEFAULT_ATTACKER_WEIGHT = 1
 ATTACKING_POSITIONS = [Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING, Position.CENTRAL_FORWARD]
 MIDFIELD_POSITIONS = [Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER]
 DEFENCE_POSITIONS = [Position.LEFT_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK, Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK]
+
+PREFERRED_FALLBACKS: dict[Position, list[Position]] = {
+
+    Position.GOALKEEPER: [],
+    
+    Position.CENTRE_BACK: [
+        Position.LEFT_BACK, Position.RIGHT_BACK, 
+        Position.CENTRAL_DEFENSIVE_MIDFIELDER
+    ],
+    Position.LEFT_BACK: [
+        Position.LEFT_WING_BACK, Position.CENTRE_BACK, 
+        Position.LEFT_MIDFIELDER
+    ],
+    Position.RIGHT_BACK: [
+        Position.RIGHT_WING_BACK, Position.CENTRE_BACK, 
+        Position.RIGHT_MIDFIELDER
+    ],
+    Position.LEFT_WING_BACK: [
+        Position.LEFT_BACK, Position.LEFT_MIDFIELDER, 
+        Position.LEFT_WING
+    ],
+    Position.RIGHT_WING_BACK: [
+        Position.RIGHT_BACK, Position.RIGHT_MIDFIELDER, 
+        Position.RIGHT_WING
+    ],
+
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER: [
+        Position.CENTRAL_MIDFIELDER, Position.CENTRE_BACK, 
+        Position.CENTRAL_ATTACKING_MIDFIELDER
+    ],
+    Position.CENTRAL_MIDFIELDER: [
+        Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER, 
+        Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER
+    ],
+    Position.CENTRAL_ATTACKING_MIDFIELDER: [
+        Position.CENTRAL_MIDFIELDER, Position.CENTRAL_FORWARD, 
+        Position.STRIKER
+    ],
+    Position.LEFT_MIDFIELDER: [
+        Position.LEFT_WING, Position.LEFT_WING_BACK, 
+        Position.CENTRAL_MIDFIELDER
+    ],
+    Position.RIGHT_MIDFIELDER: [
+        Position.RIGHT_WING, Position.RIGHT_WING_BACK, 
+        Position.CENTRAL_MIDFIELDER
+    ],
+
+    Position.LEFT_WING: [
+        Position.RIGHT_WING, Position.LEFT_MIDFIELDER, 
+        Position.STRIKER, Position.CENTRAL_FORWARD
+    ],
+    Position.RIGHT_WING: [
+        Position.LEFT_WING, Position.RIGHT_MIDFIELDER, 
+        Position.STRIKER, Position.CENTRAL_FORWARD
+    ],
+    Position.CENTRAL_FORWARD: [
+        Position.STRIKER, Position.CENTRAL_ATTACKING_MIDFIELDER, 
+        Position.LEFT_WING, Position.RIGHT_WING
+    ],
+    Position.STRIKER: [
+        Position.CENTRAL_FORWARD, Position.CENTRAL_ATTACKING_MIDFIELDER, 
+        Position.LEFT_WING, Position.RIGHT_WING
+    ]
+}
+
+FORMATION_433 = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
+]
+
+
 class Player:
     def __init__(self, name: str, position: Position):
         self.name :str = name
         self.position : Position= position
     
-
 class Team:
     def __init__(self, name: str, players: list[Player]):
         self.name : str = name 
-        self.players : list[Player] = players
+        self.players : list[MatchPlayer] = players
         if len([player for player in self.players if isinstance(player, Goalkeeper)]) != 1:
             raise ValueError("Choose only one goalkeeper")
-        self.field_players : list[Player] = [field_player for field_player in self.players if isinstance(field_player, FieldPlayer)]
-        self.goalkeeper : Player = next((player for player in self.players if isinstance(player, Goalkeeper)),None) 
+        self.starting_players : list['Player'] = [field_player for field_player in self.players if isinstance(field_player, FieldPlayer)]
+        self.goalkeepers : list['Player'] = [player for player in self.players if isinstance(player, Goalkeeper)]
         
-    def get_goalkeeper(self) -> 'Player':
-       return self.goalkeeper
-
-    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> 'Player':
-        weights: list[int] = [weights_dict.get(player.position, default_weight) for player in self.field_players]          
-        return random.choices(self.field_players, weights,k=1)[0]
-    
-    def get_defender(self) -> 'Player':
-        return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT)
-    
-    def get_midfielder(self) -> 'Player':
-        return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT)
-    
-    def get_attacker(self) -> 'Player':
-         return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
-
-    def has_player(self, player: Player) -> bool:
-        return player in self.players
-
-    def get_penalty_taker(self) -> 'Player':
-        return max(self.field_players, key=lambda player: player.shooting)
-
-    def get_freekick_taker(self) -> 'Player':
-        return max(self.field_players, key=lambda player: player.passing)
-
 
 class FieldPlayer(Player):
     def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int):
@@ -126,12 +172,6 @@ class FieldPlayer(Player):
             return round((self.pace * 0.15) + (self.shooting * 0.0) + (self.passing * 0.1) + (self.dribbling * 0.05)  + (self.defending * 0.4) + (self.physical * 0.3) )
         else:
             raise ValueError("Position doesnt exist")
-    @property
-    def ball_possession_chance(self) -> int:
-        return self.passing + self.dribbling
-    @property
-    def ball_take_over_chance(self) -> int:
-        return self.physical + self.defending
 class Goalkeeper(Player):
 
     REFLEX_MODIFIER: Final[float] = 0.6
@@ -154,4 +194,97 @@ class Goalkeeper(Player):
     def goalkeeping_score(self) -> int:
         return round(((self.reflexes * Goalkeeper.REFLEX_MODIFIER) + (self.positioning * Goalkeeper.POSITION_MODIFIER)))
 
+class MatchPlayer:
+    def __init__(self, player: 'Player'):
+        self.player: 'Player' = player
+        self.goals: int = 0
+        self.assists: int = 0
+        self.yellow_card: int = 0
+        self.has_red_card: bool = False
+        self.passes: int =0
 
+    def recieve_card(self, card_type: str) -> bool:
+        if card_type == 'yellow_card':
+            self.yellow_card += 1
+        if self.yellow_card == 2 or card_type == 'red_card':
+            self.has_red_card = True
+            return True
+        if self.yellow_card == 1:
+            return False
+        return False
+
+    @property
+    def ball_possession_chance(self) -> int:
+                return self.player.passing + self.player.dribbling
+    @property
+    def ball_take_over_chance(self) -> int:
+                return self.player.physical + self.player.defending
+        
+
+class MatchTeam:
+    def __init__(self, team: Team, formation: list[Position]):
+        self.team: Team = team
+        self.formation: list[Position] = formation
+        self.match_players: list[MatchPlayer] = [MatchPlayer(player) for player in self.team.players]
+
+    @property
+    def starting_goalkeeper(self) -> Goalkeeper:
+        return max(self.team.goalkeepers, key=lambda goalkeeper: goalkeeper.overall) 
+    
+    @property
+    def starting_players(self) -> list[Player]:
+
+        starting_players: list[MatchPlayer] = []
+
+        for position in self.formation:
+            selected_player: 'Player' | None = None
+            players_on_position: list[Player] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
+            if players_on_position:
+                selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
+            else:
+                for fallback_position in PREFERRED_FALLBACKS[position]:
+                    players_on_position: list[Player] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
+                    if players_on_position:
+                        selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
+                        break
+            if selected_player is None:
+                selected_player = sorted([p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players],key=lambda player: player.player.overall,reverse=True)[0]
+        
+            starting_players.append(selected_player)
+
+        return starting_players
+
+    @property 
+    def bench_goalkeepers(self) -> list[Goalkeeper]:
+        return [goalkeeper for goalkeeper in self.team.goalkeepers if goalkeeper != self.starting_goalkeeper]
+    
+    @property
+    def bench_players(self) -> list[Player]:
+        return [player for player in self.team.players if player not in self.starting_players]
+
+    def get_goalkeeper(self) -> MatchPlayer:
+           return self.starting_goalkeeper
+    
+    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> 'Player':
+        weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.starting_players]          
+        return random.choices(self.starting_players, weights,k=1)[0]
+    
+    def get_defender(self) -> 'Player':
+        return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT)
+    
+    def get_midfielder(self) -> 'Player':
+        return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT)
+    
+    def get_attacker(self) -> 'Player':
+            return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
+
+    def has_player(self, player: Player) -> bool:
+        return player in self.match_players
+
+    def get_penalty_taker(self) -> 'Player':
+        return max(self.starting_players, key=lambda player: player.player.shooting)
+
+    def get_freekick_taker(self) -> 'Player':
+        return max(self.starting_players, key=lambda player: player.player.passing)
+
+  
