@@ -1,69 +1,101 @@
 from __future__ import annotations
 from typing import Optional
 from typing import TYPE_CHECKING
-from src.events import KickoffEvent, Goal, ShotSave, PenaltyKickGoal, FoulDuringAttack
+from src.events import KickoffEvent, Goal, ShotSave, PenaltyKickGoal, Foul, YellowCardFoul, RedCardFoul
 import random
 
 if TYPE_CHECKING:
     from src.engine import Match
 
 KICKOFF_EVENT_COMMENTS = [
-    "Sędzia gwiżdże po raz pierwszy! Rozpoczyna drużyna {event.executing_team}.",
-    "Piłka wprawiona w ruch przez {event.executing_team}. Gramy!",
-    "Gwizdek arbitra! Wybrani zawodnicy zespołu {event.executing_team} wznowili grę od środkowego koła.",
-    "Początek spotkania! Przy piłce od pierwszej sekundy zespół {event.executing_team}.",
-    "Zaczynamy! Gra od środka rozpoczyna się dla drużyny {event.executing_team}.",
-    "Sędzia daje sygnał do rozpoczęcia meczu! Przejmuje piłkę {event.executing_team}.",
-    "Gwizdek sędziego rozbrzmiewa na stadionie! Od środka zawodnicy {event.executing_team}.",
-    "I ruszyły zegary! Pierwsze zagranie w tym meczu należy do {event.executing_team}.",
+    "Sedzia gwizdzo po raz pierwszy! Rozpoczyna druzyna {event.executing_team}.",
+    "Pilka wprawiona w ruch przez {event.executing_team}. Gramy!",
+    "Gwizdek arbitra! Wybrani zawodnicy zespolu {event.executing_team} wznowili gre od srodkowego kola.",
+    "Poczatek spotkania! Przy pilce od pierwszej sekundy zespol {event.executing_team}.",
+    "Zaczynamy! Gra od srodka rozpoczyna sie dla druzyny {event.executing_team}.",
+    "Sedzia daje sygnal do rozpoczecia meczu! Przejmuje pilke {event.executing_team}.",
+    "Gwizdek sedziego rozbrzmiewa na stadionie! Od srodka zawodnicy {event.executing_team}.",
+    "I ruszyly zegary! Pierwsze zagranie w tym meczu nalezy do {event.executing_team}.",
     "Zostawmy statystyki, czas na emocje! {event.executing_team} rozpoczyna to widowisko!",
-    "Piłka w grze! Zobaczymy, co dzisiaj zaprezentuje nam {event.executing_team}.",
+    "Pilka w grze! Zobaczymy, co dzisiaj zaprezentuje nam {event.executing_team}.",
+    "Panie i panowie, zaczynamy to wielkie widowisko! Od srodka {event.executing_team}!",
+    "Pierwsze podanie w tym spotkaniu, pilke wymieniaja zawodnicy {event.executing_team}.",
+    "Trybuny rycza, a {event.executing_team} zaczyna budowac swoj pierwszy atak!",
 ]
 
 GOAL_COMMENTS = [
-    "GOOOOAL! Co za fantastyczne wykończenie! Strzelcem bramki jest {event.goalscorer}!",
-    "Bramka! {event.goalscorer} umieszcza piłkę w siatce! Punkty dla {event.team}!",
-    "Niesamowite uderzenie! {event.goalscorer} trafia do bramki bez dawania szans obrońcom!",
-    "Mamy gola! {event.goalscorer} podwyższa wynik meczu dla {event.team}!",
-    "Siatka się zatrzęsła! Kapitalna akcja, którą wykończył {event.goalscorer}!",
-    "ALEŻ UDERZENIE! {event.goalscorer} nie daje żadnych szans bramkarzowi! Gol dla {event.team}!",
-    "Ależ precyzja! {event.goalscorer} trafia idealnie w okienko! Kibice {event.team} szaleją na trybunach!",
-    "GOOOOOOL! Stadion eksplodował! {event.goalscorer} wpisuje się na listę strzelców!",
-    "Co za kunszt! {event.goalscorer} zachowuje zimną krew w polu karnym i daje prowadzenie/bramkę dla {event.team}!",
-    "To była po prostu majstersztyk! {event.goalscorer} umieszcza piłkę tuż przy słupku!",
+    "GOOOOAL! Co za fantastyczne wykonczenie! Strzelcem bramki jest {event.goalscorer}!",
+    "Bramka! {event.goalscorer} umieszcza pilke w siatce! Punkty dla {event.team}!",
+    "Niesamowite uderzenie! {event.goalscorer} trafia do bramki bez dawania szans obroncom!",
+    "Mamy gola! {event.goalscorer} podwyzsza wynik meczu dla {event.team}!",
+    "Siatka sie zatrzesla! Kapitalna akcja, ktora wykonczyl {event.goalscorer}!",
+    "ALEZ UDERZENIE! {event.goalscorer} nie daje zadnych szans bramkarzowi! Gol dla {event.team}!",
+    "Alez precyzja! {event.goalscorer} trafia idealnie w okienko! Kibice {event.team} szaleja na trybunach!",
+    "GOOOOOOL! Stadion eksplodowal! {event.goalscorer} wpisuje sie na liste strzelcow!",
+    "Co za kunszt! {event.goalscorer} zachowuje zimna krew w polu karnym i zdobywa bramke dla {event.team}!",
+    "To byl po prostu majstersztyk! {event.goalscorer} umieszcza pilke tuz przy slupku!",
     "Zimna krew, klasa i precyzja! {event.goalscorer} pokonuje bramkarza!",
-    "Prawdziwa poezja futbolu! {event.goalscorer} strzela pięknego gola dla {event.team}!",
+    "Prawdziwa poezja futbolu! {event.goalscorer} strzela pieknego gola dla {event.team}!",
+    "BRAMKA! Stadion doslownie odlecial! {event.goalscorer} pokazal ogromna klase!",
+    "Co za przymierzenie! {event.goalscorer} nie dal bramkarzowi najmniejszych szans! {event.team} w skowronkach!",
+    "Futbol z innej planety! {event.goalscorer} konczy te koronkowa akcje trafieniem!",
+    "Nici z planow obronnych! {event.goalscorer} mija defensorow i umieszcza pilke w siatce!",
 ]
 
 SHOT_SAVE_COMMENTS = [
-    "Co za obrona! {event.goalkeeper} wyciąga się jak struna i paruje ten strzał!",
-    "Niesamowity refleks! {event.goalkeeper} ratuje swój zespół przed utratą bramki!",
-    "Strzał był groźny, ale {event.goalkeeper} pewnie interweniuje!",
-    "Bramkarz na miejscu! {event.goalkeeper} zatrzymuje uderzenie zawodnika drużyny przeciwnej!",
-    "Fantastyczna parada! {event.goalkeeper} udowadnia swoją klasę między słupkami!",
-    "Ależ wyciągnął się {event.goalkeeper}! Klasa światowa między słupkami!",
-    "Obronione! {event.goalkeeper} czyta grę niczym otwartą księgę!",
-    "To powinna być bramka, ale {event.goalkeeper} robi coś niesamowitego! Co za instynkt!",
-    "Pewny chwyt! {event.goalkeeper} uspokaja sytuację we własnym polu karnym.",
-    "Złapał to! {event.goalkeeper} paruje groźne uderzenie na rzut rożny!",
+    "Co za obrona! {event.goalkeeper} wyciaga sie jak struna i paruje ten strzal!",
+    "Niesamowity refleks! {event.goalkeeper} ratuje swoj zespol przed utrata bramki!",
+    "Strzal byl grozny, ale {event.goalkeeper} pewnie interweniuje!",
+    "Bramkarz na miejscu! {event.goalkeeper} zatrzymuje uderzenie zawodnika druzyny przeciwnej!",
+    "Fantastyczna parada! {event.goalkeeper} udowadnia swoja klase miedzy slupkami!",
+    "Alez wyciagnal sie {event.goalkeeper}! Klasa swiatowa miedzy slupkami!",
+    "Obronione! {event.goalkeeper} czyta gre niczym otwarta ksierge!",
+    "To powinna byc bramka, ale {event.goalkeeper} robi cos niesamowitego! Co za instynkt!",
+    "Pewny chwyt! {event.goalkeeper} uspokaja sytuacje we wlasnym polu karnym.",
+    "Zlapal to! {event.goalkeeper} paruje grozne uderzenie na rzut rozny!",
     "Nie ma gola! Kapitalna interwencja, {event.goalkeeper} bohaterem akcji!",
+    "Niewiarygodne! Jak on to wyciagnal?! {event.goalkeeper} ratuje skore swoim obroncom!",
+    "Koci refleks! {event.goalkeeper} paruje to uderzenie wprost za linie koncowa!",
+    "To byl wrezc pewny gol, ale {event.goalkeeper} mowi stanowcze NIE!",
 ]
 
 PENALTY_KICK_GOAL_COMMENTS = [
-    "GOOOOOOL Z RZUTU KARNEGO! {event.goalscorer} pewnym strzałem zamienia 'jedenastkę' na bramkę dla {event.team}!",
+    "GOOOOOOL Z RZUTU KARNEGO! {event.goalscorer} pewnym strzalem zamienia 'jedenastke' na bramke dla {event.team}!",
     "Zimna krew! {event.goalscorer} myli bramkarza z karnego! Gol dla {event.team}!",
-    "Bezradny bramkarz przy tym strzale z 11 metrów! {event.goalscorer} pewnie egzekwuje rzut karny!",
+    "Bezradny bramkarz przy tym strzale z 11 metrow! {event.goalscorer} pewnie egzekwuje rzut karny!",
     "Pewnie, mocno i bez kalkulacji! {event.goalscorer} trafia z karnego dla {event.team}!",
-    "Presja go nie przerosła! {event.goalscorer} zdobywa bramkę z rzutu karnego!",
+    "Presja go nie przerosla! {event.goalscorer} zdobywa bramke z rzutu karnego!",
+    "Spokoj godny mistrza! {event.goalscorer} wysyla bramkarza w jeden rog, a pilke w drugi!",
+    "Zimne nerwy i perfekcja! {event.goalscorer} uderza tuz pod poprzeczke z rzutu karnego!",
+    "Bramkarz wyczul intencje, ale uderzenie {event.goalscorer} bylo zbyt precyzyjne!",
 ]
 
 FOUL_COMMENTS = [
     "Ostrzejsze starcie! {event.fouling_player} fauluje przeciwnika!",
-    "Gwizdek sędziego! {event.fouling_player} przesadził z agresją w tej walce o piłkę.",
+    "Gwizdek sedziego! {event.fouling_player} przesadzil z agresja w tej walce o pilke.",
     "Paskudny faul! {event.fouling_player} nieprzepisowo zatrzymuje atak.",
-    "Sędzia przerywa grę. {event.fouling_player} dopuszcza się przewinienia.",
+    "Sedzia przerywa gre. {event.fouling_player} dopuszcza sie przewinienia.",
+    "Zostawienie nogi... {event.fouling_player} powstrzymuje rywala faulem.",
+    "Za mocne wejscie w nogi przeciwnika! {event.fouling_player} przekroczyl granice przepisow.",
+    "Taktyczny faul. {event.fouling_player} przerywa obiecujaca akcje rywali.",
+    "Ostre sprowadzenie do parteru! {event.fouling_player} zmusza sedziego do uzycia gwizdka.",
 ]
 
+YELLOW_CARD_FOUL_COMMENTS = [
+    "Sedzia siega do kieszeni... Zolta kartka dla {event.fouling_player}!",
+    "To musialo sie tak skonczyc! {event.fouling_player} ukarany zoltym kartonikiem.",
+    "Za to wejscie {event.fouling_player} oglada zolta kartke. Musi od teraz uwazac!",
+    "Arbitra nie przekonaly tlumaczenia. {event.fouling_player} z zolta kartka na swoim koncie.",
+    "Ostre starcie i sprawiedliwy wyrok: {event.fouling_player} wpisany do notesu sedziego!",
+]
+
+RED_CARD_FOUL_COMMENTS = [
+    "CZERWONA KARTKA! {event.fouling_player} wyleci z boiska za to bezmyslne wejscie!",
+    "Dramat zespolu! {event.fouling_player} oslabia swoja druzyne i schodzi do szatni!",
+    "Sedzia nie ma zadnych watpliwosci! Prosta czerwona kartka dla {event.fouling_player}!",
+    "Brutalne zagranie! {event.fouling_player} opuszcza plac gry po czerwonej kartce!",
+    "Koniec meczu dla {event.fouling_player}! Arbiter wyciaga czerwony kartonik!",
+]
 class Commentator:
     def __init__(self):
         self.last_commented_event: str|None = None
@@ -77,20 +109,29 @@ class Commentator:
                     case KickoffEvent() as event:
                         template = random.choice(KICKOFF_EVENT_COMMENTS)
                         minute = event.second // 60 
-                        print(f"{minute} minute: {template.format(event=event)}")
+                        print(f"{minute}' min: {template.format(event=event)}")
                     case Goal() as event:
                         template = random.choice(GOAL_COMMENTS)
                         minute = event.second // 60 
-                        print(f"{minute} minute: {template.format(event=event)}")
+                        print(f"{minute}' min: {template.format(event=event)}")
                     case ShotSave() as event:
                         template = random.choice(SHOT_SAVE_COMMENTS)
                         minute = event.second // 60 
-                        print(f"{minute} minute: {template.format(event=event)}")
+                        print(f"{minute}' min: {template.format(event=event)}")
                     case PenaltyKickGoal() as event:
                         template = random.choice(PENALTY_KICK_GOAL_COMMENTS)
                         minute = event.second // 60 
-                        print(f"{minute} minute: {template.format(event=event)}")
-                    case FoulDuringAttack() as event:
+                        print(f"{minute}' min: {template.format(event=event)}")
+                    case YellowCardFoul() as event:
+                        template = random.choice(YELLOW_CARD_FOUL_COMMENTS)
+                        minute = event.second // 60 
+                        print(f"{minute}' min: {template.format(event=event)}")
+                    case RedCardFoul() as event:
+                        template = random.choice(RED_CARD_FOUL_COMMENTS)
+                        minute = event.second // 60 
+                        print(f"{minute}' min: {template.format(event=event)}")
+                    case Foul() as event:
                         template = random.choice(FOUL_COMMENTS)
                         minute = event.second // 60 
-                        print(f"{minute} minute: {template.format(event=event)}")
+                        print(f"{minute}' min: {template.format(event=event)}")
+        

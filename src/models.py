@@ -203,7 +203,7 @@ class MatchPlayer:
         self.has_red_card: bool = False
         self.passes: int =0
 
-    def recieve_card(self, card_type: str) -> bool:
+    def receive_card(self, card_type: str) -> bool:
         if card_type == 'yellow_card':
             self.yellow_card += 1
         if self.yellow_card == 2 or card_type == 'red_card':
@@ -213,12 +213,12 @@ class MatchPlayer:
             return False
         return False
 
-    @property
-    def ball_possession_chance(self) -> int:
-                return self.player.passing + self.player.dribbling
-    @property
-    def ball_take_over_chance(self) -> int:
-                return self.player.physical + self.player.defending
+
+    def ball_possession_chance(self, modifier: float) -> float:
+                return (self.player.passing + self.player.dribbling) * modifier
+   
+    def ball_take_over_chance(self, modifier: float) -> float:
+                return (self.player.physical + self.player.defending) * modifier
         
 
 class MatchTeam:
@@ -232,7 +232,7 @@ class MatchTeam:
         return max(self.team.goalkeepers, key=lambda goalkeeper: goalkeeper.overall) 
     
     @property
-    def starting_players(self) -> list[Player]:
+    def starting_players(self) -> list[MatchPlayer]:
 
         starting_players: list[MatchPlayer] = []
 
@@ -259,15 +259,23 @@ class MatchTeam:
         return [goalkeeper for goalkeeper in self.team.goalkeepers if goalkeeper != self.starting_goalkeeper]
     
     @property
-    def bench_players(self) -> list[Player]:
+    def bench_players(self) -> list[MatchPlayer]:
         return [player for player in self.team.players if player not in self.starting_players]
+
+    @property
+    def active_players(self) -> list[MatchPlayer]:
+        return [player for player in self.starting_players if player.has_red_card is False]
+
+    @property 
+    def relative_strength_modifier(self) -> float:
+        return len(self.active_players)/10
 
     def get_goalkeeper(self) -> MatchPlayer:
            return self.starting_goalkeeper
     
     def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> 'Player':
-        weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.starting_players]          
-        return random.choices(self.starting_players, weights,k=1)[0]
+        weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.active_players]          
+        return random.choices(self.active_players, weights,k=1)[0]
     
     def get_defender(self) -> 'Player':
         return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT)
@@ -282,9 +290,11 @@ class MatchTeam:
         return player in self.match_players
 
     def get_penalty_taker(self) -> 'Player':
-        return max(self.starting_players, key=lambda player: player.player.shooting)
+        return max(self.active_players, key=lambda player: player.player.shooting)
 
     def get_freekick_taker(self) -> 'Player':
-        return max(self.starting_players, key=lambda player: player.player.passing)
+        return max(self.active_players, key=lambda player: player.player.passing)
+
+    
 
   

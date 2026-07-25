@@ -13,6 +13,7 @@ team_python = Team("FC Python", python_players)
 match_java = MatchTeam(team_java, FORMATION_433)
 match_python = MatchTeam(team_python, FORMATION_433)
 
+
 test_match = Match(match_java, match_python)
 engine = MatchEngine(commentator)
 engine.play_match(test_match)
