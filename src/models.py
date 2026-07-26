@@ -3,6 +3,8 @@ import random
 from enum import Enum, auto
 from typing import Optional, Final
 
+
+
 class Position(Enum):
     GOALKEEPER = auto()
     LEFT_BACK = auto()
@@ -136,11 +138,12 @@ FORMATION_433 = [
     Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
 ]
 
-
+BASE_DRAIN_RATE = 0.0001
 class Player:
     def __init__(self, name: str, position: Position):
         self.name :str = name
         self.position : Position= position
+        self.fitness: float = 1.0
     
 class Team:
     def __init__(self, name: str, players: list[Player]):
@@ -155,21 +158,22 @@ class Team:
 class FieldPlayer(Player):
     def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int):
         super().__init__(name, position)
-        self.pace : int = pace
-        self.shooting : int = shooting
-        self.passing : int = passing
-        self.dribbling : int = dribbling
-        self.defending : int = defending
-        self.physical : int = physical
+        self.base_pace : int = pace
+        self.base_shooting : int = shooting
+        self.base_passing : int = passing
+        self.base_dribbling : int = dribbling
+        self.base_defending : int = defending
+        self.base_physical : int = physical
+
 
     @property
     def overall(self) -> int:
         if self.position in ATTACKING_POSITIONS:
-            return round((self.pace * 0.3) + (self.shooting * 0.4) + (self.passing * 0.05) + (self.dribbling * 0.15) + (self.defending * 0.0) +(self.physical * 0.1))
+            return round((self.base_pace * 0.3) + (self.base_shooting * 0.4) + (self.base_passing * 0.05) + (self.base_dribbling * 0.15) + (self.base_defending * 0.0) +(self.base_physical * 0.1))
         elif self.position in MIDFIELD_POSITIONS:
-            return round((self.pace * 0.1) + (self.shooting * 0.1) + (self.passing * 0.3) + (self.dribbling * 0.3)  +  (self.defending * 0.1) + (self.physical * 0.1))
+            return round((self.base_pace * 0.1) + (self.base_shooting * 0.1) + (self.base_passing * 0.3) + (self.base_dribbling * 0.3)  +  (self.base_defending * 0.1) + (self.base_physical * 0.1))
         elif self.position in DEFENCE_POSITIONS:
-            return round((self.pace * 0.15) + (self.shooting * 0.0) + (self.passing * 0.1) + (self.dribbling * 0.05)  + (self.defending * 0.4) + (self.physical * 0.3) )
+            return round((self.base_pace * 0.15) + (self.base_shooting * 0.0) + (self.base_passing * 0.1) + (self.base_dribbling * 0.05)  + (self.base_defending * 0.4) + (self.base_physical * 0.3) )
         else:
             raise ValueError("Position doesnt exist")
 class Goalkeeper(Player):
@@ -201,7 +205,9 @@ class MatchPlayer:
         self.assists: int = 0
         self.yellow_card: int = 0
         self.has_red_card: bool = False
-        self.passes: int =0
+        self.passes: int = 0
+        self.current_stamina: float = self.player.fitness
+
 
     def receive_card(self, card_type: str) -> bool:
         if card_type == 'yellow_card':
@@ -214,13 +220,38 @@ class MatchPlayer:
         return False
 
 
+    @property
+    def pace(self) -> int:
+        return int(self.player.base_pace *(0.5 + 0.5 * self.current_stamina))
+    @property
+    def shooting(self) -> int:
+        return int(self.player.base_shooting *(0.5 + 0.5 * self.current_stamina))
+    @property
+    def passing(self) -> int:
+        return int(self.player.base_passing *(0.5 + 0.5 * self.current_stamina))
+    @property
+    def dribbling(self) -> int:
+        return int(self.player.base_dribbling *(0.5 + 0.5 * self.current_stamina))
+    @property
+    def defending(self) -> int:
+        return int(self.player.base_defending *(0.5 + 0.5 * self.current_stamina))
+    @property
+    def physical(self) -> int:
+        return int(self.player.base_physical *(0.5 + 0.5 * self.current_stamina))
+    
     def ball_possession_chance(self, modifier: float) -> float:
-                return (self.player.passing + self.player.dribbling) * modifier
-   
+                    return (self.passing + self.dribbling) * modifier
+       
     def ball_take_over_chance(self, modifier: float) -> float:
-                return (self.player.physical + self.player.defending) * modifier
-        
+                    return (self.physical + self.defending) * modifier
 
+    def drain_stamina(self, seconds: int, is_active: bool = False) -> float:
+        multiplier = 2.5 if is_active else 1.0
+    
+        physical_factor: float = 1.0 -(self.player.base_physical/200)
+        drain_amount:float = seconds * BASE_DRAIN_RATE * physical_factor * multiplier
+        self.current_stamina = max(0.0,self.current_stamina - drain_amount)
+         
 class MatchTeam:
     def __init__(self, team: Team, formation: list[Position]):
         self.team: Team = team
@@ -290,10 +321,15 @@ class MatchTeam:
         return player in self.match_players
 
     def get_penalty_taker(self) -> 'Player':
-        return max(self.active_players, key=lambda player: player.player.shooting)
+        return max(self.active_players, key=lambda player: player.shooting)
 
     def get_freekick_taker(self) -> 'Player':
-        return max(self.active_players, key=lambda player: player.player.passing)
+        return max(self.active_players, key=lambda player: player.passing)
+
+    def update_stamina(self, seconds: int, active_players: list[MatchPlayer] = []) -> None:
+        for player in self.active_players:
+            is_active = player in active_players
+            player.drain_stamina(seconds, is_active=is_active)
 
     
 

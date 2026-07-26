@@ -18,7 +18,6 @@ class ShotSave(MatchEvent):
     goalkeeper: str
     team: str
 
-
 @dataclass(frozen=True)
 class Foul(MatchEvent):
     fouling_player: str
