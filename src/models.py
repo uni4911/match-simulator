@@ -149,8 +149,6 @@ class Team:
     def __init__(self, name: str, players: list[Player]):
         self.name : str = name 
         self.players : list[MatchPlayer] = players
-        if len([player for player in self.players if isinstance(player, Goalkeeper)]) != 1:
-            raise ValueError("Choose only one goalkeeper")
         self.starting_players : list['Player'] = [field_player for field_player in self.players if isinstance(field_player, FieldPlayer)]
         self.goalkeepers : list['Player'] = [player for player in self.players if isinstance(player, Goalkeeper)]
         
@@ -245,7 +243,7 @@ class MatchPlayer:
     def ball_take_over_chance(self, modifier: float) -> float:
                     return (self.physical + self.defending) * modifier
 
-    def drain_stamina(self, seconds: int, is_active: bool = False) -> float:
+    def drain_stamina(self, seconds: int, is_active: bool = False) -> None:
         multiplier = 2.5 if is_active else 1.0
     
         physical_factor: float = 1.0 -(self.player.base_physical/200)
@@ -301,6 +299,13 @@ class MatchTeam:
     def relative_strength_modifier(self) -> float:
         return len(self.active_players)/10
 
+    @property
+    def midfield_power(self) -> int:
+        midfielders = [player for player in self.active_players if player.player.position in MIDFIELD_POSITIONS ]
+        total_sum = sum(player.passing + player.dribbling + player.player.overall for player in midfielders)
+        return total_sum // len(midfielders)
+             
+
     def get_goalkeeper(self) -> MatchPlayer:
            return self.starting_goalkeeper
     
@@ -308,25 +313,27 @@ class MatchTeam:
         weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.active_players]          
         return random.choices(self.active_players, weights,k=1)[0]
     
-    def get_defender(self) -> 'Player':
+    def get_defender(self) -> MatchPlayer:
         return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT)
     
-    def get_midfielder(self) -> 'Player':
+    def get_midfielder(self) -> MatchPlayer:
         return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT)
     
-    def get_attacker(self) -> 'Player':
+    def get_attacker(self) -> MatchPlayer:
             return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
 
     def has_player(self, player: Player) -> bool:
         return player in self.match_players
 
-    def get_penalty_taker(self) -> 'Player':
+    def get_penalty_taker(self) ->  MatchPlayer:
         return max(self.active_players, key=lambda player: player.shooting)
 
-    def get_freekick_taker(self) -> 'Player':
+    def get_freekick_taker(self) -> MatchPlayer:
         return max(self.active_players, key=lambda player: player.passing)
 
-    def update_stamina(self, seconds: int, active_players: list[MatchPlayer] = []) -> None:
+    def update_stamina(self, seconds: int, active_players: Optional[list[MatchPlayer]] = None) -> None:
+        if active_players is None:
+             active_players = []
         for player in self.active_players:
             is_active = player in active_players
             player.drain_stamina(seconds, is_active=is_active)
