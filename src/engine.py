@@ -65,18 +65,20 @@ class MidfieldPlay(State):
         home_ball_possession_chance: int = int(attacking_midfielder.ball_possession_chance(match.team_with_ball.relative_strength_modifier))
         away_ball_possession_chance: int = int(defending_midfielder.ball_take_over_chance(match.defending_team.relative_strength_modifier))
 
-
         winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
         seconds_passed = random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
         match.current_second += seconds_passed
         match.team_with_ball.update_stamina(seconds_passed,[attacking_midfielder])
         match.defending_team.update_stamina(seconds_passed,[defending_midfielder])
 
+        attack_probability = (1 - ATTACK_CHANCE) * midfield_control_ratio
+
         if winner:
             match.player_with_ball = attacking_midfielder
         else:
+            match.change_posession(match.player_with_ball)
             match.player_with_ball = defending_midfielder
-        if random.random() > ATTACK_CHANCE * midfield_control_ratio:
+        if random.random() < attack_probability:
             return Attack()
         else:
             return MidfieldPlay()   
@@ -96,10 +98,10 @@ class Attack(State):
 
         if winner:
             if random.random() > PASS_CHANCE:
-                new_attacking_player: Player = match.team_with_ball.get_attacker()
-                match.player_with_ball = new_attacking_player
+                match.pass_ball(match.team_with_ball.get_attacker(excluded_player=match.player_with_ball))
             return random.choices([ShotOnGoal(),AttackFoul(defending_player)])[0]
         else:
+            match.change_posession(defending_player)
             return MidfieldPlay()
         
 class ShotOnGoal(State):
@@ -116,6 +118,9 @@ class ShotOnGoal(State):
             if winner:
                 match.match_events.append(Goal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
                 match.player_with_ball.goals += 1
+                if match.potential_assistant:
+                    match.potential_assistant.assists += 1
+                match.potential_assistant = None
                 if match.team_with_ball == match.home_team:
                     match.home_score += 1
                     return KickOff(match.away_team)
@@ -123,8 +128,10 @@ class ShotOnGoal(State):
                     match.away_score += 1
                     return KickOff(match.home_team)
             else:
+                match.potential_assistant = None
                 return MidfieldPlay()
         else:
+            match.potential_assistant = None
             match.match_events.append(ShotSave(match.current_second,goalkeeper.name,match.team_with_ball.team.name))
             return MidfieldPlay()
         
@@ -173,7 +180,8 @@ class DangerousFreekick(State):
                 return ShotOnGoal()
             else:
                 if random.random() > PASS_CHANCE:
-                    match.player_with_ball = match.team_with_ball.get_attacker()
+                    match.potential_assistant = match.player_with_ball
+                    match.player_with_ball = match.team_with_ball.get_attacker(excluded_player=freekick_taker)
                     return ShotOnGoal()
                 else:
                     return MidfieldPlay()   
@@ -197,6 +205,7 @@ class Match:
         self.max_second: int = STANDARD_MATCH_LENGTH
         self.player_with_ball: MatchPlayer | None = None
         self.match_events: list[MatchEvent] = [] 
+        self.potential_assistant: MatchPlayer| None = None
 
     @property
     def team_with_ball(self) -> Team | None:
@@ -213,4 +222,10 @@ class Match:
             return None
         return self.home_team if self.team_with_ball == self.away_team else self.away_team
 
-    
+    def pass_ball(self, receiver: MatchPlayer) -> None:
+        self.potential_assistant = self.player_with_ball
+        self.player_with_ball = receiver
+
+    def change_posession(self, new_player: MatchPlayer) -> None:
+        self.player_with_ball = new_player
+        self.potential_assistant = None

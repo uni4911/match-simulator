@@ -309,18 +309,24 @@ class MatchTeam:
     def get_goalkeeper(self) -> MatchPlayer:
            return self.starting_goalkeeper
     
-    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int) -> 'Player':
-        weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.active_players]          
-        return random.choices(self.active_players, weights,k=1)[0]
+    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> 'Player':
+        if excluded_player is None:
+            weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.active_players]          
+            return random.choices(self.active_players, weights,k=1)[0]
+        else:
+            filtered_players: list[MatchPlayer] = [player for player in self.active_players if player != excluded_player]
+            weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in filtered_players]          
+            return random.choices(filtered_players, weights,k=1)[0]
+             
     
-    def get_defender(self) -> MatchPlayer:
-        return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT)
+    def get_defender(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
+        return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT, excluded_player)
     
-    def get_midfielder(self) -> MatchPlayer:
-        return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT)
+    def get_midfielder(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
+        return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT, excluded_player)
     
-    def get_attacker(self) -> MatchPlayer:
-            return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT)
+    def get_attacker(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
+            return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT, excluded_player)
 
     def has_player(self, player: Player) -> bool:
         return player in self.match_players

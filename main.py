@@ -11,7 +11,6 @@ def main():
     print("   SYMULATOR MECZU PIŁKI NOŻNEJ - TEST   ")
     print("==========================================\n")
 
-    # 1. Wczytanie zawodników dla poszczególnych drużyn z pliku data.json
     try:
         html_players = load_file(json_filename, "Amatorzy HTML")
         java_players = load_file(json_filename, "CF Java")
@@ -56,13 +55,13 @@ def main():
 
     print(f"\nStatystyki drużyny {match.home_team.team.name}:")
     for player in match.home_team.match_players:
-        if player.goals > 0 or player.yellow_card > 0 or player.has_red_card:
-            print(f" - {player.player.name}: Gole={player.goals}, Żółte kartki={player.yellow_card}, Czerwona kartka={player.has_red_card}")
+        if player.goals > 0 or player.yellow_card > 0 or player.has_red_card or player.assists > 0:
+            print(f" - {player.player.name}: Gole={player.goals}, Asysty={player.assists}, Żółte kartki={player.yellow_card}, Czerwona kartka={player.has_red_card}")
 
     print(f"\nStatystyki drużyny {match.away_team.team.name}:")
     for player in match.away_team.match_players:
-        if player.goals > 0 or player.yellow_card > 0 or player.has_red_card:
-            print(f" - {player.player.name}: Gole={player.goals}, Żółte kartki={player.yellow_card}, Czerwona kartka={player.has_red_card}")
+        if player.goals > 0 or player.yellow_card > 0 or player.has_red_card or player.assists > 0:
+            print(f" - {player.player.name}: Gole={player.goals}, Asysty={player.assists}, Żółte kartki={player.yellow_card}, Czerwona kartka={player.has_red_card}")
 
 if __name__ == "__main__":
     main()
