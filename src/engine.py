@@ -5,7 +5,7 @@ from enum import Enum, auto
 from typing import Optional, Final
 from abc import ABC, abstractmethod
 from src.commentator import Commentator
-from src.events import MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, RedCardFoul, YellowCardFoul
+from src.events import MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard
 import math
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
@@ -116,10 +116,12 @@ class ShotOnGoal(State):
         match.team_with_ball.update_stamina(seconds_passed,[match.player_with_ball])
         if random.random() < SHOT_ON_GOAL_CHANCE:
             if winner:
-                match.match_events.append(Goal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
                 match.player_with_ball.goals += 1
                 if match.potential_assistant:
+                    match.match_events.append(GoalWithAssist(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name,match.potential_assistant.player.name))
                     match.potential_assistant.assists += 1
+                else:
+                    match.match_events.append(Goal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
                 match.potential_assistant = None
                 if match.team_with_ball == match.home_team:
                     match.home_score += 1
@@ -140,17 +142,22 @@ class AttackFoul(State):
         self.fouling_player: MatchPlayer = fouling_player
         
     def execute(self, match: Match) -> 'State':      
-        foul_punishment = random.choices(FOUL_PUNISHMENTS,FOUL_WEIGHTS_DURING_ATTACK,k=1)[0]
-        foul_aftermath = random.choices(FOUL_AFTERMATH_DURING_ATTACK,FOUL_AFTERMATH_DURING_ATTACK_WEIGHT,k=1)[0]
-        if foul_punishment in ['yellow_card','red_card']:
-            if self.fouling_player.receive_card(foul_punishment):
-                match.match_events.append(RedCardFoul(match.current_second,self.fouling_player.player.name,foul_punishment, foul_aftermath))
+        foul_punishment = random.choices(FOUL_PUNISHMENTS, FOUL_WEIGHTS_DURING_ATTACK, k=1)[0]
+        foul_aftermath = random.choices(FOUL_AFTERMATH_DURING_ATTACK, FOUL_AFTERMATH_DURING_ATTACK_WEIGHT, k=1)[0]
+        
+        if foul_punishment == 'yellow_card':
+            is_second_yellow = self.fouling_player.receive_card(foul_punishment)
+            if is_second_yellow:
+                match.match_events.append(DoubleYellowCard(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
             else:
-                match.match_events.append(YellowCardFoul(match.current_second,self.fouling_player.player.name,foul_punishment, foul_aftermath))
+                match.match_events.append(YellowCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+        elif foul_punishment == 'red_card':
+            self.fouling_player.receive_card(foul_punishment)
+            match.match_events.append(RedCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
         else:
-            match.match_events.append(Foul(match.current_second,self.fouling_player.player.name,foul_punishment, foul_aftermath))
+            match.match_events.append(Foul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+            
         return PenaltyKick() if foul_aftermath == 'penalty_kick' else DangerousFreekick()
-
 class PenaltyKick(State):
     def execute(self, match: Match) -> 'State':
         goalkeeper: Goalkeeper = match.defending_team.get_goalkeeper()

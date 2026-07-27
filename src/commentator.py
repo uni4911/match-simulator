@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Optional
-from typing import TYPE_CHECKING
-from src.events import KickoffEvent, Goal, ShotSave, PenaltyKickGoal, Foul, YellowCardFoul, RedCardFoul
+from typing import Optional, TYPE_CHECKING
+from src.events import (
+    KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
+    Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent
+)
 import random
 
 if TYPE_CHECKING:
@@ -40,6 +42,14 @@ GOAL_COMMENTS = [
     "Co za przymierzenie! {event.goalscorer} nie dal bramkarzowi najmniejszych szans! {event.team} w skowronkach!",
     "Futbol z innej planety! {event.goalscorer} konczy te koronkowa akcje trafieniem!",
     "Nici z planow obronnych! {event.goalscorer} mija defensorow i umieszcza pilke w siatce!",
+]
+
+GOAL_WITH_ASSIST_COMMENTS = [
+    "GOAAAL! {event.goalscorer} wpisuje sie na liste strzelcow, ale co za kapitalna asysta, ktora popisal sie {event.assistant}!",
+    "Bramka dla {event.team}! {event.goalscorer} wykonczyl to genialne zagranie, ktore dogral {event.assistant}!",
+    "Mamy gola! Perfect duo: {event.assistant} dogrywa na centymetry, a {event.goalscorer} dopelnia formalnosci!",
+    "Co za zespolowa akcja! {event.assistant} obsluguje partnera idealnym podaniem, a {event.goalscorer} umieszcza pilke w siatce!",
+    "Siatka sie zatrzesla! {event.goalscorer} strzelcem gola, lecz brawa naleza sie rowniez dla {event.assistant} za to kluczowe podanie!",
 ]
 
 SHOT_SAVE_COMMENTS = [
@@ -89,6 +99,13 @@ YELLOW_CARD_FOUL_COMMENTS = [
     "Ostre starcie i sprawiedliwy wyrok: {event.fouling_player} wpisany do notesu sedziego!",
 ]
 
+DOUBLE_YELLOW_CARD_COMMENTS = [
+    "Druga zolta i w konsekwencji czerwona! {event.fouling_player} opuszcza boisko za drugie przewinienie!",
+    "To nie bylo madre zagranie! {event.fouling_player} zbiera druga zolta kartke i oslabia swoj zespol!",
+    "Arbiter nie mial litosci! {event.fouling_player} mial juz na koncie kartonik, a teraz wyleci do szatni!",
+    "Koniec meczu dla {event.fouling_player}! Druga zolta kartka wyklucza go z dalszej gry!",
+]
+
 RED_CARD_FOUL_COMMENTS = [
     "CZERWONA KARTKA! {event.fouling_player} wyleci z boiska za to bezmyslne wejscie!",
     "Dramat zespolu! {event.fouling_player} oslabia swoja druzyne i schodzi do szatni!",
@@ -96,9 +113,16 @@ RED_CARD_FOUL_COMMENTS = [
     "Brutalne zagranie! {event.fouling_player} opuszcza plac gry po czerwonej kartce!",
     "Koniec meczu dla {event.fouling_player}! Arbiter wyciaga czerwony kartonik!",
 ]
+
+MATCH_END_COMMENTS = [
+    "Koniec meczu! Sedzia gwiżdże po raz ostatni w tym spotkaniu!",
+    "Gwizdek arbitra obwieszcza koniec emocji! Mecz dobiegl konca.",
+    "To juz wszystko na dzisiaj! Arbiter konczy to zacięte widowisko!",
+]
+
 class Commentator:
     def __init__(self):
-        self.last_commented_event: str|None = None
+        self.last_commented_event: str | None = None
 
     def comment(self, match: Match) -> None:
         if match.match_events:
@@ -108,6 +132,10 @@ class Commentator:
                 match self.last_commented_event: 
                     case KickoffEvent() as event:
                         template = random.choice(KICKOFF_EVENT_COMMENTS)
+                        minute = event.second // 60 
+                        print(f"{minute}' min: {template.format(event=event)}")
+                    case GoalWithAssist() as event:
+                        template = random.choice(GOAL_WITH_ASSIST_COMMENTS)
                         minute = event.second // 60 
                         print(f"{minute}' min: {template.format(event=event)}")
                     case Goal() as event:
@@ -122,6 +150,10 @@ class Commentator:
                         template = random.choice(PENALTY_KICK_GOAL_COMMENTS)
                         minute = event.second // 60 
                         print(f"{minute}' min: {template.format(event=event)}")
+                    case DoubleYellowCard() as event:
+                        template = random.choice(DOUBLE_YELLOW_CARD_COMMENTS)
+                        minute = event.second // 60 
+                        print(f"{minute}' min: {template.format(event=event)}")
                     case YellowCardFoul() as event:
                         template = random.choice(YELLOW_CARD_FOUL_COMMENTS)
                         minute = event.second // 60 
@@ -134,4 +166,7 @@ class Commentator:
                         template = random.choice(FOUL_COMMENTS)
                         minute = event.second // 60 
                         print(f"{minute}' min: {template.format(event=event)}")
-        
+                    case MatchEndEvent() as event:
+                        template = random.choice(MATCH_END_COMMENTS)
+                        minute = event.second // 60
+                        print(f"{minute}' min: {template.format(event=event)}")
