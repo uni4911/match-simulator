@@ -2,10 +2,10 @@ from __future__ import annotations
 import random 
 from src.models import Team, FieldPlayer, Goalkeeper, Player, MatchTeam, MatchPlayer
 from enum import Enum, auto
-from typing import Optional, Final
+from typing import Optional, Final, Type
 from abc import ABC, abstractmethod
 from src.commentator import Commentator
-from src.events import MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard
+from src.events import MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent
 import math
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
@@ -22,6 +22,8 @@ FOUL_AFTERMATH_DURING_ATTACK: Final[str] = ['penalty_kick','dangerous_freekick']
 FOUL_AFTERMATH_DURING_ATTACK_WEIGHT: Final[int] = [10,90]
 FOUL_AFTERMATH_DURING_MIDPLAY: Final[str] = ['freekick']
 PENALTY_KICK_MODIFIER: Final[int] = 3
+
+
 
 class MatchState(Enum):
     KICK_OFF = auto()
@@ -66,11 +68,7 @@ class MidfieldPlay(State):
         away_ball_possession_chance: int = int(defending_midfielder.ball_take_over_chance(match.defending_team.relative_strength_modifier))
 
         winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
-        seconds_passed = random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
-        match.current_second += seconds_passed
-        match.team_with_ball.update_stamina(seconds_passed,[attacking_midfielder])
-        match.defending_team.update_stamina(seconds_passed,[defending_midfielder])
-
+      
         attack_probability = (1 - ATTACK_CHANCE) * midfield_control_ratio
 
         if winner:
@@ -90,11 +88,6 @@ class Attack(State):
         attack_score: int = attacking_player.shooting 
         defence_score: int = defending_player.defending 
         winner: bool = self.winner_choose(attack_score, defence_score)
-        seconds_passed = random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
-
-        match.current_second += seconds_passed
-        match.team_with_ball.update_stamina(seconds_passed,[attacking_player])
-        match.defending_team.update_stamina(seconds_passed,[defending_player])
 
         if winner:
             if random.random() > PASS_CHANCE:
@@ -111,9 +104,7 @@ class ShotOnGoal(State):
         attack_score: int = match.player_with_ball.shooting 
 
         winner: bool = self.winner_choose(attack_score, goalkeeper_score)
-        seconds_passed = random.randint(MIN_SECONDS_PASSESD, MAX_SECONDS_PASSED)
-        match.current_second += seconds_passed
-        match.team_with_ball.update_stamina(seconds_passed,[match.player_with_ball])
+        
         if random.random() < SHOT_ON_GOAL_CHANCE:
             if winner:
                 match.player_with_ball.goals += 1
@@ -191,16 +182,49 @@ class DangerousFreekick(State):
                     match.player_with_ball = match.team_with_ball.get_attacker(excluded_player=freekick_taker)
                     return ShotOnGoal()
                 else:
-                    return MidfieldPlay()   
+                    return MidfieldPlay()  
+
+EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] = {
+    KickoffEvent: (15, 30),
+    Goal: (30, 60),
+    GoalWithAssist: (35, 65),
+    PenaltyKickGoal: (45, 90),
+    ShotSave: (10, 25),
+    Foul: (10, 20),
+    YellowCardFoul: (20, 40),
+    RedCardFoul: (40, 80),
+    DoubleYellowCard: (40, 80),
+    MatchEndEvent: (0, 0), 
+    KickOff: (5, 10),          
+    MidfieldPlay: (3, 8),      
+    Attack: (4, 10),           
+    ShotOnGoal: (2, 5),    
+    AttackFoul: (2, 5),    
+    PenaltyKick: (20, 40),     
+    DangerousFreekick: (15, 35)
+}
             
 class MatchEngine:
-    def __init__(self, commentator: Commentator):
+    def __init__(self, commentator: Commentator, speed_factor: float):
         self.commentator: Commentator = commentator
+        self.speed_factor: float = speed_factor
         
     def play_match(self, match: Match) -> None:
         while match.current_second <= match.max_second:
+            current_events_length = len(match.match_events)
             match.current_state = match.current_state.execute(match)
+
+            if len(match.match_events) > current_events_length:
+                time_range = EVENT_OR_STATE_DURATIONS[type(match.match_events[-1])]
+            else:
+                time_range = EVENT_OR_STATE_DURATIONS[type(match.current_state)]
+            time_passed = random.randint(*time_range)
+            match.current_second += time_passed
+            match.home_team.update_stamina(time_passed,[match.player_with_ball])
+            match.away_team.update_stamina(time_passed,[match.player_with_ball])
             self.commentator.comment(match)
+
+            
 class Match:
     def __init__(self, home_team: MatchTeam, away_team: MatchTeam):
         self.home_team: MatchTeam = home_team

@@ -40,7 +40,7 @@ def main():
 
     match = Match(match_home, match_away)
     commentator = Commentator()
-    engine = MatchEngine(commentator)
+    engine = MatchEngine(commentator, 0.1)
 
 
     print("--- ROZPOCZĘCIE RELACJI NA ŻYWO ---")
