@@ -22,7 +22,7 @@ FOUL_AFTERMATH_DURING_ATTACK: Final[str] = ['penalty_kick','dangerous_freekick']
 FOUL_AFTERMATH_DURING_ATTACK_WEIGHT: Final[int] = [10,90]
 FOUL_AFTERMATH_DURING_MIDPLAY: Final[str] = ['freekick']
 PENALTY_KICK_MODIFIER: Final[int] = 3
-
+MIDFIELDPLAY_OPTIONS: Final[str] = ['long_shot','pass','shot_inside']
 
 
 class MatchState(Enum):

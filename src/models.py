@@ -205,6 +205,7 @@ class MatchPlayer:
         self.has_red_card: bool = False
         self.passes: int = 0
         self.current_stamina: float = self.player.fitness
+        self.assigned_position: Position = player.position
 
 
     def receive_card(self, card_type: str) -> bool:
@@ -217,26 +218,37 @@ class MatchPlayer:
             return False
         return False
 
-
+    @property
+    def position_penalty(self) -> float:
+        if (self.assigned_position == self.player.position) or (self.assigned_position == Position.GOALKEEPER):
+            return 1.0
+        elif self.assigned_position in PREFERRED_FALLBACKS.get(self.player.position, []):
+            return 0.9
+        else:
+            return 0.7    
+        
+    @property
+    def stat_modifier(self) ->  float:
+        return (0.5 + 0.5 * self.current_stamina) * self.position_penalty
     @property
     def pace(self) -> int:
-        return int(self.player.base_pace *(0.5 + 0.5 * self.current_stamina))
+        return int(self.player.base_pace * self.stat_modifier)
     @property
     def shooting(self) -> int:
-        return int(self.player.base_shooting *(0.5 + 0.5 * self.current_stamina))
+        return int(self.player.base_shooting * self.stat_modifier)
     @property
     def passing(self) -> int:
-        return int(self.player.base_passing *(0.5 + 0.5 * self.current_stamina))
+        return int(self.player.base_passing * self.stat_modifier)
     @property
     def dribbling(self) -> int:
-        return int(self.player.base_dribbling *(0.5 + 0.5 * self.current_stamina))
+        return int(self.player.base_dribbling * self.stat_modifier)
     @property
     def defending(self) -> int:
-        return int(self.player.base_defending *(0.5 + 0.5 * self.current_stamina))
+        return int(self.player.base_defending * self.stat_modifier)
     @property
     def physical(self) -> int:
-        return int(self.player.base_physical *(0.5 + 0.5 * self.current_stamina))
-    
+        return int(self.player.base_physical * self.stat_modifier)
+         
     def ball_possession_chance(self, modifier: float) -> float:
                     return (self.passing + self.dribbling) * modifier
        
@@ -245,7 +257,6 @@ class MatchPlayer:
 
     def drain_stamina(self, seconds: int, is_active: bool = False) -> None:
         multiplier = 2.5 if is_active else 1.0
-    
         physical_factor: float = 1.0 -(self.player.base_physical/200)
         drain_amount:float = seconds * BASE_DRAIN_RATE * physical_factor * multiplier
         self.current_stamina = max(0.0,self.current_stamina - drain_amount)
@@ -264,22 +275,23 @@ class MatchTeam:
     def starting_players(self) -> list[MatchPlayer]:
 
         starting_players: list[MatchPlayer] = []
-
         for position in self.formation:
-            selected_player: 'Player' | None = None
-            players_on_position: list[Player] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
+            selected_player: MatchPlayer | None = None
+            players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
             if players_on_position:
                 selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
             else:
                 for fallback_position in PREFERRED_FALLBACKS[position]:
-                    players_on_position: list[Player] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
+                    players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
                     if players_on_position:
                         selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
                         break
             if selected_player is None:
                 selected_player = sorted([p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players],key=lambda player: player.player.overall,reverse=True)[0]
-        
+            selected_player.assigned_position = position
             starting_players.append(selected_player)
+    
+            
 
         return starting_players
 
@@ -304,7 +316,7 @@ class MatchTeam:
         midfielders = [player for player in self.active_players if player.player.position in MIDFIELD_POSITIONS ]
         total_sum = sum(player.passing + player.dribbling + player.player.overall for player in midfielders)
         return total_sum // len(midfielders)
-             
+
 
     def get_goalkeeper(self) -> MatchPlayer:
            return self.starting_goalkeeper
