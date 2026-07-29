@@ -33,15 +33,18 @@ def fresh_match_player() -> MatchPlayer:
 def test_receive_first_yellow_card(fresh_match_player: MatchPlayer):
     fresh_match_player.receive_card('yellow_card')
 
-    assert fresh_match_player.yellow_card == 1 and fresh_match_player.has_red_card == False
+    assert fresh_match_player.yellow_card == 1
+    assert fresh_match_player.has_red_card == False
 
-def test_recieve_two_yellow_cards(fresh_match_player: MatchPlayer):
+def test_receive_two_yellow_cards(fresh_match_player: MatchPlayer):
     fresh_match_player.receive_card('yellow_card')
     fresh_match_player.receive_card('yellow_card')
 
-    assert fresh_match_player.yellow_card == 2 and fresh_match_player.has_red_card == True
+    assert fresh_match_player.yellow_card == 2 
+    assert fresh_match_player.has_red_card == True
 
-def test_recieve_red_cards(fresh_match_player: MatchPlayer):
+def test_receive_red_cards(fresh_match_player: MatchPlayer):
     fresh_match_player.receive_card('red_card')
 
-    assert fresh_match_player.yellow_card == 0 and fresh_match_player.has_red_card == True
+    assert fresh_match_player.yellow_card == 0  
+    assert fresh_match_player.has_red_card == True

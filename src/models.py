@@ -277,9 +277,6 @@ class MatchTeam:
     @property 
     def bench_goalkeepers(self) -> list[Goalkeeper]:
         return [goalkeeper for goalkeeper in self.team.goalkeepers if goalkeeper != self.starting_goalkeeper]
-    
-    def _bench_players(self) -> list[MatchPlayer]:
-        return [player for player in self.team.players if player not in self.starting_players]
 
     @property
     def active_players(self) -> list[MatchPlayer]:

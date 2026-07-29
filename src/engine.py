@@ -231,6 +231,9 @@ class MatchEngine:
             match.home_team.update_stamina(time_passed,[match.player_with_ball])
             match.away_team.update_stamina(time_passed,[match.player_with_ball])
             self.commentator.comment(match)
+
+        match.match_events.append(MatchEndEvent(match.current_second))
+        self.commentator.comment(match)
             
 
             

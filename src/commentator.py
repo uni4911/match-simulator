@@ -3,7 +3,7 @@ from typing import Optional, TYPE_CHECKING
 from src.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
     Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
-    Substitution
+    Substitution, MatchEvent
 )
 import random
 
@@ -125,57 +125,37 @@ SUBSTITUTION_COMMENTS = [
     "Zmiana w zespole {event.team}: {event.subbed_off} opuszcza boisko, wchodzi {event.subbed_in}!",
     "Roszada w skladzie {event.team}! Zmeczony {event.subbed_off} zastapiony przez {event.subbed_in}.",
 ]
+
+EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
+    KickoffEvent: KICKOFF_EVENT_COMMENTS,
+    GoalWithAssist: GOAL_WITH_ASSIST_COMMENTS,
+    Goal: GOAL_COMMENTS,
+    ShotSave: SHOT_SAVE_COMMENTS,
+    PenaltyKickGoal: PENALTY_KICK_GOAL_COMMENTS,
+    Foul: FOUL_COMMENTS,
+    YellowCardFoul: YELLOW_CARD_FOUL_COMMENTS,
+    DoubleYellowCard: DOUBLE_YELLOW_CARD_COMMENTS,
+    RedCardFoul: RED_CARD_FOUL_COMMENTS,
+    MatchEndEvent: MATCH_END_COMMENTS,
+    Substitution: SUBSTITUTION_COMMENTS,
+}
 class Commentator:
     def __init__(self):
-        self.last_commented_event: str | None = None
+        self.last_commented_event: MatchEvent | None = None
 
     def comment(self, match: Match) -> None:
-        if match.match_events:
-            if self.last_commented_event != match.match_events[-1]:
-                self.last_commented_event = match.match_events[-1]
+       if not match.match_events:
+           return None
 
-                match self.last_commented_event: 
-                    case KickoffEvent() as event:
-                        template = random.choice(KICKOFF_EVENT_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case GoalWithAssist() as event:
-                        template = random.choice(GOAL_WITH_ASSIST_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case Goal() as event:
-                        template = random.choice(GOAL_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case ShotSave() as event:
-                        template = random.choice(SHOT_SAVE_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case PenaltyKickGoal() as event:
-                        template = random.choice(PENALTY_KICK_GOAL_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case DoubleYellowCard() as event:
-                        template = random.choice(DOUBLE_YELLOW_CARD_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case YellowCardFoul() as event:
-                        template = random.choice(YELLOW_CARD_FOUL_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case RedCardFoul() as event:
-                        template = random.choice(RED_CARD_FOUL_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case Foul() as event:
-                        template = random.choice(FOUL_COMMENTS)
-                        minute = event.second // 60 
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case MatchEndEvent() as event:
-                        template = random.choice(MATCH_END_COMMENTS)
-                        minute = event.second // 60
-                        print(f"{minute}' min: {template.format(event=event)}")
-                    case Substitution() as event:
-                        template = random.choice(SUBSTITUTION_COMMENTS)
-                        minute = event.second // 60
-                        print(f"{minute}' min: {template.format(event=event)}")
+       latest_event = match.match_events[-1]
+       if self.last_commented_event == latest_event:
+           return None
+
+       self.last_commented_event = latest_event
+
+       comments_list = EVENT_COMMENT_MAP.get(type(latest_event))
+       if comments_list:
+           comment = random.choice(comments_list)
+           minute = latest_event.second // 60
+           print(f"{minute}' min: {comment.format(event=latest_event)}")
+    
