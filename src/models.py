@@ -266,46 +266,24 @@ class MatchTeam:
         self.team: Team = team
         self.formation: list[Position] = formation
         self.match_players: list[MatchPlayer] = [MatchPlayer(player) for player in self.team.players]
+        self.players_on_field: list[MatchPlayer] = self._starting_players()
+        self.bench_players: list[MatchPlayer] = self._bench_players()
+        self.substitution_limit: int = 5
 
     @property
     def starting_goalkeeper(self) -> Goalkeeper:
         return max(self.team.goalkeepers, key=lambda goalkeeper: goalkeeper.overall) 
-    
-    @property
-    def starting_players(self) -> list[MatchPlayer]:
-
-        starting_players: list[MatchPlayer] = []
-        for position in self.formation:
-            selected_player: MatchPlayer | None = None
-            players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
-            if players_on_position:
-                selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
-            else:
-                for fallback_position in PREFERRED_FALLBACKS[position]:
-                    players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
-                    if players_on_position:
-                        selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
-                        break
-            if selected_player is None:
-                selected_player = sorted([p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players],key=lambda player: player.player.overall,reverse=True)[0]
-            selected_player.assigned_position = position
-            starting_players.append(selected_player)
-    
-            
-
-        return starting_players
 
     @property 
     def bench_goalkeepers(self) -> list[Goalkeeper]:
         return [goalkeeper for goalkeeper in self.team.goalkeepers if goalkeeper != self.starting_goalkeeper]
     
-    @property
-    def bench_players(self) -> list[MatchPlayer]:
+    def _bench_players(self) -> list[MatchPlayer]:
         return [player for player in self.team.players if player not in self.starting_players]
 
     @property
     def active_players(self) -> list[MatchPlayer]:
-        return [player for player in self.starting_players if player.has_red_card is False]
+        return [player for player in self.players_on_field if player.has_red_card is False]
 
     @property 
     def relative_strength_modifier(self) -> float:
@@ -317,9 +295,30 @@ class MatchTeam:
         total_sum = sum(player.passing + player.dribbling + player.player.overall for player in midfielders)
         return total_sum // len(midfielders)
 
+    def _bench_players(self) -> list[MatchPlayer]:
+            return [player for player in self.match_players if player not in self.players_on_field]
 
-    def get_goalkeeper(self) -> MatchPlayer:
-           return self.starting_goalkeeper
+    def _starting_players(self) -> list[MatchPlayer]:
+    
+            starting_players: list[MatchPlayer] = []
+            for position in self.formation:
+                selected_player: MatchPlayer | None = None
+                players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
+                if players_on_position:
+                    selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
+                else:
+                    for fallback_position in PREFERRED_FALLBACKS[position]:
+                        players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
+                        if players_on_position:
+                            selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
+                            break
+                if selected_player is None:
+                    selected_player = sorted([p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players],key=lambda player: player.player.overall,reverse=True)[0]
+                selected_player.assigned_position = position
+                starting_players.append(selected_player)    
+    
+            return starting_players
+        
     
     def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> 'Player':
         if excluded_player is None:
@@ -330,6 +329,8 @@ class MatchTeam:
             weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in filtered_players]          
             return random.choices(filtered_players, weights,k=1)[0]
              
+    def get_goalkeeper(self) -> MatchPlayer:
+               return self.starting_goalkeeper
     
     def get_defender(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
         return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT, excluded_player)
@@ -355,6 +356,30 @@ class MatchTeam:
         for player in self.active_players:
             is_active = player in active_players
             player.drain_stamina(seconds, is_active=is_active)
+
+    def make_substitution(self, player_off: MatchPlayer, player_in: MatchPlayer) -> bool:
+        if player_in in self.bench_players and player_off in self.active_players and self.substitution_limit > 0:
+            player_in.assigned_position = player_off.assigned_position
+            self.players_on_field.append(player_in)
+            self.players_on_field.remove(player_off)
+            self.bench_players.append(player_off)
+            self.bench_players.remove(player_in)
+            self.substitution_limit -= 1
+            return True
+        else:
+            return False
+
+    def check_and_make_auto_substitution(self) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
+        player_off = min(self.active_players, key=lambda player: player.current_stamina)
+        if player_off.current_stamina > 0.75:
+            return None
+        player_in = next((player for player in self.bench_players if player.player.position == player_off.assigned_position),None)
+        if player_in is None:
+            player_in = next((player for player in self.bench_players if not isinstance(player.player, Goalkeeper)),None)
+        if self.make_substitution(player_off, player_in):
+            return (player_off, player_in)
+        return None
+             
 
     
 

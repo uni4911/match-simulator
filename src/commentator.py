@@ -2,7 +2,8 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 from src.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
-    Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent
+    Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
+    Substitution
 )
 import random
 
@@ -120,6 +121,10 @@ MATCH_END_COMMENTS = [
     "To juz wszystko na dzisiaj! Arbiter konczy to zacięte widowisko!",
 ]
 
+SUBSTITUTION_COMMENTS = [
+    "Zmiana w zespole {event.team}: {event.subbed_off} opuszcza boisko, wchodzi {event.subbed_in}!",
+    "Roszada w skladzie {event.team}! Zmeczony {event.subbed_off} zastapiony przez {event.subbed_in}.",
+]
 class Commentator:
     def __init__(self):
         self.last_commented_event: str | None = None
@@ -168,5 +173,9 @@ class Commentator:
                         print(f"{minute}' min: {template.format(event=event)}")
                     case MatchEndEvent() as event:
                         template = random.choice(MATCH_END_COMMENTS)
+                        minute = event.second // 60
+                        print(f"{minute}' min: {template.format(event=event)}")
+                    case Substitution() as event:
+                        template = random.choice(SUBSTITUTION_COMMENTS)
                         minute = event.second // 60
                         print(f"{minute}' min: {template.format(event=event)}")

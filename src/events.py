@@ -43,3 +43,9 @@ class DoubleYellowCard(Foul):
 @dataclass(frozen=True)
 class MatchEndEvent(MatchEvent):
     pass
+
+@dataclass(frozen=True)
+class Substitution(MatchEvent):
+    team: str
+    subbed_in: str
+    subbed_off: str

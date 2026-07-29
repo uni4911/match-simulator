@@ -5,7 +5,9 @@ from enum import Enum, auto
 from typing import Optional, Final, Type
 from abc import ABC, abstractmethod
 from src.commentator import Commentator
-from src.events import MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent
+from src.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
+                        RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent,
+                        Substitution)
 import math
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
@@ -201,7 +203,8 @@ EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] 
     ShotOnGoal: (2, 5),    
     AttackFoul: (2, 5),    
     PenaltyKick: (20, 40),     
-    DangerousFreekick: (15, 35)
+    DangerousFreekick: (15, 35),
+    Substitution: (30, 45)
 }
             
 class MatchEngine:
@@ -211,6 +214,11 @@ class MatchEngine:
         
     def play_match(self, match: Match) -> None:
         while match.current_second <= match.max_second:
+            for team in [match.home_team, match.away_team]:
+                sub_result = team.check_and_make_auto_substitution()
+                if sub_result is not None:
+                    player_off, player_in = sub_result
+                    match.match_events.append(Substitution(match.current_second,team.team.name,player_in.player.name, player_off.player.name))
             current_events_length = len(match.match_events)
             match.current_state = match.current_state.execute(match)
 
@@ -223,6 +231,7 @@ class MatchEngine:
             match.home_team.update_stamina(time_passed,[match.player_with_ball])
             match.away_team.update_stamina(time_passed,[match.player_with_ball])
             self.commentator.comment(match)
+            
 
             
 class Match:
@@ -237,6 +246,7 @@ class Match:
         self.player_with_ball: MatchPlayer | None = None
         self.match_events: list[MatchEvent] = [] 
         self.potential_assistant: MatchPlayer| None = None
+
 
     @property
     def team_with_ball(self) -> Team | None:
