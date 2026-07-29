@@ -128,8 +128,26 @@ class ShotOnGoal(State):
         else:
             match.potential_assistant = None
             match.match_events.append(ShotSave(match.current_second,goalkeeper.name,match.team_with_ball.team.name))
+            return random.choices([CornerKick(),MidfieldPlay()],[15,85],k=1)[0]
+
+
+class CornerKick(State):
+
+    def execute(self, match: Match) -> 'State':
+        corner_kick_taker = match.team_with_ball.get_corner_taker()
+        attacker = match.team_with_ball.get_heading_player(excluded_player=corner_kick_taker)
+        defender = match.defending_team.get_heading_player()
+
+        winner = self.winner_choose(attacker.heading_score, defender.heading_score)
+        if winner:
+            match.player_with_ball = attacker
+            match.potential_assistant = corner_kick_taker
+            return ShotOnGoal()
+        else:
+            match.change_posession(defender)
             return MidfieldPlay()
-        
+
+
 class AttackFoul(State):
     def __init__(self,fouling_player: MatchPlayer):
         self.fouling_player: MatchPlayer = fouling_player
@@ -185,6 +203,8 @@ class DangerousFreekick(State):
                     return ShotOnGoal()
                 else:
                     return MidfieldPlay()  
+
+
 
 EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] = {
     KickoffEvent: (15, 30),

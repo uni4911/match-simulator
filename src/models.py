@@ -154,7 +154,7 @@ class Team:
         
 
 class FieldPlayer(Player):
-    def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int):
+    def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, heading: int, height: int):
         super().__init__(name, position)
         self.base_pace : int = pace
         self.base_shooting : int = shooting
@@ -162,6 +162,8 @@ class FieldPlayer(Player):
         self.base_dribbling : int = dribbling
         self.base_defending : int = defending
         self.base_physical : int = physical
+        self.heading: int = heading
+        self.height: int = height
 
 
     @property
@@ -248,12 +250,22 @@ class MatchPlayer:
     @property
     def physical(self) -> int:
         return int(self.player.base_physical * self.stat_modifier)
+    @property
+    def heading(self) -> int:
+        return int(self.player.heading)
+    @property
+    def height(self) -> int:
+        return self.player.height
+    @property
+    def heading_score(self) -> int:
+        return int((self.player.heading * 0.5) + (self.physical * 0.3) + (self.player.height * 0.2))
          
     def ball_possession_chance(self, modifier: float) -> float:
-                    return (self.passing + self.dribbling) * modifier
+        return (self.passing + self.dribbling) * modifier
        
     def ball_take_over_chance(self, modifier: float) -> float:
-                    return (self.physical + self.defending) * modifier
+        return (self.physical + self.defending) * modifier
+   
 
     def drain_stamina(self, seconds: int, is_active: bool = False) -> None:
         multiplier = 2.5 if is_active else 1.0
@@ -347,6 +359,16 @@ class MatchTeam:
     def get_freekick_taker(self) -> MatchPlayer:
         return max(self.active_players, key=lambda player: player.passing)
 
+    def get_corner_taker(self) -> MatchPlayer:
+        return max(self.active_players, key=lambda player: player.passing)
+    
+    def get_heading_player(self, excluded_player: MatchPlayer|None = None) -> MatchPlayer:
+        candidates = [player for player in self.active_players if player != excluded_player]
+        weights = [player.heading + ((player.height - 160) * 0.5) for player in candidates]
+        return random.choices(candidates, weights,k=1)[0]
+        
+        
+      
     def update_stamina(self, seconds: int, active_players: Optional[list[MatchPlayer]] = None) -> None:
         if active_players is None:
              active_players = []

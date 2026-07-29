@@ -3,7 +3,7 @@ from typing import Optional, TYPE_CHECKING
 from src.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
     Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
-    Substitution, MatchEvent
+    Substitution, MatchEvent, CornerKickEvent
 )
 import random
 
@@ -126,6 +126,13 @@ SUBSTITUTION_COMMENTS = [
     "Roszada w skladzie {event.team}! Zmeczony {event.subbed_off} zastapiony przez {event.subbed_in}.",
 ]
 
+CORNER_KICK_COMMENTS = [
+    "Rzut rozny dla zespolu {event.executing_team}! Do pilki ustawionej w narożniku podchodzi {event.taker}.",
+    "Sansa na zagrozenie z rzutu roznego! {event.taker} przygotowuje sie do dosrodkowania.",
+    "Krotka narada w polu karnym, a {event.taker} juz ustawia pilke w narożniku boiska dla {event.executing_team}.",
+    "Będzie dosrodkowanie z rzutu roznego! {event.taker} spoglada w pole karne.",
+]
+
 EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
     KickoffEvent: KICKOFF_EVENT_COMMENTS,
     GoalWithAssist: GOAL_WITH_ASSIST_COMMENTS,
@@ -138,6 +145,7 @@ EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
     RedCardFoul: RED_CARD_FOUL_COMMENTS,
     MatchEndEvent: MATCH_END_COMMENTS,
     Substitution: SUBSTITUTION_COMMENTS,
+    CornerKickEvent: CORNER_KICK_COMMENTS
 }
 class Commentator:
     def __init__(self):

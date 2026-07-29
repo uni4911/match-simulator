@@ -49,3 +49,8 @@ class Substitution(MatchEvent):
     team: str
     subbed_in: str
     subbed_off: str
+
+@dataclass(frozen=True)
+class CornerKickEvent(MatchEvent):
+    executing_team: str
+    taker: str
