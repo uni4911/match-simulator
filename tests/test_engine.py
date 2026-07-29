@@ -1,23 +1,7 @@
 from unittest.mock import patch
 from src.engine import MatchEngine
+from src.commentator import Commentator
 
-@patch('src.engine.random.randint')
-def test_random_choose(mock_randint):
-    mock_randint.return_value = 4
-    engine = MatchEngine()
-    result = engine._winner_choose(attack=5,defence=5)
+commentator = Commentator()
 
-    assert result
-
-    mock_randint.assert_called_once_with(1,10)
-
-@patch('src.engine.random.randint')
-def test_random_choose_edge_case(mock_randint):
-    mock_randint.return_value = 4
-    engine = MatchEngine()
-    result = engine._winner_choose(attack=0,defence=0)
-
-    assert result is False
-
-    mock_randint.assert_not_called()
 

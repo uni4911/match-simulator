@@ -1,5 +1,7 @@
-from src.models import FieldPlayer, Position, Goalkeeper
+from src.models import FieldPlayer, Position, Goalkeeper, MatchPlayer, MatchTeam
 import pytest
+
+
 
 @pytest.mark.parametrize("name , position, pace, shooting, passing, dribbling, defending, physical, overall",
     [("Test",Position.STRIKER,90,82,75,75,40,68,82),
@@ -19,3 +21,27 @@ def test_goalkeeping_score(reflexes: int, positioning: int, expected_score: int)
     score = player_test.goalkeeping_score
 
     assert score == expected_score
+@pytest.fixture
+def fresh_match_player() -> MatchPlayer:
+    player = FieldPlayer(
+        name="Jan Kowalski", 
+        position=Position.STRIKER, 
+        pace=80, shooting=85, passing=70, dribbling=75, defending=30, physical=70
+    )
+    return MatchPlayer(player)
+
+def test_receive_first_yellow_card(fresh_match_player: MatchPlayer):
+    fresh_match_player.receive_card('yellow_card')
+
+    assert fresh_match_player.yellow_card == 1 and fresh_match_player.has_red_card == False
+
+def test_recieve_two_yellow_cards(fresh_match_player: MatchPlayer):
+    fresh_match_player.receive_card('yellow_card')
+    fresh_match_player.receive_card('yellow_card')
+
+    assert fresh_match_player.yellow_card == 2 and fresh_match_player.has_red_card == True
+
+def test_recieve_red_cards(fresh_match_player: MatchPlayer):
+    fresh_match_player.receive_card('red_card')
+
+    assert fresh_match_player.yellow_card == 0 and fresh_match_player.has_red_card == True
