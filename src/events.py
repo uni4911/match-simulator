@@ -57,4 +57,16 @@ class CornerKickEvent(MatchEvent):
 @dataclass(frozen=True)
 class HalfTimeEvent(MatchEvent):
     home_score: int = 0
-    away_score: int = 0
+    away_score: int = 0
+
+@dataclass(frozen=True)
+class InjuryEvent(MatchEvent):
+    player: str
+    team: str
+    severity: str = "minor"
+    forced_off: bool = False
+
+    @property
+    def injuried_player(self) -> str:
+        return self.player
+

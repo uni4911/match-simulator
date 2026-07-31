@@ -213,6 +213,17 @@ class MatchPlayer:
         self.passes: int = 0
         self.current_stamina: float = self.player.fitness
         self.assigned_position: Position = player.position
+        self.is_injured: bool = False
+        self.injury_severity: str = "none"  
+        self.is_forced_off: bool = False
+
+    @property
+    def is_injuried(self) -> bool:
+        return self.is_injured
+
+    @is_injuried.setter
+    def is_injuried(self, value: bool) -> None:
+        self.is_injured = value
 
 
     def receive_card(self, card_type: str) -> bool:
@@ -235,8 +246,12 @@ class MatchPlayer:
             return 0.7    
         
     @property
-    def stat_modifier(self) ->  float:
-        return (0.5 + 0.5 * self.current_stamina) * self.position_penalty
+    def stat_modifier(self) -> float:
+        base_mod = (0.5 + 0.5 * self.current_stamina) * self.position_penalty
+        if self.is_injured and self.injury_severity == "minor":
+            base_mod *= 0.80 
+        return base_mod
+
     @property
     def pace(self) -> int:
         return int(self.player.base_pace * self.stat_modifier)
@@ -297,7 +312,7 @@ class MatchTeam:
 
     @property
     def active_players(self) -> list[MatchPlayer]:
-        return [player for player in self.players_on_field if player.has_red_card is False]
+        return [player for player in self.players_on_field if not player.has_red_card and not player.is_forced_off]
 
     @property 
     def relative_strength_modifier(self) -> float:
@@ -306,6 +321,8 @@ class MatchTeam:
     @property
     def midfield_power(self) -> int:
         midfielders = [player for player in self.active_players if player.player.position in MIDFIELD_POSITIONS ]
+        if not midfielders:
+            return 1
         total_sum = sum(player.passing + player.dribbling + player.player.overall for player in midfielders)
         return total_sum // len(midfielders)
 
@@ -386,7 +403,7 @@ class MatchTeam:
             player.current_stamina = min(1.0, player.current_stamina + amount)
 
     def make_substitution(self, player_off: MatchPlayer, player_in: MatchPlayer) -> bool:
-        if player_in in self.bench_players and player_off in self.active_players and self.substitution_limit > 0:
+        if player_in in self.bench_players and player_off in self.players_on_field and not player_off.has_red_card and self.substitution_limit > 0:
             player_in.assigned_position = player_off.assigned_position
             self.players_on_field.append(player_in)
             self.players_on_field.remove(player_off)
@@ -398,16 +415,37 @@ class MatchTeam:
             return False
 
     def check_and_make_auto_substitution(self) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
-        player_off = min(self.active_players, key=lambda player: player.current_stamina)
-        if player_off.current_stamina > 0.75:
+        if self.substitution_limit <= 0 or not self.bench_players:
             return None
-        player_in = next((player for player in self.bench_players if player.player.position == player_off.assigned_position),None)
+    
+        injured_on_field = [p for p in self.active_players if p.is_injured]
+        if injured_on_field:
+            player_off = injured_on_field[0]
+        else:
+            player_off = min(self.active_players, key=lambda player: player.current_stamina)
+            if player_off.current_stamina > 0.75:
+                return None
+
+        player_in = next((player for player in self.bench_players if player.player.position == player_off.assigned_position), None)
         if player_in is None:
-            player_in = next((player for player in self.bench_players if not isinstance(player.player, Goalkeeper)),None)
-        if self.make_substitution(player_off, player_in):
+            player_in = next((player for player in self.bench_players if not isinstance(player.player, Goalkeeper)), None)
+        if player_in and self.make_substitution(player_off, player_in):
             return (player_off, player_in)
         return None
-             
+
+    def handle_injury(self, injured_player: MatchPlayer, severity: str = "severe") -> Optional[tuple[MatchPlayer, MatchPlayer]]:
+        injured_player.is_injured = True
+        injured_player.injury_severity = severity
+        if severity == "severe":
+            injured_player.is_forced_off = True
+
+        if severity == "severe" and self.substitution_limit > 0 and self.bench_players:
+            player_in = next((p for p in self.bench_players if p.player.position == injured_player.assigned_position), None)
+            if player_in is None:
+                player_in = next((p for p in self.bench_players if not isinstance(p.player, Goalkeeper)), None)
+            if player_in and self.make_substitution(injured_player, player_in):
+                return (injured_player, player_in)
+        return None
 
     
 

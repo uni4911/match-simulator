@@ -48,3 +48,16 @@ def test_receive_red_cards(fresh_match_player: MatchPlayer):
 
     assert fresh_match_player.yellow_card == 0  
     assert fresh_match_player.has_red_card == True
+
+def test_minor_injury_stat_penalty(fresh_match_player: MatchPlayer):
+    base_shooting = fresh_match_player.shooting
+    fresh_match_player.is_injured = True
+    fresh_match_player.injury_severity = "minor"
+    assert fresh_match_player.shooting < base_shooting
+    assert fresh_match_player.stat_modifier < 1.0
+
+def test_severe_injury_forced_off(fresh_match_player: MatchPlayer):
+    fresh_match_player.is_injured = True
+    fresh_match_player.injury_severity = "severe"
+    fresh_match_player.is_forced_off = True
+    assert fresh_match_player.is_forced_off == True

@@ -3,13 +3,14 @@ from typing import Optional, TYPE_CHECKING
 from src.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
     Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
-    Substitution, MatchEvent, CornerKickEvent, HalfTimeEvent
+    Substitution, MatchEvent, CornerKickEvent, HalfTimeEvent, InjuryEvent
 )
 import random
 
 if TYPE_CHECKING:
     from src.engine import Match
     from src.event_bus import EventBus
+
 
 KICKOFF_EVENT_COMMENTS = [
     "Sedzia gwizdzo po raz pierwszy! Rozpoczyna druzyna {event.executing_team}.",
@@ -147,6 +148,18 @@ CORNER_KICK_COMMENTS = [
     "Będzie dosrodkowanie z rzutu roznego! {event.taker} spoglada w pole karne.",
 ]
 
+INJURY_SEVERE_COMMENTS = [
+    "Uwaga! {event.player} zwija sie z bolu na murawie. Sztab medyczny sygnalizuje koniecznosc zmiany!",
+    "Powazny uraz zawodnika zespolu {event.team}! {event.player} nie bedzie w stanie kontynuowac gry!",
+    "Dramat na boisku! {event.player} zmuszony opuscic plac gry z powodu kontuzji!",
+]
+
+INJURY_MINOR_COMMENTS = [
+    "{event.player} zwija sie z bolu po tym starciu... Na szczescie po interwencji lekarzy wraca do gry!",
+    "Medycy zglaszaja uraz u {event.player}, ale zawodnik zaciska zeby i gra dalej!",
+    "Lekki uraz w zespole {event.team}. {event.player} utyka, ale nie chce opuszczac boiska.",
+]
+
 EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
     KickoffEvent: KICKOFF_EVENT_COMMENTS,
     GoalWithAssist: GOAL_WITH_ASSIST_COMMENTS,
@@ -176,6 +189,8 @@ class Commentator:
         comments_list = None
         if isinstance(event, KickoffEvent) and getattr(event, 'half', 1) == 2:
             comments_list = KICKOFF_2ND_HALF_COMMENTS
+        elif isinstance(event, InjuryEvent):
+            comments_list = INJURY_SEVERE_COMMENTS if getattr(event, 'severity', 'minor') == 'severe' else INJURY_MINOR_COMMENTS
         else:
             comments_list = EVENT_COMMENT_MAP.get(type(event))
 

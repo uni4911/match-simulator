@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from src.commentator import Commentator
 from src.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
                         RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent,
-                        Substitution, HalfTimeEvent)
+                        Substitution, HalfTimeEvent, InjuryEvent)
 from src.event_bus import EventBus
 import math
 
@@ -106,7 +106,7 @@ class Attack(State):
                 else:
                     receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
-            return random.choices([ShotOnGoal(),AttackFoul(defending_player)])[0]
+            return random.choices([ShotOnGoal(),AttackFoul(defending_player, match.player_with_ball)])[0]
         else:
             match.change_posession(defending_player)
             return MidfieldPlay()
@@ -161,8 +161,9 @@ class CornerKick(State):
 
 
 class AttackFoul(State):
-    def __init__(self,fouling_player: MatchPlayer):
+    def __init__(self,fouling_player: MatchPlayer, fouled_player: MatchPlayer | None = None):
         self.fouling_player: MatchPlayer = fouling_player
+        self.fouled_player: MatchPlayer | None = fouled_player
         
     def execute(self, match: Match) -> 'State':      
         foul_punishment = random.choices(FOUL_PUNISHMENTS, FOUL_WEIGHTS_DURING_ATTACK, k=1)[0]
@@ -180,6 +181,10 @@ class AttackFoul(State):
         else:
             match.add_event(Foul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
             
+        target = self.fouled_player or match.player_with_ball
+        if target is not None:
+            match.process_injury_risk(target, foul_punishment=foul_punishment)
+
         return PenaltyKick() if foul_aftermath == 'penalty_kick' else DangerousFreekick()
 class PenaltyKick(State):
     def execute(self, match: Match) -> 'State':
@@ -229,6 +234,7 @@ EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] 
     YellowCardFoul: (20, 40),
     RedCardFoul: (40, 80),
     DoubleYellowCard: (40, 80),
+    InjuryEvent: (20, 40),
     HalfTimeEvent: (30, 60),
     MatchEndEvent: (0, 0), 
     KickOff: (5, 10),          
@@ -272,6 +278,12 @@ class MatchEngine:
                     if sub_result is not None:
                         player_off, player_in = sub_result
                         match.add_event(Substitution(match.current_second, team.team.name, player_in.player.name, player_off.player.name))
+                    
+                    # Check non-contact injury risk for low-stamina active players
+                    for player in team.active_players:
+                        if player.current_stamina < 0.35 and not player.is_injured:
+                            match.process_injury_risk(player, non_contact=True)
+
                 current_events_length = len(match.match_events)
                 match.current_state = match.current_state.execute(match)
 
@@ -320,6 +332,40 @@ class Match:
         self.match_events.append(event)
         if self.event_bus is not None:
             self.event_bus.publish(event)
+
+    def process_injury_risk(self, player: MatchPlayer, foul_punishment: str | None = None, non_contact: bool = False) -> None:
+        if player.is_injured or player.is_forced_off:
+            return
+
+        if non_contact:
+            base_prob = 0.008
+        elif foul_punishment == 'red_card':
+            base_prob = 0.35
+        elif foul_punishment == 'yellow_card':
+            base_prob = 0.15
+        else:
+            base_prob = 0.05
+
+        fatigue_factor = 1.0 + (1.0 - player.current_stamina) * 0.5
+        injury_chance = base_prob * fatigue_factor
+
+        if random.random() < injury_chance:
+            severity = "severe" if random.random() < 0.30 else "minor"
+            player_team = self.home_team if self.home_team.has_player(player.player) else self.away_team
+
+            sub_result = player_team.handle_injury(player, severity=severity)
+
+            self.add_event(InjuryEvent(
+                second=self.current_second,
+                player=player.player.name,
+                team=player_team.team.name,
+                severity=severity,
+                forced_off=(severity == "severe")
+            ))
+
+            if sub_result is not None:
+                p_off, p_in = sub_result
+                self.add_event(Substitution(self.current_second, player_team.team.name, p_in.player.name, p_off.player.name))
 
 
     @property

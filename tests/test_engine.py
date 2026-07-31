@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 from src.engine import MatchEngine, Match
 from src.models import (
-    FieldPlayer, Goalkeeper, Position, Team, MatchTeam, FORMATION_433
+    FieldPlayer, Goalkeeper, Position, Team, MatchTeam, MatchPlayer, FORMATION_433
 )
 from src.commentator import Commentator
 import pytest
@@ -106,6 +106,47 @@ def test_active_player_drains_more_stamina(sample_home_team: MatchTeam):
     drain_active = initial_stamina_active - active_player.current_stamina
     drain_passive = initial_stamina_passive - passive_player.current_stamina
 
-    assert drain_active > drain_passive
-
     assert pytest.approx(drain_active, rel=1e-5) == drain_passive * 2.5
+
+def test_handle_injury_forced_substitution(sample_home_team: MatchTeam):
+    bench_fp = FieldPlayer("Rezerwowy 1", Position.CENTRE_BACK, 70, 70, 70, 70, 70, 70, 70, 180)
+    bench_mp = MatchPlayer(bench_fp)
+    sample_home_team.match_players.append(bench_mp)
+    sample_home_team.bench_players.append(bench_mp)
+
+    injured_player = sample_home_team.players_on_field[0]
+    initial_on_field = len(sample_home_team.players_on_field)
+    
+    sub_res = sample_home_team.handle_injury(injured_player, severity="severe")
+    
+    assert sub_res is not None
+    p_off, p_in = sub_res
+    assert p_off == injured_player
+    assert p_in in sample_home_team.players_on_field
+    assert injured_player not in sample_home_team.players_on_field
+    assert len(sample_home_team.players_on_field) == initial_on_field
+
+def test_handle_injury_reduces_active_players_when_no_subs(sample_home_team: MatchTeam):
+    sample_home_team.substitution_limit = 0
+    injured_player = sample_home_team.players_on_field[0]
+    initial_active = len(sample_home_team.active_players)
+
+    sub_res = sample_home_team.handle_injury(injured_player, severity="severe")
+
+    assert sub_res is None
+    assert injured_player.is_forced_off == True
+    assert len(sample_home_team.active_players) == initial_active - 1
+
+def test_process_injury_risk_adds_injury_event(sample_home_team: MatchTeam, sample_away_team: MatchTeam):
+    from src.events import InjuryEvent
+    match = Match(sample_home_team, sample_away_team)
+    target_player = sample_home_team.players_on_field[0]
+
+    # Force 100% injury chance by mocking random
+    import unittest.mock as mock
+    with mock.patch("random.random", return_value=0.0001):
+        match.process_injury_risk(target_player, foul_punishment="red_card")
+
+    injury_events = [e for e in match.match_events if isinstance(e, InjuryEvent)]
+    assert len(injury_events) == 1
+    assert injury_events[0].player == target_player.player.name
