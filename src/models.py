@@ -56,11 +56,16 @@ ATTACKER_WEIGHTS: Final[dict[Position, int]] = {
     Position.CENTRAL_FORWARD: 10,
     Position.RIGHT_WING: 10,
     Position.STRIKER: 10,
+    Position.CENTRAL_ATTACKING_MIDFIELDER: 8,
+    Position.CENTRAL_MIDFIELDER: 6,
+    Position.LEFT_MIDFIELDER: 6,
+    Position.RIGHT_MIDFIELDER: 6,
     Position.CENTRAL_DEFENSIVE_MIDFIELDER: 4,
-    Position.CENTRAL_MIDFIELDER: 4,
-    Position.CENTRAL_ATTACKING_MIDFIELDER: 4,
-    Position.LEFT_MIDFIELDER: 4,
-    Position.RIGHT_MIDFIELDER: 4
+    Position.LEFT_WING_BACK: 3,
+    Position.RIGHT_WING_BACK: 3,
+    Position.LEFT_BACK: 2,
+    Position.RIGHT_BACK: 2,
+    Position.CENTRE_BACK: 2
 }
 DEFAULT_ATTACKER_WEIGHT = 1
 

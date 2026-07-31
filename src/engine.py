@@ -26,6 +26,8 @@ FOUL_AFTERMATH_DURING_ATTACK_WEIGHT: Final[int] = [10,90]
 FOUL_AFTERMATH_DURING_MIDPLAY: Final[str] = ['freekick']
 PENALTY_KICK_MODIFIER: Final[int] = 3
 MIDFIELDPLAY_OPTIONS: Final[str] = ['long_shot','pass','shot_inside']
+PASS_RECIEVRS = ["attacker", "midfielder", "defender"]
+PASS_RECIVERS_WEIGHTS = [50, 35, 15]
 
 
 class MatchState(Enum):
@@ -76,6 +78,8 @@ class MidfieldPlay(State):
 
         if winner:
             match.player_with_ball = attacking_midfielder
+            if random.random() < 0.15:
+                return ShotOnGoal()
         else:
             match.change_posession(match.player_with_ball)
             match.player_with_ball = defending_midfielder
@@ -94,7 +98,14 @@ class Attack(State):
 
         if winner:
             if random.random() > PASS_CHANCE:
-                match.pass_ball(match.team_with_ball.get_attacker(excluded_player=match.player_with_ball))
+                pass_recipient_type = random.choices(PASS_RECIEVRS, PASS_RECIVERS_WEIGHTS, k=1)[0]
+                if pass_recipient_type == "midfielder":
+                    receiver = match.team_with_ball.get_midfielder(excluded_player=match.player_with_ball)
+                elif pass_recipient_type == "defender":
+                    receiver = match.team_with_ball.get_defender(excluded_player=match.player_with_ball)
+                else:
+                    receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
+                match.pass_ball(receiver)
             return random.choices([ShotOnGoal(),AttackFoul(defending_player)])[0]
         else:
             match.change_posession(defending_player)
@@ -174,10 +185,11 @@ class PenaltyKick(State):
     def execute(self, match: Match) -> 'State':
         goalkeeper: Goalkeeper = match.defending_team.get_goalkeeper()
         penalty_taker: MatchPlayer  = match.team_with_ball.get_penalty_taker()
+        match.player_with_ball = penalty_taker
 
         winner = self.winner_choose(penalty_taker.shooting * PENALTY_KICK_MODIFIER, goalkeeper.goalkeeping_score)
         if winner:
-            match.add_event(PenaltyKickGoal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
+            match.add_event(PenaltyKickGoal(match.current_second, penalty_taker.player.name, match.team_with_ball.team.name))
             penalty_taker.goals += 1
             if match.team_with_ball == match.home_team:
                 match.home_score += 1
