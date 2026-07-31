@@ -3,13 +3,13 @@ import pytest
 
 
 
-@pytest.mark.parametrize("name , position, pace, shooting, passing, dribbling, defending, physical, overall",
-    [("Test",Position.STRIKER,90,82,75,75,40,68,82),
-     ("Test",Position.CENTRE_BACK,70,55,65,50,90,85,81),
-     ("Test", Position.CENTRAL_ATTACKING_MIDFIELDER,75,70,85,85,65,55,78)])
+@pytest.mark.parametrize("name , position, pace, shooting, passing, dribbling, defending, physical, overall, heading, height",
+    [("Test",Position.STRIKER,90,82,75,75,40,68,82,75,180),
+     ("Test",Position.CENTRE_BACK,70,55,65,50,90,85,81,75,180),
+     ("Test", Position.CENTRAL_ATTACKING_MIDFIELDER,75,70,85,85,65,55,78,75,180)])
 
-def test_field_player_overall_calculation(name: str,position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, overall:int) -> None:
-    playerA = FieldPlayer(name,position,pace,shooting,passing,dribbling,defending, physical)
+def test_field_player_overall_calculation(name: str,position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, overall:int, heading: int, height: int) -> None:
+    playerA = FieldPlayer(name,position,pace,shooting,passing,dribbling,defending, physical,heading,height)
     playerA_overall = playerA.overall
     
     assert playerA_overall == overall
@@ -26,7 +26,7 @@ def fresh_match_player() -> MatchPlayer:
     player = FieldPlayer(
         name="Jan Kowalski", 
         position=Position.STRIKER, 
-        pace=80, shooting=85, passing=70, dribbling=75, defending=30, physical=70
+        pace=80, shooting=85, passing=70, dribbling=75, defending=30, physical=70,heading=70, height=180
     )
     return MatchPlayer(player)
 

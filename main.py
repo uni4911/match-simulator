@@ -1,6 +1,7 @@
 import os
 from src.loader import load_file
 from src.models import Team, FORMATION_433
+from src.event_bus import EventBus
 from src.engine import MatchTeam, Match, MatchEngine
 from src.commentator import Commentator
 
@@ -38,9 +39,10 @@ def main():
     match_home = MatchTeam(home_team_obj, FORMATION_433)
     match_away = MatchTeam(away_team_obj, FORMATION_433)
 
-    match = Match(match_home, match_away)
-    commentator = Commentator()
-    engine = MatchEngine(commentator, 0.1)
+    event_bus = EventBus()
+    commentator = Commentator(event_bus=event_bus)
+    match = Match(match_home, match_away, event_bus=event_bus)
+    engine = MatchEngine(commentator=commentator, speed_factor=0.1, event_bus=event_bus)
 
 
     print("--- ROZPOCZĘCIE RELACJI NA ŻYWO ---")

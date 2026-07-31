@@ -43,14 +43,16 @@ class DoubleYellowCard(Foul):
 @dataclass(frozen=True)
 class MatchEndEvent(MatchEvent):
     pass
-
 @dataclass(frozen=True)
 class Substitution(MatchEvent):
     team: str
     subbed_in: str
     subbed_off: str
-
 @dataclass(frozen=True)
 class CornerKickEvent(MatchEvent):
     executing_team: str
     taker: str
+
+@dataclass(frozen=True)
+class HalfTimeEvent(MatchEvent):
+    pass

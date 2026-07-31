@@ -8,6 +8,7 @@ from src.commentator import Commentator
 from src.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
                         RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent,
                         Substitution)
+from src.event_bus import EventBus
 import math
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
@@ -56,7 +57,7 @@ class KickOff(State):
     def execute(self, match: Match) -> 'State':
         match.player_with_ball = self.executing_team.get_midfielder()
         if match.current_second == 0:
-            match.match_events.append(KickoffEvent(match.current_second,self.executing_team.team.name))
+            match.add_event(KickoffEvent(match.current_second,self.executing_team.team.name))
         return MidfieldPlay()
     
 class MidfieldPlay(State):
@@ -111,10 +112,10 @@ class ShotOnGoal(State):
             if winner:
                 match.player_with_ball.goals += 1
                 if match.potential_assistant:
-                    match.match_events.append(GoalWithAssist(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name,match.potential_assistant.player.name))
+                    match.add_event(GoalWithAssist(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name,match.potential_assistant.player.name))
                     match.potential_assistant.assists += 1
                 else:
-                    match.match_events.append(Goal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
+                    match.add_event(Goal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
                 match.potential_assistant = None
                 if match.team_with_ball == match.home_team:
                     match.home_score += 1
@@ -127,7 +128,7 @@ class ShotOnGoal(State):
                 return MidfieldPlay()
         else:
             match.potential_assistant = None
-            match.match_events.append(ShotSave(match.current_second,goalkeeper.name,match.team_with_ball.team.name))
+            match.add_event(ShotSave(match.current_second,goalkeeper.name,match.team_with_ball.team.name))
             return random.choices([CornerKick(),MidfieldPlay()],[15,85],k=1)[0]
 
 
@@ -159,14 +160,14 @@ class AttackFoul(State):
         if foul_punishment == 'yellow_card':
             is_second_yellow = self.fouling_player.receive_card(foul_punishment)
             if is_second_yellow:
-                match.match_events.append(DoubleYellowCard(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+                match.add_event(DoubleYellowCard(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
             else:
-                match.match_events.append(YellowCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+                match.add_event(YellowCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
         elif foul_punishment == 'red_card':
             self.fouling_player.receive_card(foul_punishment)
-            match.match_events.append(RedCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+            match.add_event(RedCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
         else:
-            match.match_events.append(Foul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+            match.add_event(Foul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
             
         return PenaltyKick() if foul_aftermath == 'penalty_kick' else DangerousFreekick()
 class PenaltyKick(State):
@@ -176,7 +177,7 @@ class PenaltyKick(State):
 
         winner = self.winner_choose(penalty_taker.shooting * PENALTY_KICK_MODIFIER, goalkeeper.goalkeeping_score)
         if winner:
-            match.match_events.append(PenaltyKickGoal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
+            match.add_event(PenaltyKickGoal(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
             penalty_taker.goals += 1
             if match.team_with_ball == match.home_team:
                 match.home_score += 1
@@ -228,17 +229,22 @@ EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] 
 }
             
 class MatchEngine:
-    def __init__(self, commentator: Commentator, speed_factor: float):
-        self.commentator: Commentator = commentator
+    def __init__(self, commentator: Commentator | None = None, speed_factor: float = 0.1, event_bus: EventBus | None = None):
+        self.commentator: Commentator | None = commentator
         self.speed_factor: float = speed_factor
+        self.event_bus: EventBus | None = event_bus
+        
         
     def play_match(self, match: Match) -> None:
+        if self.event_bus is not None and match.event_bus is None:
+            match.event_bus = self.event_bus
+
         while match.current_second <= match.max_second:
             for team in [match.home_team, match.away_team]:
                 sub_result = team.check_and_make_auto_substitution()
                 if sub_result is not None:
                     player_off, player_in = sub_result
-                    match.match_events.append(Substitution(match.current_second,team.team.name,player_in.player.name, player_off.player.name))
+                    match.add_event(Substitution(match.current_second,team.team.name,player_in.player.name, player_off.player.name))
             current_events_length = len(match.match_events)
             match.current_state = match.current_state.execute(match)
 
@@ -250,17 +256,20 @@ class MatchEngine:
             match.current_second += time_passed
             match.home_team.update_stamina(time_passed,[match.player_with_ball])
             match.away_team.update_stamina(time_passed,[match.player_with_ball])
-            self.commentator.comment(match)
+            if self.commentator and match.event_bus is None:
+                self.commentator.comment(match)
 
-        match.match_events.append(MatchEndEvent(match.current_second))
-        self.commentator.comment(match)
+        match.add_event(MatchEndEvent(match.current_second))
+        if self.commentator and match.event_bus is None:
+            self.commentator.comment(match)
             
 
             
 class Match:
-    def __init__(self, home_team: MatchTeam, away_team: MatchTeam):
+    def __init__(self, home_team: MatchTeam, away_team: MatchTeam, event_bus: EventBus | None = None):
         self.home_team: MatchTeam = home_team
         self.away_team: MatchTeam = away_team
+        self.event_bus: EventBus | None = event_bus
         self.home_score: int = 0
         self.away_score: int = 0
         self.current_state: 'State' = KickOff(random.choice([self.home_team,self.away_team]))
@@ -269,6 +278,13 @@ class Match:
         self.player_with_ball: MatchPlayer | None = None
         self.match_events: list[MatchEvent] = [] 
         self.potential_assistant: MatchPlayer| None = None
+        self.half: int = 1
+        self.additional_time: int = 0
+
+    def add_event(self, event: MatchEvent) -> None:
+        self.match_events.append(event)
+        if self.event_bus is not None:
+            self.event_bus.publish(event)
 
 
     @property

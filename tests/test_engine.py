@@ -21,7 +21,7 @@ def sample_home_team() -> MatchTeam:
             name=f"Gracz Dom {i}",
             position=pos,
             pace=75, shooting=70, passing=75, 
-            dribbling=75, defending=70, physical=75
+            dribbling=75, defending=70, physical=75, heading=70, height=180
         )
         for i, pos in enumerate(FORMATION_433)
     ]
@@ -43,7 +43,7 @@ def sample_away_team() -> MatchTeam:
             name=f"Gracz Wyjazd {i}",
             position=pos,
             pace=75, shooting=70, passing=75, 
-            dribbling=75, defending=70, physical=75
+            dribbling=75, defending=70, physical=75, heading=70, height=180
         )
         for i, pos in enumerate(FORMATION_433)
     ]

@@ -9,6 +9,7 @@ import random
 
 if TYPE_CHECKING:
     from src.engine import Match
+    from src.event_bus import EventBus
 
 KICKOFF_EVENT_COMMENTS = [
     "Sedzia gwizdzo po raz pierwszy! Rozpoczyna druzyna {event.executing_team}.",
@@ -148,22 +149,29 @@ EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
     CornerKickEvent: CORNER_KICK_COMMENTS
 }
 class Commentator:
-    def __init__(self):
+    def __init__(self, event_bus: EventBus | None = None):
         self.last_commented_event: MatchEvent | None = None
+        if event_bus is not None:
+            self.subscribe_to(event_bus)
+
+    def subscribe_to(self, event_bus: EventBus) -> None:
+        event_bus.subscribe(MatchEvent, self.handle_event)
+
+    def handle_event(self, event: MatchEvent) -> None:
+        comments_list = EVENT_COMMENT_MAP.get(type(event))
+        if comments_list:
+            comment = random.choice(comments_list)
+            minute = event.second // 60
+            print(f"{minute}' min: {comment.format(event=event)}")
 
     def comment(self, match: Match) -> None:
-       if not match.match_events:
-           return None
+        if not match.match_events:
+            return None
 
-       latest_event = match.match_events[-1]
-       if self.last_commented_event == latest_event:
-           return None
+        latest_event = match.match_events[-1]
+        if self.last_commented_event == latest_event:
+            return None
 
-       self.last_commented_event = latest_event
-
-       comments_list = EVENT_COMMENT_MAP.get(type(latest_event))
-       if comments_list:
-           comment = random.choice(comments_list)
-           minute = latest_event.second // 60
-           print(f"{minute}' min: {comment.format(event=latest_event)}")
+        self.last_commented_event = latest_event
+        self.handle_event(latest_event)
     
