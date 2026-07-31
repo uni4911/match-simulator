@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from src.commentator import Commentator
 from src.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
                         RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent,
-                        Substitution)
+                        Substitution, HalfTimeEvent)
 from src.event_bus import EventBus
 import math
 
@@ -51,13 +51,13 @@ class State(ABC):
         pass
 
 class KickOff(State):
-    def __init__(self, executing_team: MatchTeam):
+    def __init__(self, executing_team: MatchTeam, half: int = 1):
         self.executing_team: MatchTeam = executing_team
+        self.half: int = half
 
     def execute(self, match: Match) -> 'State':
         match.player_with_ball = self.executing_team.get_midfielder()
-        if match.current_second == 0:
-            match.add_event(KickoffEvent(match.current_second,self.executing_team.team.name))
+        match.add_event(KickoffEvent(match.current_second, self.executing_team.team.name, half=self.half))
         return MidfieldPlay()
     
 class MidfieldPlay(State):
@@ -217,6 +217,7 @@ EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] 
     YellowCardFoul: (20, 40),
     RedCardFoul: (40, 80),
     DoubleYellowCard: (40, 80),
+    HalfTimeEvent: (30, 60),
     MatchEndEvent: (0, 0), 
     KickOff: (5, 10),          
     MidfieldPlay: (3, 8),      
@@ -239,29 +240,51 @@ class MatchEngine:
         if self.event_bus is not None and match.event_bus is None:
             match.event_bus = self.event_bus
 
-        while match.current_second <= match.max_second:
-            for team in [match.home_team, match.away_team]:
-                sub_result = team.check_and_make_auto_substitution()
-                if sub_result is not None:
-                    player_off, player_in = sub_result
-                    match.add_event(Substitution(match.current_second,team.team.name,player_in.player.name, player_off.player.name))
-            current_events_length = len(match.match_events)
-            match.current_state = match.current_state.execute(match)
+        first_half_executing_team = match.current_state.executing_team
+        added_seconds_1st = random.randint(30, 180)
+        added_seconds_2nd = random.randint(60, 300)
 
-            if len(match.match_events) > current_events_length:
-                time_range = EVENT_OR_STATE_DURATIONS[type(match.match_events[-1])]
+        for half in (1, 2):
+            match.half = half
+
+            if half == 1:
+                target_second = 2700 + added_seconds_1st
             else:
-                time_range = EVENT_OR_STATE_DURATIONS[type(match.current_state)]
-            time_passed = random.randint(*time_range)
-            match.current_second += time_passed
-            match.home_team.update_stamina(time_passed,[match.player_with_ball])
-            match.away_team.update_stamina(time_passed,[match.player_with_ball])
+                target_second = 5400 + added_seconds_2nd
+                second_half_executing_team = match.home_team if first_half_executing_team == match.away_team else match.away_team
+                match.current_state = KickOff(second_half_executing_team, half=2)
+
+            while match.current_second <= target_second:
+                for team in [match.home_team, match.away_team]:
+                    sub_result = team.check_and_make_auto_substitution()
+                    if sub_result is not None:
+                        player_off, player_in = sub_result
+                        match.add_event(Substitution(match.current_second, team.team.name, player_in.player.name, player_off.player.name))
+                current_events_length = len(match.match_events)
+                match.current_state = match.current_state.execute(match)
+
+                if len(match.match_events) > current_events_length:
+                    time_range = EVENT_OR_STATE_DURATIONS.get(type(match.match_events[-1]), (5, 15))
+                else:
+                    time_range = EVENT_OR_STATE_DURATIONS.get(type(match.current_state), (3, 8))
+                time_passed = random.randint(*time_range)
+                match.current_second += time_passed
+                match.home_team.update_stamina(time_passed, [match.player_with_ball])
+                match.away_team.update_stamina(time_passed, [match.player_with_ball])
+                if self.commentator and match.event_bus is None:
+                    self.commentator.comment(match)
+
+            if half == 1:
+                match.add_event(HalfTimeEvent(match.current_second, home_score=match.home_score, away_score=match.away_score))
+                match.home_team.recover_stamina(0.20)
+                match.away_team.recover_stamina(0.20)
+                match.current_second = 2700
+            else:
+                match.add_event(MatchEndEvent(match.current_second))
             if self.commentator and match.event_bus is None:
                 self.commentator.comment(match)
 
-        match.add_event(MatchEndEvent(match.current_second))
-        if self.commentator and match.event_bus is None:
-            self.commentator.comment(match)
+            
             
 
             
@@ -278,8 +301,8 @@ class Match:
         self.player_with_ball: MatchPlayer | None = None
         self.match_events: list[MatchEvent] = [] 
         self.potential_assistant: MatchPlayer| None = None
-        self.half: int = 1
         self.additional_time: int = 0
+        self.half: int = 1
 
     def add_event(self, event: MatchEvent) -> None:
         self.match_events.append(event)

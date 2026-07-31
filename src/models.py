@@ -376,6 +376,10 @@ class MatchTeam:
             is_active = player in active_players
             player.drain_stamina(seconds, is_active=is_active)
 
+    def recover_stamina(self, amount: float = 0.20) -> None:
+        for player in self.match_players:
+            player.current_stamina = min(1.0, player.current_stamina + amount)
+
     def make_substitution(self, player_off: MatchPlayer, player_in: MatchPlayer) -> bool:
         if player_in in self.bench_players and player_off in self.active_players and self.substitution_limit > 0:
             player_in.assigned_position = player_off.assigned_position

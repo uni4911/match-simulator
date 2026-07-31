@@ -7,6 +7,7 @@ class MatchEvent:
 @dataclass(frozen=True)
 class KickoffEvent(MatchEvent):
     executing_team: str
+    half: int = 1
 
 @dataclass(frozen=True)
 class Goal(MatchEvent):
@@ -55,4 +56,5 @@ class CornerKickEvent(MatchEvent):
 
 @dataclass(frozen=True)
 class HalfTimeEvent(MatchEvent):
-    pass
+    home_score: int = 0
+    away_score: int = 0

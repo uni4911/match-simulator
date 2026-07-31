@@ -3,7 +3,7 @@ from typing import Optional, TYPE_CHECKING
 from src.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
     Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
-    Substitution, MatchEvent, CornerKickEvent
+    Substitution, MatchEvent, CornerKickEvent, HalfTimeEvent
 )
 import random
 
@@ -25,6 +25,19 @@ KICKOFF_EVENT_COMMENTS = [
     "Panie i panowie, zaczynamy to wielkie widowisko! Od srodka {event.executing_team}!",
     "Pierwsze podanie w tym spotkaniu, pilke wymieniaja zawodnicy {event.executing_team}.",
     "Trybuny rycza, a {event.executing_team} zaczyna budowac swoj pierwszy atak!",
+]
+
+KICKOFF_2ND_HALF_COMMENTS = [
+    "Sedzia gwizdzo po raz drugi! Rozpoczyna druga polowe druzyna {event.executing_team}.",
+    "Gwizdek na druga polowe! Przy pilce od srodka {event.executing_team}.",
+    "Zaczynamy druga polowe! {event.executing_team} wznawia gre od srodkowego kola.",
+    "Zawodnicy wrocili na boisko! Druga polowa rozpoczyna sie od podania zespołu {event.executing_team}.",
+]
+
+HALF_TIME_COMMENTS = [
+    "--- PRZERWA W MECZU --- Sedzia zaprasza pilkarzy do szatni! Wynik do przerwy: {event.home_score} - {event.away_score}.",
+    "--- KONIEC PIERWSZEJ POŁOWY --- Pierwsze 45 minut za nami! Stan meczu: {event.home_score} - {event.away_score}.",
+    "--- PRZERWA --- Zespoly udaja sie na odpoczynek. Aktualny wynik: {event.home_score} - {event.away_score}.",
 ]
 
 GOAL_COMMENTS = [
@@ -146,8 +159,10 @@ EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
     RedCardFoul: RED_CARD_FOUL_COMMENTS,
     MatchEndEvent: MATCH_END_COMMENTS,
     Substitution: SUBSTITUTION_COMMENTS,
-    CornerKickEvent: CORNER_KICK_COMMENTS
+    CornerKickEvent: CORNER_KICK_COMMENTS,
+    HalfTimeEvent: HALF_TIME_COMMENTS
 }
+
 class Commentator:
     def __init__(self, event_bus: EventBus | None = None):
         self.last_commented_event: MatchEvent | None = None
@@ -158,7 +173,12 @@ class Commentator:
         event_bus.subscribe(MatchEvent, self.handle_event)
 
     def handle_event(self, event: MatchEvent) -> None:
-        comments_list = EVENT_COMMENT_MAP.get(type(event))
+        comments_list = None
+        if isinstance(event, KickoffEvent) and getattr(event, 'half', 1) == 2:
+            comments_list = KICKOFF_2ND_HALF_COMMENTS
+        else:
+            comments_list = EVENT_COMMENT_MAP.get(type(event))
+
         if comments_list:
             comment = random.choice(comments_list)
             minute = event.second // 60
