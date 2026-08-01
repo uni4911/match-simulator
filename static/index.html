@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Match Simulator</title>
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <div class="metro-wrapper">
+            <header class="metro-topbar">
+                <div class="metro-logo">
+                    <span class="metro-logo-badge">MATCH</span>
+                    <span>SIMULATOR</span>
+                </div>
+                <div class="metro-nav-tabs">
+                    <div class="metro-tab active">MATCH DAY</div>
+                </div>
+                <div id="status-badge" class="metro-status">
+                    <span class="status-dot"></span>
+                    <span id="status-badge-text">LIVE</span>
+                </div>
+            </header>
+
+            <main class="metro-grid">
+                <h1 id="score-board" class="sr-only">Match loading...</h1>
+
+                <section class="tile-box tile-scoreboard">
+                    <div class="scoreboard-inner">
+                        <div class="team-block home">
+                            <div id="home-team-name" class="team-title">CF Java</div>
+                            <div id="home-team-badge" class="tile-badge">JAV</div>
+                        </div>
+
+                        <div class="score-center-block">
+                            <div class="metro-score">
+                                <span id="home-score">0</span>
+                                <span class="metro-divider">:</span>
+                                <span id="away-score">0</span>
+                            </div>
+                            <div id="current-minute" class="metro-minute">0'</div>
+                        </div>
+
+                        <div class="team-block away">
+                            <div id="away-team-badge" class="tile-badge">PYT</div>
+                            <div id="away-team-name" class="team-title">Python FC</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tile-box tile-action">
+                    <button id="tick-btn" class="btn-tile-box">
+                        <div class="btn-tile-icon">▶</div>
+                        <div>
+                            <div class="btn-tile-title">KOLEJNA AKCJA</div>
+                            <div class="btn-tile-sub">NACIŚNIJ ABY WYKONAĆ TICK</div>
+                        </div>
+                    </button>
+                </section>
+
+                <section class="tile-box tile-events">
+                    <div class="tile-header">
+                        <div class="tile-header-title">MECZ NA ŻYWO - CENTRUM ZDARZEŃ</div>
+                        <div id="events-count" class="tile-count">0 ZDARZEŃ</div>
+                    </div>
+                    <div id="events-container" class="metro-events-list">
+                        <div class="empty-events">Oczekiwanie na pierwszy gwizdek...</div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <script src="/static/app.js"></script>
+    </body>
+</html>

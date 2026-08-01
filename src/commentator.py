@@ -179,6 +179,7 @@ EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
 class Commentator:
     def __init__(self, event_bus: EventBus | None = None):
         self.last_commented_event: MatchEvent | None = None
+        self.commented_events: dict[MatchEvent, str] = {}
         if event_bus is not None:
             self.subscribe_to(event_bus)
 
@@ -209,4 +210,20 @@ class Commentator:
 
         self.last_commented_event = latest_event
         self.handle_event(latest_event)
-    
+
+    def get_comment_text(self, event: MatchEvent) -> str:
+        if event not in self.commented_events:
+            comments_list = None
+            if isinstance(event, KickoffEvent) and getattr(event, 'half', 1) == 2:
+                comments_list = KICKOFF_2ND_HALF_COMMENTS
+            elif isinstance(event, InjuryEvent):
+                comments_list = INJURY_SEVERE_COMMENTS if getattr(event, 'severity', 'minor') == 'severe' else INJURY_MINOR_COMMENTS
+            else:
+                comments_list = EVENT_COMMENT_MAP.get(type(event))
+
+            if comments_list:
+                comment = random.choice(comments_list)
+                minute = event.second // 60
+                formated_comment = f"{minute}' min: {comment.format(event=event)}"
+                self.commented_events[event] = formated_comment
+        return self.commented_events.get(event)

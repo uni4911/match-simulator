@@ -61,3 +61,14 @@ def test_severe_injury_forced_off(fresh_match_player: MatchPlayer):
     fresh_match_player.injury_severity = "severe"
     fresh_match_player.is_forced_off = True
     assert fresh_match_player.is_forced_off == True
+
+def test_all_formations_initialization():
+    from src.models import AVAILABLE_FORMATIONS, Team
+    from src.loader import load_file
+    players = load_file("data.json", "Python FC")
+    team = Team("Python FC", players)
+
+    for name, formation in AVAILABLE_FORMATIONS.items():
+        match_team = MatchTeam(team, formation)
+        assert len(match_team.players_on_field) == 10
+        assert match_team.formation == formation
