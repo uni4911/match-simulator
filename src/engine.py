@@ -279,7 +279,6 @@ class MatchEngine:
                         player_off, player_in = sub_result
                         match.add_event(Substitution(match.current_second, team.team.name, player_in.player.name, player_off.player.name))
                     
-                    # Check non-contact injury risk for low-stamina active players
                     for player in team.active_players:
                         if player.current_stamina < 0.35 and not player.is_injured:
                             match.process_injury_risk(player, non_contact=True)

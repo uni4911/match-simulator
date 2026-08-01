@@ -25,11 +25,88 @@
             <main class="metro-grid">
                 <h1 id="score-board" class="sr-only">Match loading...</h1>
 
+                <section class="tile-box tile-setup">
+                    <div class="tile-header">
+                        <div class="tile-header-title">
+                            <span class="header-icon">⚙️</span> KONFIGURACJA MECZU
+                        </div>
+                        <div class="tile-badge-info">PRZYGOTOWANIE SPOTKANIA</div>
+                    </div>
+
+                    <div class="setup-arena">
+                        <!-- Gospodarze Setup Card -->
+                        <div class="setup-card home-card">
+                            <div class="setup-card-header">
+                                <div id="setup-home-badge" class="setup-team-badge home">---</div>
+                                <div class="setup-card-title">
+                                    <span class="card-tag">GOSPODARZE</span>
+                                    <span id="setup-home-name" class="card-team-name">Wybierz drużynę</span>
+                                </div>
+                            </div>
+                            <div class="setup-field-group">
+                                <label for="home-team-select" class="metro-label">
+                                    <span class="label-icon">🛡️</span> DRUŻYNA GOSPODARZY
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="home-team-select" class="metro-select"></select>
+                                </div>
+                            </div>
+                            <div class="setup-field-group">
+                                <label for="home-formation-select" class="metro-label">
+                                    <span class="label-icon">📋</span> TAKTYKA / FORMACJA
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="home-formation-select" class="metro-select"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VS Divider -->
+                        <div class="setup-vs-container">
+                            <div class="vs-glow-circle">VS</div>
+                        </div>
+
+                        <!-- Goście Setup Card -->
+                        <div class="setup-card away-card">
+                            <div class="setup-card-header">
+                                <div class="setup-card-title text-right">
+                                    <span class="card-tag away">GOŚCIE</span>
+                                    <span id="setup-away-name" class="card-team-name">Wybierz drużynę</span>
+                                </div>
+                                <div id="setup-away-badge" class="setup-team-badge away">---</div>
+                            </div>
+                            <div class="setup-field-group">
+                                <label for="away-team-select" class="metro-label">
+                                    <span class="label-icon">🛡️</span> DRUŻYNA GOŚCI
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="away-team-select" class="metro-select"></select>
+                                </div>
+                            </div>
+                            <div class="setup-field-group">
+                                <label for="away-formation-select" class="metro-label">
+                                    <span class="label-icon">📋</span> TAKTYKA / FORMACJA
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="away-formation-select" class="metro-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setup-footer">
+                        <button id="start-match-btn" class="metro-btn primary setup-start-btn">
+                            <span class="btn-icon">⚽</span>
+                            <span>ROZPOCZNIJ NOWY MECZ</span>
+                        </button>
+                    </div>
+                </section>
+
                 <section class="tile-box tile-scoreboard">
                     <div class="scoreboard-inner">
                         <div class="team-block home">
-                            <div id="home-team-name" class="team-title">CF Java</div>
-                            <div id="home-team-badge" class="tile-badge">JAV</div>
+                            <div id="home-team-name" class="team-title">---</div>
+                            <div id="home-team-badge" class="tile-badge">---</div>
                         </div>
 
                         <div class="score-center-block">
@@ -42,8 +119,8 @@
                         </div>
 
                         <div class="team-block away">
-                            <div id="away-team-badge" class="tile-badge">PYT</div>
-                            <div id="away-team-name" class="team-title">Python FC</div>
+                            <div id="away-team-badge" class="tile-badge">---</div>
+                            <div id="away-team-name" class="team-title">---</div>
                         </div>
                     </div>
                 </section>
