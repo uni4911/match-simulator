@@ -41,3 +41,15 @@ def test_start_match_invalid_team():
     with pytest.raises(HTTPException) as exc_info:
         start_match(req)
     assert exc_info.value.status_code == 400
+
+def test_team_stats():
+    from main import team_stats
+    stats = team_stats()
+    assert "home_team_name" in stats
+    assert "away_team_name" in stats
+    assert "home_players" in stats
+    assert "away_players" in stats
+    assert len(stats["home_players"]) > 0
+    player = stats["home_players"][0]
+    assert hasattr(player, "name") or "name" in player
+    assert hasattr(player, "yellow_cards") or "yellow_cards" in player

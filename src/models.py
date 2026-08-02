@@ -298,7 +298,15 @@ class MatchPlayer:
         if self.is_injured and self.injury_severity == "minor":
             base_mod *= 0.80 
         return base_mod
-
+    @property 
+    def name(self) -> str:
+            return self.player.name
+    @property
+    def position(self) -> str:
+        return self.assigned_position.name
+    @property
+    def yellow_cards(self) -> int:
+        return self.yellow_card
     @property
     def pace(self) -> int:
         return int(self.player.base_pace * self.stat_modifier)
@@ -326,6 +334,7 @@ class MatchPlayer:
     @property
     def heading_score(self) -> int:
         return int((self.player.heading * 0.5) + (self.physical * 0.3) + (self.player.height * 0.2))
+
          
     def ball_possession_chance(self, modifier: float) -> float:
         return (self.passing + self.dribbling) * modifier

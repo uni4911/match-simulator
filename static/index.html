@@ -14,7 +14,8 @@
                     <span>SIMULATOR</span>
                 </div>
                 <div class="metro-nav-tabs">
-                    <div class="metro-tab active">MATCH DAY</div>
+                    <button id="nav-tab-setup" type="button" class="metro-tab active">⚙️ KONFIGURACJA</button>
+                    <button id="nav-tab-match" type="button" class="metro-tab">⚽ MECZ NA ŻYWO</button>
                 </div>
                 <div id="status-badge" class="metro-status">
                     <span class="status-dot"></span>
@@ -22,10 +23,9 @@
                 </div>
             </header>
 
-            <main class="metro-grid">
-                <h1 id="score-board" class="sr-only">Match loading...</h1>
-
-                <section class="tile-box tile-setup">
+            <!-- PRIMARY MENU: KONFIGURACJA MECZU -->
+            <div id="setup-view" class="metro-setup-view">
+                <section class="tile-box tile-setup primary-setup-menu">
                     <div class="tile-header">
                         <div class="tile-header-title">
                             <span class="header-icon">⚙️</span> KONFIGURACJA MECZU
@@ -95,58 +95,83 @@
                     </div>
 
                     <div class="setup-footer">
-                        <button id="start-match-btn" class="metro-btn primary setup-start-btn">
+                        <button id="start-match-btn" type="button" class="metro-btn primary setup-start-btn">
                             <span class="btn-icon">⚽</span>
                             <span>ROZPOCZNIJ NOWY MECZ</span>
                         </button>
                     </div>
                 </section>
+            </div>
 
-                <section class="tile-box tile-scoreboard">
-                    <div class="scoreboard-inner">
-                        <div class="team-block home">
-                            <div id="home-team-name" class="team-title">---</div>
-                            <div id="home-team-badge" class="tile-badge">---</div>
-                        </div>
+            <!-- LIVE MATCH VIEW: SCOREBOARD, ZDARZENIA, STATYSTYKI ZAWODNIKÓW -->
+            <div id="match-view" class="metro-layout hidden">
+                <!-- LEWY PANEL: Główna zawartość meczowa -->
+                <main class="metro-main-content">
+                    <h1 id="score-board" class="sr-only">Match loading...</h1>
 
-                        <div class="score-center-block">
-                            <div class="metro-score">
-                                <span id="home-score">0</span>
-                                <span class="metro-divider">:</span>
-                                <span id="away-score">0</span>
+                    <section class="tile-box tile-scoreboard">
+                        <div class="scoreboard-inner">
+                            <div class="team-block home">
+                                <div id="home-team-name" class="team-title">---</div>
+                                <div id="home-team-badge" class="tile-badge">---</div>
                             </div>
-                            <div id="current-minute" class="metro-minute">0'</div>
-                        </div>
 
-                        <div class="team-block away">
-                            <div id="away-team-badge" class="tile-badge">---</div>
-                            <div id="away-team-name" class="team-title">---</div>
-                        </div>
-                    </div>
-                </section>
+                            <div class="score-center-block">
+                                <div class="metro-score">
+                                    <span id="home-score">0</span>
+                                    <span class="metro-divider">:</span>
+                                    <span id="away-score">0</span>
+                                </div>
+                                <div id="current-minute" class="metro-minute">0'</div>
+                            </div>
 
-                <section class="tile-box tile-action">
-                    <button id="tick-btn" class="btn-tile-box">
-                        <div class="btn-tile-icon">▶</div>
-                        <div>
-                            <div class="btn-tile-title">KOLEJNA AKCJA</div>
-                            <div class="btn-tile-sub">NACIŚNIJ ABY WYKONAĆ TICK</div>
+                            <div class="team-block away">
+                                <div id="away-team-badge" class="tile-badge">---</div>
+                                <div id="away-team-name" class="team-title">---</div>
+                            </div>
                         </div>
-                    </button>
-                </section>
+                    </section>
 
-                <section class="tile-box tile-events">
+                    <section class="tile-box tile-events full-width-events">
+                        <div class="tile-header">
+                            <div class="tile-header-title">MECZ NA ŻYWO - CENTRUM ZDARZEŃ</div>
+                            <div id="events-count" class="tile-count">0 ZDARZEŃ</div>
+                        </div>
+                        <div id="events-container" class="metro-events-list">
+                            <div class="empty-events">Oczekiwanie na pierwszy gwizdek...</div>
+                        </div>
+                    </section>
+                </main>
+
+                <!-- PRAWY PANEL: Statystyki graczy -->
+                <aside class="tile-box tile-stats" id="player-stats-section">
                     <div class="tile-header">
-                        <div class="tile-header-title">MECZ NA ŻYWO - CENTRUM ZDARZEŃ</div>
-                        <div id="events-count" class="tile-count">0 ZDARZEŃ</div>
+                        <div class="tile-header-title">
+                            <span class="header-icon">📊</span> STATYSTYKI GRACZY
+                        </div>
+                        <button id="refresh-stats-btn" type="button" class="stats-refresh-btn" title="Odśwież statystyki">
+                            <span class="refresh-icon">🔄</span>
+                        </button>
                     </div>
-                    <div id="events-container" class="metro-events-list">
-                        <div class="empty-events">Oczekiwanie na pierwszy gwizdek...</div>
+
+                    <div class="stats-team-tabs">
+                        <button id="tab-home-stats" type="button" class="stats-tab active home">
+                            <span id="stats-home-badge" class="stats-tab-badge">---</span>
+                            <span id="stats-home-name" class="stats-tab-name">GOSPODARZE</span>
+                        </button>
+                        <button id="tab-away-stats" type="button" class="stats-tab away">
+                            <span id="stats-away-badge" class="stats-tab-badge">---</span>
+                            <span id="stats-away-name" class="stats-tab-name">GOŚCIE</span>
+                        </button>
                     </div>
-                </section>
-            </main>
+
+                    <div id="stats-players-list" class="metro-players-list">
+                        <div class="empty-stats">Ładowanie statystyk zawodników...</div>
+                    </div>
+                </aside>
+            </div>
         </div>
 
-        <script src="/static/app.js"></script>
+        <script type="module" src="/static/app.js"></script>
     </body>
 </html>

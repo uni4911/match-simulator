@@ -11,7 +11,7 @@ from src.models import AVAILABLE_FORMATIONS, FORMATION_433
 from src.event_bus import EventBus
 from src.engine import MatchTeam, Match, MatchEngine, EVENT_OR_STATE_DURATIONS
 from src.commentator import Commentator
-from api.schemas import MatchStatusSchema, StartMatchRequest, MatchOptionsResponse
+from api.schemas import MatchStatusSchema, StartMatchRequest, MatchOptionsResponse, MatchFullStatsSchema, MatchPlayerStatsSchema
 
 
 json_filename = "data.json"
@@ -91,12 +91,18 @@ async def match_event_generator():
         time_range = EVENT_OR_STATE_DURATIONS.get(key,(3,8))
         time_passed = random.randint(*time_range)
         match.current_second += time_passed
+        active_players = [match.player_with_ball] if getattr(match, 'player_with_ball', None) else []
+        match.home_team.update_stamina(time_passed, active_players)
+        match.away_team.update_stamina(time_passed, active_players)
         report = get_match_status_report()
         data_json = json.dumps(report)
 
         yield f"data: {data_json}\n\n"
 
         await asyncio.sleep(0.1)
+
+async def get_players_stats():
+    global match
 
 app = FastAPI()
 app.add_middleware(
@@ -138,6 +144,19 @@ def start_match(req: StartMatchRequest):
 def match_status():
     return get_match_status_report()
 
+@app.get("/match/stats",response_model=MatchFullStatsSchema)
+def team_stats():
+    global match
+    if match is None:
+        raise HTTPException(status_code=404, detail="Match not started")
+    teams_stats = {'home_team_name': match.home_team.team.name,
+                   'away_team_name': match.away_team.team.name,
+                   'home_players': match.home_team.match_players,
+                   'away_players': match.away_team.match_players}
+    
+    return teams_stats
+
+
 @app.post("/match/tick", response_model=MatchStatusSchema)
 def match_tick():
     global match
@@ -145,11 +164,15 @@ def match_tick():
         raise HTTPException(status_code=400, detail="Brak aktywnego meczu")
     match.current_state = match.current_state.execute(match)
     match.current_second += 15
+    active_players = [match.player_with_ball] if getattr(match, 'player_with_ball', None) else []
+    match.home_team.update_stamina(15, active_players)
+    match.away_team.update_stamina(15, active_players)
     return get_match_status_report()
 
 @app.get("/")
 def read_root():
     return FileResponse("static/index.html")
+
 
 @app.get("/match/stream")
 async def stream_match():

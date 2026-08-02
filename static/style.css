@@ -49,10 +49,39 @@ body {
 
 .metro-wrapper {
   width: 100%;
-  max-width: 960px;
+  max-width: 1280px;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.metro-layout {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.metro-main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.metro-grid-actions {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.metro-grid-actions .tile-action {
+  grid-column: span 4;
+}
+
+.metro-grid-actions .tile-events {
+  grid-column: span 8;
 }
 
 .metro-topbar {
@@ -85,26 +114,40 @@ body {
   border-radius: 2px;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .metro-nav-tabs {
   display: flex;
   gap: 0.5rem;
 }
 
 .metro-tab {
+  background: transparent;
+  border: none;
   font-family: 'Oswald', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  padding: 0.4rem 1rem;
+  padding: 0.45rem 1.1rem;
   color: var(--metro-text-sub);
   text-transform: uppercase;
   border-bottom: 2px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.metro-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .metro-tab.active {
   color: #ffffff;
   border-bottom-color: var(--metro-accent-teal);
-  background: rgba(0, 180, 216, 0.15);
+  background: rgba(0, 180, 216, 0.18);
 }
 
 .metro-status {
@@ -344,11 +387,12 @@ body {
 
 .metro-events-list {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   gap: 0.5rem;
   max-height: 320px;
   overflow-y: auto;
   padding-right: 0.25rem;
+  scroll-behavior: smooth;
 }
 
 .metro-events-list::-webkit-scrollbar {
@@ -422,6 +466,25 @@ body {
   font-size: 0.9rem;
 }
 
+.metro-setup-view {
+  width: 100%;
+  max-width: 900px;
+  margin: 1rem auto 0 auto;
+}
+
+.primary-setup-menu {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 180, 216, 0.4);
+}
+
+.full-width-events {
+  width: 100%;
+}
+
+.full-width-events .metro-events-list {
+  max-height: 480px;
+}
+
 .tile-setup {
   grid-column: span 12;
   padding: 1.5rem 1.75rem;
@@ -487,7 +550,6 @@ body {
 
 .setup-card:hover {
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
 }
 
@@ -705,19 +767,27 @@ body {
 
 .metro-btn.primary:hover {
   background: linear-gradient(135deg, #0084eb, var(--metro-accent-blue));
-  transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 114, 206, 0.6);
 }
 
 .metro-btn.primary:active {
-  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 114, 206, 0.4);
 }
 
-@media (max-width: 768px) {
-  .metro-grid {
+@media (max-width: 992px) {
+  .metro-layout {
+    flex-direction: column;
+  }
+  .tile-stats {
+    width: 100%;
+    position: static;
+    max-height: none;
+  }
+  .metro-grid-actions {
     grid-template-columns: 1fr;
   }
-  .tile-setup, .tile-scoreboard, .tile-action, .tile-events {
+  .metro-grid-actions .tile-action,
+  .metro-grid-actions .tile-events {
     grid-column: span 1;
   }
   .scoreboard-inner {
@@ -738,6 +808,302 @@ body {
   .setup-start-btn {
     max-width: 100%;
   }
+}
+
+/* LEWY PANEL: STATYSTYKI ZAWODNIKÓW */
+.tile-stats {
+  width: 380px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 1.25rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #0d1729, #132238);
+  border-top: 4px solid var(--metro-accent-teal);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  max-height: calc(100vh - 2.5rem);
+}
+
+.stats-refresh-btn {
+  background: transparent;
+  border: none;
+  color: var(--metro-accent-teal);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: transform 0.3s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-refresh-btn:hover {
+  color: #ffffff;
+  transform: rotate(180deg);
+}
+
+.stats-team-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.3rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.4rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--metro-text-sub);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.stats-tab * {
+  pointer-events: none;
+}
+
+.stats-tab-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.75rem;
+  border-radius: 2px;
+}
+
+.stats-tab.home.active {
+  background: rgba(0, 114, 206, 0.25);
+  border-color: var(--metro-accent-blue);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 114, 206, 0.3);
+}
+
+.stats-tab.away.active {
+  background: rgba(255, 107, 0, 0.25);
+  border-color: var(--metro-accent-orange);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
+}
+
+.stats-section-header {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--metro-accent-teal);
+  background: rgba(0, 180, 216, 0.1);
+  border-left: 3px solid var(--metro-accent-teal);
+  padding: 0.35rem 0.6rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.2rem;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.stats-section-header.bench {
+  color: var(--metro-gold);
+  background: rgba(255, 183, 3, 0.1);
+  border-left-color: var(--metro-gold);
+}
+
+.metro-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+  max-height: 540px;
+}
+
+.metro-players-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.metro-players-list::-webkit-scrollbar-track {
+  background: #080d16;
+}
+
+.metro-players-list::-webkit-scrollbar-thumb {
+  background: var(--metro-accent-teal);
+  border-radius: 2px;
+}
+
+/* Karta pojedynczego gracza */
+.player-stat-card {
+  background: rgba(15, 25, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--metro-accent-teal);
+  border-radius: 4px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-stat-card:hover {
+  border-color: var(--metro-accent-teal);
+  background: rgba(22, 36, 62, 0.95);
+  box-shadow: 0 4px 14px rgba(0, 180, 216, 0.25);
+}
+
+.player-stat-card.has-red {
+  border-left-color: var(--metro-accent-red);
+  background: rgba(230, 57, 70, 0.08);
+  opacity: 0.8;
+}
+
+.player-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.player-card-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.pos-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.pos-gk { background: #d97706; }
+.pos-def { background: #2563eb; }
+.pos-mid { background: #0d9488; }
+.pos-fwd { background: #dc2626; }
+.pos-fld { background: #475569; }
+
+.player-card-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-stat-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  line-height: 1.2;
+  opacity: 0.4;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--metro-text-sub);
+}
+
+.stat-pill.goals.active {
+  opacity: 1;
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--metro-accent-green);
+  color: #34d399;
+}
+
+.stat-pill.assists.active {
+  opacity: 1;
+  background: rgba(0, 180, 216, 0.25);
+  border-color: var(--metro-accent-teal);
+  color: #38bdf8;
+}
+
+.stat-pill.yellow.active {
+  opacity: 1;
+  background: rgba(255, 183, 3, 0.25);
+  border-color: var(--metro-gold);
+  color: #fbbf24;
+}
+
+.stat-pill.red.active {
+  opacity: 1;
+  background: rgba(230, 57, 70, 0.25);
+  border-color: var(--metro-accent-red);
+  color: #f87171;
+}
+
+.stamina-block {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stamina-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stamina-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+.stamina-fill.high { background: var(--metro-accent-green); }
+.stamina-fill.medium { background: var(--metro-gold); }
+.stamina-fill.low { background: var(--metro-accent-red); }
+
+.stamina-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--metro-text-sub);
+  min-width: 42px;
+  text-align: right;
+}
+
+.empty-stats {
+  text-align: center;
+  color: var(--metro-text-sub);
+  padding: 2.5rem 1rem;
+  font-style: italic;
+  font-size: 0.88rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 
