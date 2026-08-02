@@ -829,13 +829,13 @@ body {
 
 .stats-refresh-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--metro-accent-teal);
   font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 4px;
-  transition: transform 0.3s ease, color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -843,7 +843,9 @@ body {
 
 .stats-refresh-btn:hover {
   color: #ffffff;
-  transform: rotate(180deg);
+  background: rgba(0, 180, 216, 0.2);
+  border-color: var(--metro-accent-teal);
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.4);
 }
 
 .stats-team-tabs {
@@ -1106,4 +1108,835 @@ body {
   border-radius: 4px;
 }
 
+/* ==========================================================================
+   STYL DLA MODUŁU LIGOWEGO (LEAGUE FEATURE)
+   ========================================================================== */
+
+.metro-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.metro-checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--metro-accent-teal);
+}
+
+.metro-checkbox-label input[type="checkbox"] {
+  accent-color: var(--metro-accent-teal);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.team-selection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.selection-quick-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.metro-btn-sm {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--metro-text-sub);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.metro-btn-sm:hover {
+  background: rgba(0, 180, 216, 0.2);
+  color: #ffffff;
+  border-color: var(--metro-accent-teal);
+}
+
+.league-teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.team-checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(15, 25, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.team-checkbox-card:hover {
+  border-color: var(--metro-accent-teal);
+  background: rgba(22, 36, 62, 0.9);
+}
+
+.team-checkbox-card input[type="checkbox"] {
+  accent-color: var(--metro-accent-teal);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.team-checkbox-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--metro-blue);
+  color: #ffffff;
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  border: 1px solid var(--metro-accent-blue);
+}
+
+.team-checkbox-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* NAGŁÓWEK AKTYWNEJ LIGI */
+.tile-league-header {
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #0f1c30, #152642);
+  border-top: 4px solid var(--metro-gold);
+  border-radius: 6px;
+}
+
+.league-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.league-title-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.league-badge-icon {
+  font-size: 2.2rem;
+}
+
+.league-main-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.league-sub-title {
+  font-size: 0.85rem;
+  color: var(--metro-text-sub);
+  font-weight: 500;
+}
+
+.league-header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.metro-btn.primary-alt {
+  background: linear-gradient(135deg, #00b4d8, #0077b6);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+}
+
+.metro-btn.primary-alt:hover {
+  background: linear-gradient(135deg, #48cae4, #00b4d8);
+  box-shadow: 0 6px 16px rgba(0, 180, 216, 0.5);
+}
+
+.metro-btn.danger {
+  background: linear-gradient(135deg, #e63946, #b81d28);
+  color: #ffffff;
+}
+
+.metro-btn.danger:hover {
+  background: linear-gradient(135deg, #ff4d5a, #e63946);
+}
+
+.league-progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.league-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--metro-accent-teal), var(--metro-gold));
+  transition: width 0.4s ease;
+}
+
+/* TABELA LIGOWA */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.metro-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.metro-table th {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--metro-text-sub);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 0.6rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.metro-table td {
+  padding: 0.75rem 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.metro-table .table-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.metro-table .gold-rank {
+  background: rgba(255, 183, 3, 0.08);
+}
+.metro-table .silver-rank {
+  background: rgba(148, 163, 184, 0.08);
+}
+.metro-table .bronze-rank {
+  background: rgba(217, 119, 6, 0.08);
+}
+
+.rank-cell {
+  font-size: 1.1rem;
+}
+
+.team-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.table-team-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--metro-blue);
+  color: #ffffff;
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  border: 1px solid var(--metro-accent-blue);
+}
+
+.table-team-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.text-green { color: var(--metro-accent-green); }
+.text-gold { color: var(--metro-gold); }
+.text-red { color: var(--metro-accent-red); }
+
+.highlight-col {
+  background: rgba(0, 180, 216, 0.12);
+  color: var(--metro-accent-teal);
+}
+
+.points-cell {
+  font-size: 1.1rem;
+  color: var(--metro-gold);
+}
+
+.empty-table-msg {
+  text-align: center;
+  padding: 2rem;
+  color: var(--metro-text-sub);
+  font-style: italic;
+}
+
+/* FILTRY I TERMINARZ LIGOWY */
+.round-navigator-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 25, 42, 0.9);
+  border: 1px solid var(--metro-accent-teal);
+  border-radius: 4px;
+  padding: 0.4rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.round-nav-arrow {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 0.9rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.round-nav-arrow:hover:not(:disabled) {
+  background: var(--metro-accent-teal);
+  border-color: var(--metro-accent-teal);
+  color: #000000;
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+}
+
+.round-nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.round-select-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.round-select-element {
+  width: 100%;
+  background: #090e17;
+  color: var(--metro-gold);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.6rem;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.round-select-element:hover {
+  border-color: var(--metro-accent-teal);
+  background: #0f1a2e;
+}
+
+.round-select-element option {
+  background-color: #090e17;
+  color: #ffffff;
+  font-size: 0.85rem;
+}
+
+.fixtures-filter-bar {
+  display: flex;
+  gap: 0.4rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.3rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fixture-filter-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--metro-text-sub);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.2rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fixture-filter-btn.active {
+  background: rgba(0, 180, 216, 0.25);
+  color: #ffffff;
+  border: 1px solid var(--metro-accent-teal);
+}
+
+.metro-fixtures-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  overflow-y: auto;
+  max-height: 520px;
+  padding-right: 0.3rem;
+}
+
+.fixture-card {
+  background: rgba(15, 25, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.fixture-card:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(22, 36, 62, 0.9);
+}
+
+.fixture-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fixture-number {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--metro-text-sub);
+  letter-spacing: 0.05em;
+}
+
+.fixture-status-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+.fixture-status-badge.status-finished {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--metro-accent-green);
+  border: 1px solid var(--metro-accent-green);
+}
+
+.fixture-status-badge.status-pending {
+  background: rgba(255, 183, 3, 0.15);
+  color: var(--metro-gold);
+  border: 1px solid var(--metro-gold);
+}
+
+.fixture-teams-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.fixture-team {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.fixture-team.home {
+  justify-content: flex-start;
+}
+
+.fixture-team.away {
+  justify-content: flex-end;
+}
+
+.fixture-team-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fixture-team-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+  background: var(--metro-blue);
+  color: #ffffff;
+  border: 1px solid var(--metro-accent-blue);
+  flex-shrink: 0;
+}
+
+.fixture-team-badge.away {
+  border-color: var(--metro-accent-orange);
+}
+
+.fixture-score-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  color: var(--metro-text-sub);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 50px;
+  text-align: center;
+}
+
+.fixture-score-badge.has-score {
+  color: #ffffff;
+  background: var(--metro-accent-blue);
+  border-color: var(--metro-accent-teal);
+}
+
+.fixture-footer-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.live-match-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--metro-accent-red), #b91c1c);
+  color: #ffffff;
+  border: none;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
+}
+
+.live-match-btn:hover {
+  background: linear-gradient(135deg, #ef4444, var(--metro-accent-red));
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.5);
+}
+
+.play-match-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--metro-accent-green), #059669);
+  color: #ffffff;
+  border: none;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.play-match-btn:hover {
+  background: linear-gradient(135deg, #34d399, var(--metro-accent-green));
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
+/* ==========================================================================
+   LEAGUE PLAYER SEASON STATS & MODAL STYLES
+   ========================================================================== */
+
+.metro-league-active-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.tile-player-season-stats {
+  width: 100%;
+}
+
+.league-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.league-stat-card {
+  background: var(--metro-blue);
+  border: 1px solid var(--metro-border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.league-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.stat-card-header {
+  background: rgba(0, 114, 206, 0.15);
+  border-bottom: 2px solid var(--metro-accent-blue);
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-card-body {
+  padding: 0.6rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stat-player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.85rem;
+  transition: background 0.15s ease;
+}
+
+.stat-player-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stat-player-item.rank-top {
+  background: rgba(255, 183, 3, 0.08);
+  border-left: 3px solid var(--metro-gold);
+}
+
+.stat-player-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+
+.stat-player-rank {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.stat-player-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stat-player-name {
+  font-weight: 600;
+  color: var(--metro-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-card-subpos {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--metro-text-sub);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stat-player-pos {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--metro-text-sub);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+
+.stat-player-val {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--metro-accent-teal);
+  background: rgba(0, 180, 216, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.stat-card-footer {
+  padding: 0.5rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-footer-btn {
+  background: transparent;
+  border: none;
+  color: var(--metro-accent-teal);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.stat-card-footer-btn:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Modal Overlay & Styling */
+.metro-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 10, 20, 0.85);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.metro-modal-content {
+  background: var(--metro-tile-dark);
+  border: 2px solid var(--metro-accent-blue);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 920px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.metro-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--metro-blue);
+  border-bottom: 1px solid var(--metro-border);
+}
+
+.metro-modal-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.metro-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--metro-text-sub);
+  font-size: 1.75rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.metro-modal-close:hover {
+  color: var(--metro-accent-red);
+}
+
+.metro-modal-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.modal-filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.modal-tab-buttons {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.modal-tab-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--metro-border);
+  color: var(--metro-text-sub);
+  padding: 0.35rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.modal-tab-btn.active {
+  background: var(--metro-accent-blue);
+  color: #ffffff;
+  border-color: var(--metro-accent-blue);
+}
 

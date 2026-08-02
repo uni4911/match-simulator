@@ -1,8 +1,9 @@
 from __future__ import annotations
 import random
 from enum import Enum, auto
-from typing import Optional, Final
-
+from typing import Optional, Final, TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.engine import Match
 
 
 class Position(Enum):
@@ -357,6 +358,10 @@ class MatchTeam:
         self.players_on_field: list[MatchPlayer] = self._starting_players()
         self.bench_players: list[MatchPlayer] = self._bench_players()
         self.substitution_limit: int = 5
+        self.played_players: set[MatchPlayer] = set(self.players_on_field)
+        starting_gk = next((mp for mp in self.match_players if isinstance(mp.player, Goalkeeper)), None)
+        if starting_gk:
+            self.played_players.add(starting_gk)
 
     @property
     def starting_goalkeeper(self) -> Goalkeeper:
@@ -465,6 +470,7 @@ class MatchTeam:
             self.players_on_field.remove(player_off)
             self.bench_players.append(player_off)
             self.bench_players.remove(player_in)
+            self.played_players.add(player_in)
             self.substitution_limit -= 1
             return True
         else:
@@ -503,6 +509,91 @@ class MatchTeam:
                 return (injured_player, player_in)
         return None
 
-    
+class League:
+    def __init__(self, name: str, teams: Optional[list[Team]] = None):
+        self.name: str = name 
+        self.teams: list[Team] = teams if teams is not None else []
+        self.fixtures: list[Match] = []
+        self.table: dict[Team, LeagueTeamStats] = {}
+        self.player_stats: dict[Player, PlayerSeasonStats] = {}
 
-  
+    def register_match_player_stats(self, match: Match) -> None:
+        home_team = match.home_team
+        away_team = match.away_team
+
+        for match_team, conceded in [(home_team, match.away_score), (away_team, match.home_score)]:
+            clean_sheet = (conceded == 0)
+            played = getattr(match_team, "played_players", match_team.players_on_field)
+            for mp in played:
+                if mp.player not in self.player_stats:
+                    self.player_stats[mp.player] = PlayerSeasonStats(mp.player)
+                self.player_stats[mp.player].register_match_player(mp, team_conceded_zero=clean_sheet)
+
+
+class PlayerSeasonStats:
+    def __init__(self, player: Player):
+        self.player: Player = player
+        self.matches_played: int = 0
+        self.goals: int = 0
+        self.assists: int = 0
+        self.yellow_cards: int = 0
+        self.red_cards: int = 0
+        self.passes: int = 0
+        self.clean_sheets: int = 0
+
+    @property
+    def player_name(self) -> str:
+        return self.player.name
+
+    @property
+    def position(self) -> str:
+        return self.player.position.name
+
+    def register_match_player(self, match_player: MatchPlayer, team_conceded_zero: bool = False) -> None:
+        self.matches_played += 1
+        self.goals += match_player.goals
+        self.assists += match_player.assists
+        self.yellow_cards += match_player.yellow_card
+        if match_player.has_red_card:
+            self.red_cards += 1
+        self.passes += match_player.passes
+        if isinstance(self.player, Goalkeeper) and team_conceded_zero:
+            self.clean_sheets += 1
+
+
+class LeagueTeamStats:
+    def __init__(self,team: Team):
+        self.team: Team = team
+        self.goals_scored: int = 0
+        self.goals_conceded: int = 0
+        self.matches_played: int = 0
+        self.wins: int = 0
+        self.draws: int = 0
+        self.loses: int = 0
+
+    @property
+    def points(self) -> int:
+        return self.wins * 3 + self.draws * 1
+        
+    @property
+    def goals_difference(self) -> int:
+        return self.goals_scored - self.goals_conceded
+    
+    @property
+    def team_name(self) -> str:
+        return self.team.name
+
+    def register_match_result(self, goals_scored: int, goals_conceded: int) -> None:
+
+        diff = goals_scored - goals_conceded
+        self.goals_scored += goals_scored
+        self.goals_conceded += goals_conceded
+        self.matches_played += 1
+
+        match diff:
+            case diff if diff > 0:
+                self.wins += 1
+            case diff if diff < 0:
+                self.loses += 1
+            case 0:
+                self.draws += 1

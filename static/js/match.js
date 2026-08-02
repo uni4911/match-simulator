@@ -6,20 +6,19 @@ let liveEventSource = null;
 export function switchView(viewName) {
     const setupView = document.getElementById('setup-view');
     const matchView = document.getElementById('match-view');
+    const leagueView = document.getElementById('league-view');
+
     const tabSetup = document.getElementById('nav-tab-setup');
     const tabMatch = document.getElementById('nav-tab-match');
+    const tabLeague = document.getElementById('nav-tab-league');
 
-    if (viewName === 'setup') {
-        if (setupView) setupView.classList.remove('hidden');
-        if (matchView) matchView.classList.add('hidden');
-        if (tabSetup) tabSetup.classList.add('active');
-        if (tabMatch) tabMatch.classList.remove('active');
-    } else if (viewName === 'match') {
-        if (setupView) setupView.classList.add('hidden');
-        if (matchView) matchView.classList.remove('hidden');
-        if (tabSetup) tabSetup.classList.remove('active');
-        if (tabMatch) tabMatch.classList.add('active');
-    }
+    if (setupView) setupView.classList.toggle('hidden', viewName !== 'setup');
+    if (matchView) matchView.classList.toggle('hidden', viewName !== 'match');
+    if (leagueView) leagueView.classList.toggle('hidden', viewName !== 'league');
+
+    if (tabSetup) tabSetup.classList.toggle('active', viewName === 'setup');
+    if (tabMatch) tabMatch.classList.toggle('active', viewName === 'match');
+    if (tabLeague) tabLeague.classList.toggle('active', viewName === 'league');
 }
 
 export function renderMatchData(data) {

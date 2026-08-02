@@ -41,18 +41,23 @@ function createPlayerStatCard(player, index) {
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'player-card-info';
-
-    const posSpan = document.createElement('span');
-    const shortPos = getShortPosition(player.position);
-    posSpan.className = `pos-badge ${getPositionClass(player.position)}`;
-    posSpan.textContent = shortPos;
+    infoDiv.style.flexDirection = 'column';
+    infoDiv.style.alignItems = 'flex-start';
+    infoDiv.style.gap = '0.15rem';
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'player-card-name';
     nameSpan.textContent = `${index + 1}. ${player.name || 'Zawodnik'}`;
 
-    infoDiv.appendChild(posSpan);
+    const posSpan = document.createElement('span');
+    const shortPos = getShortPosition(player.position);
+    posSpan.className = 'player-card-subpos';
+    posSpan.textContent = shortPos;
+
+
     infoDiv.appendChild(nameSpan);
+    infoDiv.appendChild(posSpan);
+
 
     const pillsDiv = document.createElement('div');
     pillsDiv.className = 'player-stat-pills';

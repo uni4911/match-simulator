@@ -1,6 +1,21 @@
 import { loadMatchOptions, updateSetupPreviews, startNewMatch } from './js/setup.js';
 import { fetchPlayerStats, renderPlayerStats, setActiveStatsTab } from './js/stats.js';
 import { updateMatchState, switchView } from './js/match.js';
+import { 
+    initLeagueView, 
+    createNewLeague, 
+    showLeagueCreationView, 
+    playAllLeagueMatches, 
+    playCurrentRoundMatches,
+    changeRound,
+    selectRound,
+    setFixturesFilter,
+    selectAllTeams,
+    openPlayerStatsModal,
+    closePlayerStatsModal,
+    setModalCategory,
+    setModalSearch
+} from './js/league.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadMatchOptions();
@@ -19,11 +34,101 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Navigation tab switches
     const tabSetup = document.getElementById('nav-tab-setup');
     const tabMatch = document.getElementById('nav-tab-match');
+    const tabLeague = document.getElementById('nav-tab-league');
+
     if (tabSetup) {
         tabSetup.addEventListener('click', () => switchView('setup'));
     }
     if (tabMatch) {
         tabMatch.addEventListener('click', () => switchView('match'));
+    }
+    if (tabLeague) {
+        tabLeague.addEventListener('click', () => switchView('league'));
+    }
+
+    // League event listeners
+    const createLeagueBtn = document.getElementById('create-league-btn');
+    if (createLeagueBtn) {
+        createLeagueBtn.addEventListener('click', createNewLeague);
+    }
+
+    const resetLeagueBtn = document.getElementById('reset-league-btn');
+    if (resetLeagueBtn) {
+        resetLeagueBtn.addEventListener('click', showLeagueCreationView);
+    }
+
+    const simCurrentRoundBtn = document.getElementById('sim-current-round-btn');
+    if (simCurrentRoundBtn) {
+        simCurrentRoundBtn.addEventListener('click', playCurrentRoundMatches);
+    }
+
+    const prevRoundBtn = document.getElementById('prev-round-btn');
+    if (prevRoundBtn) {
+        prevRoundBtn.addEventListener('click', () => changeRound(-1));
+    }
+
+    const nextRoundBtn = document.getElementById('next-round-btn');
+    if (nextRoundBtn) {
+        nextRoundBtn.addEventListener('click', () => changeRound(1));
+    }
+
+    const roundSelectDropdown = document.getElementById('round-select-dropdown');
+    if (roundSelectDropdown) {
+        roundSelectDropdown.addEventListener('change', (e) => selectRound(e.target.value));
+    }
+
+    const simAllBtn = document.getElementById('sim-all-matches-btn');
+    if (simAllBtn) {
+        simAllBtn.addEventListener('click', playAllLeagueMatches);
+    }
+
+    const selectAllBtn = document.getElementById('select-all-teams-btn');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => selectAllTeams(true));
+    }
+
+    const deselectAllBtn = document.getElementById('deselect-all-teams-btn');
+    if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', () => selectAllTeams(false));
+    }
+
+    // Fixture filter buttons
+    const filterAllBtn = document.getElementById('filter-fixtures-all');
+    const filterPendingBtn = document.getElementById('filter-fixtures-pending');
+    const filterFinishedBtn = document.getElementById('filter-fixtures-finished');
+
+    if (filterAllBtn) filterAllBtn.addEventListener('click', () => setFixturesFilter('all'));
+    if (filterPendingBtn) filterPendingBtn.addEventListener('click', () => setFixturesFilter('pending'));
+    if (filterFinishedBtn) filterFinishedBtn.addEventListener('click', () => setFixturesFilter('finished'));
+
+    // Player Season Stats Modal event listeners
+    const showAllStatsBtn = document.getElementById('show-all-player-stats-btn');
+    if (showAllStatsBtn) {
+        showAllStatsBtn.addEventListener('click', () => openPlayerStatsModal('goals'));
+    }
+
+    const closeModalBtn = document.getElementById('close-player-stats-modal-btn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closePlayerStatsModal);
+    }
+
+    const playerStatsModal = document.getElementById('player-stats-modal');
+    if (playerStatsModal) {
+        playerStatsModal.addEventListener('click', (e) => {
+            if (e.target === playerStatsModal) closePlayerStatsModal();
+        });
+    }
+
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const cat = e.target.getAttribute('data-category');
+            if (cat) setModalCategory(cat);
+        });
+    });
+
+    const searchInput = document.getElementById('modal-player-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => setModalSearch(e.target.value));
     }
 
     // Stats team tab switches (Gospodarze / Goście)
@@ -55,4 +160,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await updateMatchState('/match/status', 'GET');
     await fetchPlayerStats();
+    await initLeagueView();
 });
