@@ -1,8 +1,9 @@
 from __future__ import annotations
 import random
 from enum import Enum, auto
-from typing import Optional, Final
-
+from typing import Optional, Final, TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.engine import Match
 
 
 class Position(Enum):
@@ -503,6 +504,47 @@ class MatchTeam:
                 return (injured_player, player_in)
         return None
 
-    
+class League:
+    def __init__(self, name: str, teams: Optional[list[Team]] = None):
+        self.name: str = name 
+        self.teams: list[Team] = teams if teams is not None else []
+        self.fixtures: list[Match] = []
+        self.table: dict[Team, LeagueTeamStats] = {}
 
-  
+
+class LeagueTeamStats:
+    def __init__(self,team: Team):
+        self.team: Team = team
+        self.goals_scored: int = 0
+        self.goals_conceded: int = 0
+        self.matches_played: int = 0
+        self.wins: int = 0
+        self.draws: int = 0
+        self.loses: int = 0
+
+    @property
+    def points(self) -> int:
+        return self.wins * 3 + self.draws * 1
+        
+    @property
+    def goals_difference(self) -> int:
+        return self.goals_scored - self.goals_conceded
+    
+    @property
+    def team_name(self) -> str:
+        return self.team.name
+
+    def register_match_result(self, goals_scored: int, goals_conceded: int) -> None:
+
+        diff = goals_scored - goals_conceded
+        self.goals_scored += goals_scored
+        self.goals_conceded += goals_conceded
+        self.matches_played += 1
+
+        match diff:
+            case diff if diff > 0:
+                self.wins += 1
+            case diff if diff < 0:
+                self.loses += 1
+            case 0:
+                self.draws += 1

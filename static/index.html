@@ -16,6 +16,7 @@
                 <div class="metro-nav-tabs">
                     <button id="nav-tab-setup" type="button" class="metro-tab active">⚙️ KONFIGURACJA</button>
                     <button id="nav-tab-match" type="button" class="metro-tab">⚽ MECZ NA ŻYWO</button>
+                    <button id="nav-tab-league" type="button" class="metro-tab">🏆 LIGA</button>
                 </div>
                 <div id="status-badge" class="metro-status">
                     <span class="status-dot"></span>
@@ -169,6 +170,152 @@
                         <div class="empty-stats">Ładowanie statystyk zawodników...</div>
                     </div>
                 </aside>
+            </div>
+
+            <!-- LEAGUE VIEW: TWORZENIE LIGI / TABELA LIGOWA I TERMINARZ -->
+            <div id="league-view" class="metro-setup-view hidden" style="max-width: 1280px;">
+                <!-- Container 1: TWORZENIE LIGI (gdy nie ma aktywnej ligi) -->
+                <div id="league-creation-container" class="tile-box tile-setup primary-setup-menu">
+                    <div class="tile-header">
+                        <div class="tile-header-title">
+                            <span class="header-icon">🏆</span> TWORZENIE NOWEJ LIGI
+                        </div>
+                        <div class="tile-badge-info">SEZON LIGOWY</div>
+                    </div>
+
+                    <div class="setup-arena" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                        <div class="setup-field-group" style="width: 100%;">
+                            <label for="league-name-input" class="metro-label">
+                                <span class="label-icon">✏️</span> NAZWA LIGI
+                            </label>
+                            <input type="text" id="league-name-input" class="metro-select" value="Ekstraklasa" placeholder="Wprowadź nazwę ligi..." style="font-family: inherit;">
+                        </div>
+
+                        <div class="setup-field-group" style="width: 100%;">
+                            <label class="metro-label">
+                                <span class="label-icon">⚙️</span> OPCJE ROZGRYWEK
+                            </label>
+                            <label class="metro-checkbox-label">
+                                <input type="checkbox" id="league-double-round-checkbox">
+                                <span>System dwukołowy (Mecz i rewanż - gospodarz / gość)</span>
+                            </label>
+                        </div>
+
+                        <div class="setup-field-group" style="width: 100%;">
+                            <div class="team-selection-header">
+                                <label class="metro-label">
+                                    <span class="label-icon">🛡️</span> WYBIERZ DRUŻYNY W LIDZE (MINIMUM 2)
+                                </label>
+                                <div class="selection-quick-btns">
+                                    <button type="button" id="select-all-teams-btn" class="metro-btn-sm">Zaznacz wszystkie</button>
+                                    <button type="button" id="deselect-all-teams-btn" class="metro-btn-sm">Odznacz wszystkie</button>
+                                </div>
+                            </div>
+                            <div id="league-team-checkboxes" class="league-teams-grid">
+                                <!-- Zostanie wypełnione dynamicznie JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setup-footer">
+                        <button id="create-league-btn" type="button" class="metro-btn primary setup-start-btn">
+                            <span class="btn-icon">🏆</span>
+                            <span>UTWÓRZ LIGĘ I GENERUJ TERMINARZ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Container 2: AKTYWNA LIGA (gdy liga została utworzona) -->
+                <div id="league-active-container" class="metro-layout hidden">
+                    <!-- LEWY PANEL: TABELA LIGOWA -->
+                    <main class="metro-main-content">
+                        <section class="tile-box tile-league-header">
+                            <div class="league-header-inner">
+                                <div class="league-title-block">
+                                    <span class="league-badge-icon">🏆</span>
+                                    <div>
+                                        <h2 id="active-league-name" class="league-main-title">Moja Liga</h2>
+                                        <span id="league-progress-text" class="league-sub-title">0 z 0 meczów rozegranych</span>
+                                    </div>
+                                </div>
+                                <div class="league-header-actions">
+                                    <button id="sim-all-matches-btn" type="button" class="metro-btn primary-alt">
+                                        <span class="btn-icon">⚡</span> SYMULUJ CAŁY SEZON
+                                    </button>
+                                    <button id="reset-league-btn" type="button" class="metro-btn danger">
+                                        <span class="btn-icon">➕</span> NOWA LIGA
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="league-progress-bar-container">
+                                <div id="league-progress-bar" class="league-progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </section>
+
+                        <section class="tile-box tile-events">
+                            <div class="tile-header">
+                                <div class="tile-header-title">
+                                    <span class="header-icon">📊</span> TABELA LIGOWA
+                                </div>
+                                <div id="league-teams-count-badge" class="tile-badge-info">0 DRUŻYN</div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="metro-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">#</th>
+                                            <th>DRUŻYNA</th>
+                                            <th class="text-center" title="Mecze rozegrane">M</th>
+                                            <th class="text-center" title="Zwycięstwa">Z</th>
+                                            <th class="text-center" title="Remisy">R</th>
+                                            <th class="text-center" title="Porażki">P</th>
+                                            <th class="text-center" title="Bramki zdobyte">BZ</th>
+                                            <th class="text-center" title="Bramki stracone">BS</th>
+                                            <th class="text-center" title="Różnica bramek">RB</th>
+                                            <th class="text-center highlight-col" title="Punkty">PKT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="league-table-body">
+                                        <!-- Dynamicznie generowane wiersze -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </main>
+
+                    <!-- PRAWY PANEL: TERMINARZ KOLEJEK -->
+                    <aside class="tile-box tile-stats" style="width: 450px;">
+                        <div class="tile-header">
+                            <div class="tile-header-title">
+                                <span class="header-icon">📅</span> TERMINARZ MATCHÓW
+                            </div>
+                            <button id="sim-current-round-btn" type="button" class="stats-refresh-btn" style="font-size:0.82rem; font-weight:700;" title="Symuluj całą wybraną kolejkę">
+                                ⚡ Symuluj kolejkę
+                            </button>
+                        </div>
+
+                        <!-- NAWIGACJA PO KOLEJKACH -->
+                        <div class="round-navigator-box">
+                            <button type="button" id="prev-round-btn" class="round-nav-arrow" title="Poprzednia kolejka">◀</button>
+                            
+                            <div class="round-select-wrapper">
+                                <select id="round-select-dropdown" class="round-select-element"></select>
+                            </div>
+
+                            <button type="button" id="next-round-btn" class="round-nav-arrow" title="Następna kolejka">▶</button>
+                        </div>
+
+                        <div class="fixtures-filter-bar">
+                            <button type="button" id="filter-fixtures-all" class="fixture-filter-btn active">Wszystkie w kolejce</button>
+                            <button type="button" id="filter-fixtures-pending" class="fixture-filter-btn">Do rozegrania</button>
+                            <button type="button" id="filter-fixtures-finished" class="fixture-filter-btn">Zakończone</button>
+                        </div>
+
+                        <div id="league-fixtures-list" class="metro-fixtures-list">
+                            <!-- Dynamicznie generowana lista spotkań dla wybranej kolejki -->
+                        </div>
+                    </aside>
+                </div>
             </div>
         </div>
 
