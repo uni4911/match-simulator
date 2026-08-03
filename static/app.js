@@ -14,7 +14,9 @@ import {
     openPlayerStatsModal,
     closePlayerStatsModal,
     setModalCategory,
-    setModalSearch
+    setModalSearch,
+    selectAllTeams 
+
 } from './js/league.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         deselectAllBtn.addEventListener('click', () => selectAllTeams(false));
     }
 
-    // Fixture filter buttons
+
     const filterAllBtn = document.getElementById('filter-fixtures-all');
     const filterPendingBtn = document.getElementById('filter-fixtures-pending');
     const filterFinishedBtn = document.getElementById('filter-fixtures-finished');
@@ -101,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (filterPendingBtn) filterPendingBtn.addEventListener('click', () => setFixturesFilter('pending'));
     if (filterFinishedBtn) filterFinishedBtn.addEventListener('click', () => setFixturesFilter('finished'));
 
-    // Player Season Stats Modal event listeners
+    
     const showAllStatsBtn = document.getElementById('show-all-player-stats-btn');
     if (showAllStatsBtn) {
         showAllStatsBtn.addEventListener('click', () => openPlayerStatsModal('goals'));
@@ -131,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchInput.addEventListener('input', (e) => setModalSearch(e.target.value));
     }
 
-    // Stats team tab switches (Gospodarze / Goście)
+
     const homeTab = document.getElementById('tab-home-stats');
     const awayTab = document.getElementById('tab-away-stats');
     if (homeTab) {

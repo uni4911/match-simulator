@@ -54,6 +54,13 @@ class LeagueTableResponse(BaseModel):
     player_stats: list[PlayerSeasonStatsSchema] = []
 
 
+
+class LeagueTableResponse(BaseModel):
+    name: str
+    teams: list[str]
+    fixtures: list[LeagueMatchSchema]
+    table: list[LeagueTeamStatsSchema]
+
 class LeagueTeamStatsSchema(BaseModel):
         model_config = ConfigDict(from_attributes=True)
         team_name: str

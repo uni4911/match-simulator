@@ -1113,6 +1113,7 @@ body {
    ========================================================================== */
 
 .metro-checkbox-label {
+
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -1939,4 +1940,3 @@ body {
   color: #ffffff;
   border-color: var(--metro-accent-blue);
 }
-

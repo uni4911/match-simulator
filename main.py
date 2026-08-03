@@ -17,9 +17,6 @@ from api.schemas import (MatchStatusSchema, StartMatchRequest, MatchOptionsRespo
                          PlayLeagueMatch, PlayerSeasonStatsSchema)
 
 
-
-
-
 json_filename = "data.json"
 try:
     loaded_teams = load_all_teams(json_filename)
@@ -120,8 +117,6 @@ async def match_event_generator():
                 home_stats.register_match_result(match.home_score, match.away_score)
                 away_stats.register_match_result(match.away_score, match.home_score)
             league.register_match_player_stats(match)
-
-
 
         report = get_match_status_report()
         data_json = json.dumps(report)
@@ -237,8 +232,6 @@ def _get_league_response(league_obj):
         "player_stats": player_stats_sorted
     }
 
-
-
 @app.post("/league/start", response_model=LeagueTableResponse)
 def league_start(req: CreateLeagueRequest):
     global league, league_engine
@@ -279,7 +272,6 @@ def play_league_match(req: PlayLeagueMatch):
 
     return _get_league_response(league)
 
-
 @app.get("/league/player-stats", response_model=list[PlayerSeasonStatsSchema])
 def get_league_player_stats(sort_by: str = "goals"):
     if league is None:
@@ -287,7 +279,6 @@ def get_league_player_stats(sort_by: str = "goals"):
     if league_engine is None:
         return list(league.player_stats.values())
     return league_engine.get_sorted_player_stats(sort_by=sort_by)
-
 
 @app.post("/league/match/live_start", response_model=MatchStatusSchema)
 def start_league_match_live(req: PlayLeagueMatch):
@@ -312,8 +303,3 @@ def start_league_match_live(req: PlayLeagueMatch):
     return get_match_status_report()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-
-
-

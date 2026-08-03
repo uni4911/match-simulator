@@ -1,4 +1,6 @@
+
 from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats
+from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433
 from src.engine import Match, MatchEngine
 
 class LeagueEngine:
@@ -52,6 +54,7 @@ class LeagueEngine:
         away_stats = self.league.table[away_team.team]
         away_stats.register_match_result(away_score,home_score)
 
+
         self.league.register_match_player_stats(match)
        
     def get_sorted_table(self) -> list[LeagueTeamStats]:
@@ -66,5 +69,10 @@ class LeagueEngine:
     def get_sorted_player_stats(self, sort_by: str = "goals") -> list[PlayerSeasonStats]:
         key_func = lambda stats: getattr(stats, sort_by, stats.goals)
         return sorted(self.league.player_stats.values(), key=key_func, reverse=True)
+
+
+       
+    def get_sorted_table(self) -> list[LeagueTeamStats]:
+        return sorted(self.league.table.values(), key=lambda team: (-team.points, -team.goals_difference, - team.goals_scored))
 
         

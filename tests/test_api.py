@@ -89,4 +89,3 @@ def test_league_endpoints():
     live_resp = start_league_match_live(live_req)
     assert "home_team_name" in live_resp
     assert "away_team_name" in live_resp
-

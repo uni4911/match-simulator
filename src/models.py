@@ -596,4 +596,5 @@ class LeagueTeamStats:
             case diff if diff < 0:
                 self.loses += 1
             case 0:
-                self.draws += 1
+                self.draws += 1
+
