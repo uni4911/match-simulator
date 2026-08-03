@@ -9,14 +9,20 @@ class LeagueEngine:
     def generate_fixture(self, double_round: bool = False): 
         self.league.fixtures.clear()
         teams_list = list(self.league.teams)
+        if len(teams_list) % 2 != 0:
+            teams_list.append(None)
+
         number_of_teams = len(teams_list)
 
         for i in range(0, number_of_teams - 1):
 
             for j in range(0, number_of_teams // 2):
-                home_mt = MatchTeam(teams_list[j], FORMATION_433)
-                away_mt = MatchTeam(teams_list[number_of_teams - 1 - j], FORMATION_433)
-                self.league.fixtures.append(Match(home_mt, away_mt))
+                home_team = teams_list[j]
+                away_team = teams_list[number_of_teams - 1 - j]
+                if home_team is not None and away_team is not None:
+                    home_mt = MatchTeam(home_team, FORMATION_433)
+                    away_mt = MatchTeam(away_team, FORMATION_433)
+                    self.league.fixtures.append(Match(home_mt, away_mt))
     
             first_team = teams_list[0]
             rest_of_teams = teams_list[1:]
