@@ -1391,6 +1391,17 @@ body {
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
+.metro-table th.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.metro-table th.sortable-header:hover {
+  background: rgba(0, 180, 216, 0.25);
+  color: var(--metro-accent-teal);
+}
+
 .metro-table td {
   padding: 0.75rem 0.6rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);

@@ -43,7 +43,7 @@ INTERCEPTION_COMMENTS = [
 
 
 KICKOFF_EVENT_COMMENTS = [
-    "Sedzia gwizdzo po raz pierwszy! Rozpoczyna druzyna {event.executing_team}.",
+    "Sedzia gwiżdże po raz pierwszy! Rozpoczyna druzyna {event.executing_team}.",
     "Pilka wprawiona w ruch przez {event.executing_team}. Gramy!",
     "Gwizdek arbitra! Wybrani zawodnicy zespolu {event.executing_team} wznowili gre od srodkowego kola.",
     "Poczatek spotkania! Przy pilce od pierwszej sekundy zespol {event.executing_team}.",
@@ -59,7 +59,7 @@ KICKOFF_EVENT_COMMENTS = [
 ]
 
 KICKOFF_2ND_HALF_COMMENTS = [
-    "Sedzia gwizdzo po raz drugi! Rozpoczyna druga polowe druzyna {event.executing_team}.",
+    "Sedzia gwiżdże po raz drugi! Rozpoczyna druga polowe druzyna {event.executing_team}.",
     "Gwizdek na druga polowe! Przy pilce od srodka {event.executing_team}.",
     "Zaczynamy druga polowe! {event.executing_team} wznawia gre od srodkowego kola.",
     "Zawodnicy wrocili na boisko! Druga polowa rozpoczyna sie od podania zespołu {event.executing_team}.",
@@ -112,7 +112,7 @@ SHOT_SAVE_COMMENTS = [
     "Nie ma gola! Kapitalna interwencja, {event.goalkeeper} bohaterem akcji!",
     "Niewiarygodne! Jak on to wyciagnal?! {event.goalkeeper} ratuje skore swoim obroncom!",
     "Koci refleks! {event.goalkeeper} paruje to uderzenie wprost za linie koncowa!",
-    "To byl wrezc pewny gol, ale {event.goalkeeper} mowi stanowcze NIE!",
+    "To byl wręcz pewny gol, ale {event.goalkeeper} mowi stanowcze NIE!",
 ]
 
 PENALTY_KICK_GOAL_COMMENTS = [
@@ -173,7 +173,7 @@ SUBSTITUTION_COMMENTS = [
 
 CORNER_KICK_COMMENTS = [
     "Rzut rozny dla zespolu {event.executing_team}! Do pilki ustawionej w narożniku podchodzi {event.taker}.",
-    "Sansa na zagrozenie z rzutu roznego! {event.taker} przygotowuje sie do dosrodkowania.",
+    "Szansa na zagrozenie z rzutu roznego! {event.taker} przygotowuje sie do dosrodkowania.",
     "Krotka narada w polu karnym, a {event.taker} juz ustawia pilke w narożniku boiska dla {event.executing_team}.",
     "Będzie dosrodkowanie z rzutu roznego! {event.taker} spoglada w pole karne.",
 ]

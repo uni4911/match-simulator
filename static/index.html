@@ -403,7 +403,7 @@
                         <aside class="tile-box tile-stats" style="width: 450px;">
                             <div class="tile-header">
                                 <div class="tile-header-title">
-                                    <span class="header-icon">📅</span> TERMINARZ MATCHÓW
+                                    <span class="header-icon">📅</span> TERMINARZ MECZÓW
                                 </div>
                                 <button id="sim-current-round-btn" type="button" class="stats-refresh-btn" style="font-size:0.82rem; font-weight:700;" title="Symuluj całą wybraną kolejkę">
                                     ⚡ Symuluj kolejkę
@@ -437,7 +437,7 @@
                     <section class="tile-box tile-player-season-stats">
                         <div class="tile-header">
                             <div class="tile-header-title">
-                                <span class="header-icon">🌟</span> LIDERZY STATYSTYK INDYWIDUALNIH
+                                <span class="header-icon">🌟</span> LIDERZY STATYSTYK INDYWIDUALNYCH
                             </div>
                             <button id="show-all-player-stats-btn" type="button" class="metro-btn-sm" style="background: var(--metro-accent-blue); font-weight: 700;">
                                 🔍 POKAŻ PEŁNĄ LISTĘ GRACZY
@@ -475,16 +475,16 @@
                     <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
                         <table class="metro-table">
                             <thead>
-                                <tr>
-                                    <th class="text-center">#</th>
-                                    <th>ZAWODNIK</th>
-                                    <th class="text-center">POZYCJA</th>
-                                    <th class="text-center" title="Mecze rozegrane">MECZE</th>
-                                    <th class="text-center highlight-col">BRAMKI</th>
-                                    <th class="text-center text-green">ASYSTY</th>
-                                    <th class="text-center">KARTKI (🟨/🟥)</th>
-                                    <th class="text-center text-gold">CZYSTE KONTA</th>
-                                    <th class="text-center text-sub">PODANIA</th>
+                                <tr id="modal-player-stats-thead-row">
+                                    <th class="text-center sortable-header" data-sort="rank">#</th>
+                                    <th class="sortable-header" data-sort="name">ZAWODNIK</th>
+                                    <th class="text-center sortable-header" data-sort="position">POZYCJA</th>
+                                    <th class="text-center sortable-header" data-sort="matches" title="Mecze rozegrane">MECZE</th>
+                                    <th class="text-center sortable-header" data-sort="goals">BRAMKI</th>
+                                    <th class="text-center sortable-header" data-sort="assists">ASYSTY</th>
+                                    <th class="text-center sortable-header" data-sort="cards">KARTKI (🟨/🟥)</th>
+                                    <th class="text-center sortable-header" data-sort="cleansheets">CZYSTE KONTA</th>
+                                    <th class="text-center sortable-header" data-sort="passes">PODANIA</th>
                                 </tr>
                             </thead>
                             <tbody id="modal-player-stats-tbody">

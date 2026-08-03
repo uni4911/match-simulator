@@ -15,7 +15,8 @@ import math
 STANDARD_MATCH_LENGTH: Final[int] = 5400
 PASS_CHANCE: Final[float] = 0.30
 ATTACK_CHANCE: Final[float] = 0.70
-MIN_SECONDS_PASSESD: Final[int] = 5
+MIN_SECONDS_PASSED: Final[int] = 5
+MIN_SECONDS_PASSESD: Final[int] = MIN_SECONDS_PASSED
 MAX_SECONDS_PASSED: Final[int] = 15
 GOALKEEPER_SCORE_MODIFIER: Final[int] = 3
 SHOT_ON_GOAL_CHANCE: Final[float] = 0.3
@@ -27,8 +28,10 @@ FOUL_AFTERMATH_DURING_ATTACK_WEIGHT: Final[list[int]] = [10, 90]
 FOUL_AFTERMATH_DURING_MIDPLAY: Final[list[str]] = ['freekick']
 PENALTY_KICK_MODIFIER: Final[int] = 3
 MIDFIELDPLAY_OPTIONS: Final[list[str]] = ['long_shot', 'pass', 'shot_inside']
-PASS_RECIEVRS = ["attacker", "winger", "cam", "midfielder"]
-PASS_RECIVERS_WEIGHTS = [50, 22, 18, 10]
+PASS_RECEIVERS = ["attacker", "winger", "cam", "midfielder"]
+PASS_RECIEVRS = PASS_RECEIVERS
+PASS_RECEIVERS_WEIGHTS = [50, 22, 18, 10]
+PASS_RECIVERS_WEIGHTS = PASS_RECEIVERS_WEIGHTS
 
 
 class MatchState(Enum):
@@ -223,7 +226,7 @@ class Attack(State):
         if winner:
             roll = random.random()
             if roll < 0.40:
-                pass_recipient_type = random.choices(PASS_RECIEVRS, PASS_RECIVERS_WEIGHTS, k=1)[0]
+                pass_recipient_type = random.choices(PASS_RECEIVERS, PASS_RECEIVERS_WEIGHTS, k=1)[0]
                 if pass_recipient_type == "winger":
                     receiver = match.team_with_ball.get_winger(excluded_player=match.player_with_ball)
                 elif pass_recipient_type == "cam":

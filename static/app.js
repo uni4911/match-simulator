@@ -14,6 +14,7 @@ import {
     openPlayerStatsModal,
     closePlayerStatsModal,
     setModalCategory,
+    toggleModalSort,
     setModalSearch,
     closeMatchDetailsModal,
     switchMatchDetailsTab
@@ -125,6 +126,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.addEventListener('click', (e) => {
             const cat = e.currentTarget.getAttribute('data-category');
             if (cat) setModalCategory(cat);
+        });
+    });
+
+    document.querySelectorAll('#modal-player-stats-thead-row .sortable-header').forEach(th => {
+        th.addEventListener('click', (e) => {
+            const sortKey = e.currentTarget.getAttribute('data-sort');
+            if (sortKey) toggleModalSort(sortKey);
         });
     });
 
