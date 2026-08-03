@@ -3,7 +3,7 @@ import json
 import asyncio
 import random
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from src.loader import load_all_teams
@@ -91,7 +91,9 @@ def get_match_status_report():
         'away_score': match.away_score,
         'current_minute': match.current_second // 60,
         'is_finished': match.current_second >= 5400,
-        'events': api_events
+        'events': api_events,
+        'home_team_stats': match.home_team.stats.to_dict(match.away_team.stats),
+        'away_team_stats': match.away_team.stats.to_dict(match.home_team.stats)
     }
 
 
@@ -106,10 +108,7 @@ async def match_event_generator():
             key = type(match.current_state)
         time_range = EVENT_OR_STATE_DURATIONS.get(key, (3, 8))
         time_passed = random.randint(*time_range)
-        match.current_second += time_passed
-        active_players = [match.player_with_ball] if getattr(match, 'player_with_ball', None) else []
-        match.home_team.update_stamina(time_passed, active_players)
-        match.away_team.update_stamina(time_passed, active_players)
+        match.advance_time(time_passed)
         report = get_match_status_report()
         data_json = json.dumps(report)
 
@@ -184,7 +183,9 @@ def team_stats():
     teams_stats = {'home_team_name': match.home_team.team.name,
                    'away_team_name': match.away_team.team.name,
                    'home_players': match.home_team.match_players,
-                   'away_players': match.away_team.match_players}
+                   'away_players': match.away_team.match_players,
+                   'home_team_stats': match.home_team.stats.to_dict(match.away_team.stats),
+                   'away_team_stats': match.away_team.stats.to_dict(match.home_team.stats)}
     
     return teams_stats
 
@@ -195,10 +196,7 @@ def match_tick():
     if not match:
         raise HTTPException(status_code=400, detail="Brak aktywnego meczu")
     match.current_state = match.current_state.execute(match)
-    match.current_second += 15
-    active_players = [match.player_with_ball] if getattr(match, 'player_with_ball', None) else []
-    match.home_team.update_stamina(15, active_players)
-    match.away_team.update_stamina(15, active_players)
+    match.advance_time(15)
     return get_match_status_report()
 
 @app.get("/")
@@ -219,13 +217,39 @@ def _get_league_response(league_obj):
     fixtures_data = []
     for idx, m in enumerate(league_obj.fixtures):
         r_num = (idx // matches_per_round) + 1
+        is_fin = getattr(m, "is_finished", False)
+        
+        home_t_stats = None
+        away_t_stats = None
+        events_list = []
+        home_players_list = []
+        away_players_list = []
+
+        if is_fin and hasattr(m, "home_team") and hasattr(m.home_team, "stats"):
+            home_t_stats = m.home_team.stats.to_dict(m.away_team.stats)
+            away_t_stats = m.away_team.stats.to_dict(m.home_team.stats)
+            for ev in getattr(m, "match_events", []):
+                ev_name = type(ev).__name__
+                if ev_name in IMPORTANT_EVENT_NAMES:
+                    desc = commentator.get_comment_text(ev) or f"Zdarzenie: {ev_name}"
+                    events_list.append({'second': ev.second, 'event_type': ev_name, 'description': desc})
+            if hasattr(m.home_team, "match_players"):
+                home_players_list = [p for p in m.home_team.match_players]
+            if hasattr(m.away_team, "match_players"):
+                away_players_list = [p for p in m.away_team.match_players]
+
         fixtures_data.append({
             "home_team_name": getattr(m.home_team, "team", m.home_team).name,
             "away_team_name": getattr(m.away_team, "team", m.away_team).name,
             "home_score": m.home_score,
             "away_score": m.away_score,
-            "is_finished": getattr(m, "is_finished", False),
-            "round_number": r_num
+            "is_finished": is_fin,
+            "round_number": r_num,
+            "home_team_stats": home_t_stats,
+            "away_team_stats": away_t_stats,
+            "events": events_list,
+            "home_players": home_players_list,
+            "away_players": away_players_list
         })
 
     # Ensure all players from league teams are tracked in player_stats

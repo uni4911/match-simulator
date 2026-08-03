@@ -1,4 +1,4 @@
-import { getTeamInitials, getShortPosition, getPositionClass } from './helpers.js';
+import { getTeamInitials, getShortPosition, getPositionClass, getEventIcon } from './helpers.js';
 import { renderMatchData, switchView, startLiveStream } from './match.js';
 import { fetchPlayerStats } from './stats.js';
 
@@ -394,6 +394,22 @@ function renderFixturesList(fixtures) {
             footer.appendChild(watchLiveBtn);
             footer.appendChild(playBtn);
             card.appendChild(footer);
+        } else {
+            const footer = document.createElement('div');
+            footer.className = 'fixture-footer-row';
+
+            const statsBtn = document.createElement('button');
+            statsBtn.type = 'button';
+            statsBtn.className = 'metro-btn-sm match-stats-btn';
+            statsBtn.style.width = '100%';
+            statsBtn.style.background = 'var(--metro-blue)';
+            statsBtn.style.borderColor = 'var(--metro-accent-blue)';
+            statsBtn.style.fontWeight = '700';
+            statsBtn.innerHTML = '📊 STATYSTYKI MECZU';
+            statsBtn.onclick = () => openMatchDetailsModal(fixture);
+
+            footer.appendChild(statsBtn);
+            card.appendChild(footer);
         }
 
         listContainer.appendChild(card);
@@ -619,7 +635,7 @@ export function openPlayerStatsModal(category = 'goals') {
     const searchInput = document.getElementById('modal-player-search');
     if (searchInput) searchInput.value = '';
 
-    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+    document.querySelectorAll('#player-stats-modal .modal-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-category') === category);
     });
 
@@ -634,7 +650,7 @@ export function closePlayerStatsModal() {
 
 export function setModalCategory(category) {
     currentModalCategory = category;
-    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+    document.querySelectorAll('#player-stats-modal .modal-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-category') === category);
     });
     renderModalTable();
@@ -692,7 +708,178 @@ export function renderModalTable() {
     }).join('');
 }
 
+export function openMatchDetailsModal(fixture) {
+    const modal = document.getElementById('match-details-modal');
+    if (!modal) return;
 
+    const homeNameEl = document.getElementById('md-home-name');
+    const awayNameEl = document.getElementById('md-away-name');
+    const homeBadgeEl = document.getElementById('md-home-badge');
+    const awayBadgeEl = document.getElementById('md-away-badge');
+    const scoreEl = document.getElementById('md-score');
+    const statusEl = document.getElementById('md-status');
+
+    if (homeNameEl) homeNameEl.textContent = fixture.home_team_name;
+    if (awayNameEl) awayNameEl.textContent = fixture.away_team_name;
+    if (homeBadgeEl) homeBadgeEl.textContent = getTeamInitials(fixture.home_team_name);
+    if (awayBadgeEl) awayBadgeEl.textContent = getTeamInitials(fixture.away_team_name);
+    if (scoreEl) scoreEl.textContent = `${fixture.home_score} : ${fixture.away_score}`;
+    if (statusEl) statusEl.textContent = fixture.is_finished ? 'ZAKOŃCZONY' : 'DO ROZEGRANIA';
+
+    // Render team stats
+    const statsGrid = document.getElementById('md-team-stats-grid');
+    if (statsGrid) {
+        const homeStats = fixture.home_team_stats || {
+            possession_percentage: 50, shots_on_target: fixture.home_score, shots_off_target: 2, total_shots: fixture.home_score + 2, fouls: 5, passes: 300, corners: 4, saves: 3
+        };
+        const awayStats = fixture.away_team_stats || {
+            possession_percentage: 50, shots_on_target: fixture.away_score, shots_off_target: 3, total_shots: fixture.away_score + 3, fouls: 6, passes: 290, corners: 3, saves: 2
+        };
+
+        const createStatRow = (title, homeVal, awayVal, isPct = false) => {
+            let hPct = 50, aPct = 50;
+            if (isPct) {
+                hPct = homeVal;
+                aPct = awayVal;
+            } else {
+                const sum = (homeVal || 0) + (awayVal || 0);
+                if (sum > 0) {
+                    hPct = Math.round((homeVal / sum) * 100);
+                    aPct = 100 - hPct;
+                }
+            }
+            return `
+                <div class="team-stat-row">
+                    <div class="stat-team-val home">${isPct ? homeVal + '%' : homeVal}</div>
+                    <div class="stat-center">
+                        <span class="stat-title">${title}</span>
+                        <div class="dual-bar">
+                            <div class="dual-bar-fill home" style="width: ${hPct}%;"></div>
+                            <div class="dual-bar-fill away" style="width: ${aPct}%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-team-val away">${isPct ? awayVal + '%' : awayVal}</div>
+                </div>
+            `;
+        };
+
+        statsGrid.innerHTML = `
+            ${createStatRow('POSIADANIE PIŁKI', homeStats.possession_percentage ?? 50, awayStats.possession_percentage ?? 50, true)}
+            ${createStatRow('STRZAŁY CELNE', homeStats.shots_on_target ?? 0, awayStats.shots_on_target ?? 0)}
+            ${createStatRow('STRZAŁY NIECELNE', homeStats.shots_off_target ?? 0, awayStats.shots_off_target ?? 0)}
+            ${createStatRow('STRZAŁY OGÓŁEM', homeStats.total_shots ?? 0, awayStats.total_shots ?? 0)}
+            ${createStatRow('FAULE', homeStats.fouls ?? 0, awayStats.fouls ?? 0)}
+            ${createStatRow('PODANIA', homeStats.passes ?? 0, awayStats.passes ?? 0)}
+            ${createStatRow('RZUTY ROŻNE', homeStats.corners ?? 0, awayStats.corners ?? 0)}
+            ${createStatRow('INTERWENCJE BRAMKARZY', homeStats.saves ?? 0, awayStats.saves ?? 0)}
+        `;
+    }
+
+    // Render events
+    const eventsContainer = document.getElementById('md-events-list');
+    if (eventsContainer) {
+        eventsContainer.innerHTML = '';
+        const events = fixture.events || [];
+        if (events.length === 0) {
+            eventsContainer.innerHTML = '<div class="empty-events">Brak zarejestrowanych zdarzeń w tym meczu.</div>';
+        } else {
+            events.forEach(event => {
+                const minute = Math.floor((event.second || 0) / 60);
+                const row = document.createElement('div');
+                row.className = `metro-event-row event-${event.event_type || 'default'}`;
+
+                const timeEl = document.createElement('div');
+                timeEl.className = 'metro-event-time';
+                timeEl.textContent = `${minute}'`;
+
+                const iconEl = document.createElement('div');
+                iconEl.className = 'metro-event-icon';
+                iconEl.textContent = getEventIcon(event.event_type);
+
+                const descEl = document.createElement('div');
+                descEl.className = 'metro-event-desc';
+                descEl.textContent = event.description;
+
+                row.appendChild(timeEl);
+                row.appendChild(iconEl);
+                row.appendChild(descEl);
+
+                eventsContainer.appendChild(row);
+            });
+        }
+    }
+
+    // Render Home & Away players list
+    const renderPlayersInContainer = (containerId, players, title) => {
+        const c = document.getElementById(containerId);
+        if (!c) return;
+        c.innerHTML = '';
+        if (!players || players.length === 0) {
+            c.innerHTML = `<div class="empty-stats">Brak szczegółowych danych zawodników drużyny ${title}</div>`;
+            return;
+        }
+        players.forEach((p, idx) => {
+            const card = document.createElement('div');
+            card.className = `player-stat-card ${p.has_red_card ? 'has-red' : ''}`;
+            const shortPos = getShortPosition(p.position);
+            const posClass = getPositionClass(p.position);
+
+            card.innerHTML = `
+                <div class="player-card-main">
+                    <div class="player-card-info">
+                        <div class="player-card-name-row">
+                            <span class="pos-badge ${posClass}">${shortPos}</span>
+                            <span class="player-card-name">${idx + 1}. ${p.name || p.player_name || 'Zawodnik'}</span>
+                        </div>
+                    </div>
+                    <div class="player-stat-pills">
+                        <span class="stat-pill goals ${p.goals > 0 ? 'active' : ''}">⚽ ${p.goals || 0}</span>
+                        <span class="stat-pill assists ${p.assists > 0 ? 'active' : ''}">🅰️ ${p.assists || 0}</span>
+                        <span class="stat-pill yellow ${p.yellow_cards > 0 ? 'active' : ''}">🟨 ${p.yellow_cards || 0}</span>
+                        ${p.has_red_card || p.red_cards > 0 ? '<span class="stat-pill red active">🟥</span>' : ''}
+                    </div>
+                </div>
+            `;
+            c.appendChild(card);
+        });
+    };
+
+    renderPlayersInContainer('md-home-players-list', fixture.home_players, fixture.home_team_name);
+    renderPlayersInContainer('md-away-players-list', fixture.away_players, fixture.away_team_name);
+
+    switchMatchDetailsTab('stats');
+
+    modal.classList.remove('hidden');
+}
+
+export function closeMatchDetailsModal() {
+    const modal = document.getElementById('match-details-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+export function switchMatchDetailsTab(tabName) {
+    const panels = {
+        'stats': 'md-panel-stats',
+        'events': 'md-panel-events',
+        'players': 'md-panel-players',
+        'away-players': 'md-panel-away-players'
+    };
+    const buttons = {
+        'stats': 'btn-md-tab-stats',
+        'events': 'btn-md-tab-events',
+        'players': 'btn-md-tab-players',
+        'away-players': 'btn-md-tab-away-players'
+    };
+
+    Object.keys(panels).forEach(key => {
+        const panel = document.getElementById(panels[key]);
+        const btn = document.getElementById(buttons[key]);
+        if (panel) panel.classList.toggle('hidden', key !== tabName);
+        if (btn) btn.classList.toggle('active', key === tabName);
+    });
+}
 
 window.openPlayerStatsModal = openPlayerStatsModal;
+window.openMatchDetailsModal = openMatchDetailsModal;
+
 

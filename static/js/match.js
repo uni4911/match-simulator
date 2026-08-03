@@ -91,6 +91,49 @@ export function renderMatchData(data) {
             eventsContainer.scrollTop = eventsContainer.scrollHeight;
         }
     }
+
+    if (data.home_team_stats && data.away_team_stats) {
+        renderTeamMatchStats(data.home_team_stats, data.away_team_stats);
+    }
+}
+
+export function renderTeamMatchStats(homeStats, awayStats) {
+    if (!homeStats || !awayStats) return;
+
+    const setStatRow = (key, homeVal, awayVal, isPercentage = false) => {
+        const homeValEl = document.getElementById(`stat-home-${key}`);
+        const awayValEl = document.getElementById(`stat-away-${key}`);
+        const homeBarEl = document.getElementById(`bar-home-${key}`);
+        const awayBarEl = document.getElementById(`bar-away-${key}`);
+
+        if (homeValEl) homeValEl.textContent = isPercentage ? `${homeVal}%` : homeVal;
+        if (awayValEl) awayValEl.textContent = isPercentage ? `${awayVal}%` : awayVal;
+
+        let homePct = 50;
+        let awayPct = 50;
+        if (isPercentage) {
+            homePct = homeVal;
+            awayPct = awayVal;
+        } else {
+            const sum = (homeVal || 0) + (awayVal || 0);
+            if (sum > 0) {
+                homePct = Math.round((homeVal / sum) * 100);
+                awayPct = 100 - homePct;
+            }
+        }
+
+        if (homeBarEl) homeBarEl.style.width = `${homePct}%`;
+        if (awayBarEl) awayBarEl.style.width = `${awayPct}%`;
+    };
+
+    setStatRow('possession', homeStats.possession_percentage ?? 50, awayStats.possession_percentage ?? 50, true);
+    setStatRow('shots-target', homeStats.shots_on_target ?? 0, awayStats.shots_on_target ?? 0);
+    setStatRow('shots-off', homeStats.shots_off_target ?? 0, awayStats.shots_off_target ?? 0);
+    setStatRow('shots-total', homeStats.total_shots ?? 0, awayStats.total_shots ?? 0);
+    setStatRow('fouls', homeStats.fouls ?? 0, awayStats.fouls ?? 0);
+    setStatRow('passes', homeStats.passes ?? 0, awayStats.passes ?? 0);
+    setStatRow('corners', homeStats.corners ?? 0, awayStats.corners ?? 0);
+    setStatRow('saves', homeStats.saves ?? 0, awayStats.saves ?? 0);
 }
 
 export async function updateMatchState(url, userMethod = 'GET') {

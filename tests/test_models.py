@@ -71,4 +71,61 @@ def test_all_formations_initialization():
     for name, formation in AVAILABLE_FORMATIONS.items():
         match_team = MatchTeam(team, formation)
         assert len(match_team.players_on_field) == 10
-        assert match_team.formation == formation
+        assert match_team.formation == formation
+
+
+def test_team_stats_match_defaults_and_total_shots():
+    from src.models import TeamStatsMatch
+    stats = TeamStatsMatch()
+    assert stats.possession_time == 0.0
+    assert stats.shots_on_target == 0
+    assert stats.shots_off_target == 0
+    assert stats.total_shots == 0
+    assert stats.fouls == 0
+    assert stats.passes == 0
+    assert stats.corners == 0
+    assert stats.saves == 0
+
+    stats.shots_on_target = 5
+    stats.shots_off_target = 3
+    assert stats.total_shots == 8
+
+
+def test_possession_percentage_calculation():
+    from src.models import TeamStatsMatch
+    home_stats = TeamStatsMatch()
+    away_stats = TeamStatsMatch()
+
+    assert home_stats.get_possession_percentage(away_stats) == 50.0
+
+    home_stats.possession_time = 300.0
+    away_stats.possession_time = 200.0
+
+    assert home_stats.get_possession_percentage(away_stats) == 60.0
+    assert away_stats.get_possession_percentage(home_stats) == 40.0
+
+
+def test_team_stats_match_reset_and_to_dict():
+    from src.models import TeamStatsMatch
+    stats = TeamStatsMatch()
+    stats.possession_time = 150.0
+    stats.shots_on_target = 4
+    stats.shots_off_target = 2
+    stats.fouls = 3
+    stats.passes = 120
+    stats.goals = 2
+
+    opponent = TeamStatsMatch()
+    opponent.possession_time = 150.0
+
+    d = stats.to_dict(opponent)
+    assert d["possession_percentage"] == 50.0
+    assert d["shots_on_target"] == 4
+    assert d["total_shots"] == 6
+    assert d["fouls"] == 3
+    assert d["passes"] == 120
+
+    stats.reset()
+    assert stats.possession_time == 0.0
+    assert stats.shots_on_target == 0
+    assert stats.fouls == 0

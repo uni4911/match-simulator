@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Match Simulator</title>
-        <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="/static/style.css?v=2">
     </head>
     <body>
         <div class="metro-wrapper">
@@ -129,6 +129,121 @@
                             <div class="team-block away">
                                 <div id="away-team-badge" class="tile-badge">---</div>
                                 <div id="away-team-name" class="team-title">---</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- STATYSTYKI DRUŻYNOWE MECZU NA ŻYWO -->
+                    <section class="tile-box tile-team-stats" id="team-stats-section">
+                        <div class="tile-header">
+                            <div class="tile-header-title">
+                                <span class="header-icon">📈</span> STATYSTYKI DRUŻYNOWE MECZU
+                            </div>
+                            <div class="tile-badge-info">NA ŻYWO</div>
+                        </div>
+                        <div class="team-stats-grid" id="team-stats-grid">
+                            <!-- Posiadanie piłki -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-possession">50%</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">POSIADANIE PIŁKI</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-possession" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-possession" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-possession">50%</div>
+                            </div>
+
+                            <!-- Strzały celne -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-shots-target">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">STRZAŁY CELNE</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-shots-target" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-shots-target" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-shots-target">0</div>
+                            </div>
+
+                            <!-- Strzały niecelne -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-shots-off">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">STRZAŁY NIECELNE</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-shots-off" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-shots-off" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-shots-off">0</div>
+                            </div>
+
+                            <!-- Strzały ogółem -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-shots-total">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">STRZAŁY OGÓŁEM</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-shots-total" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-shots-total" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-shots-total">0</div>
+                            </div>
+
+                            <!-- Faule -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-fouls">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">FAULE</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-fouls" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-fouls" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-fouls">0</div>
+                            </div>
+
+                            <!-- Podania -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-passes">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">PODANIA</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-passes" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-passes" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-passes">0</div>
+                            </div>
+
+                            <!-- Rzuty rożne -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-corners">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">RZUTY ROŻNE</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-corners" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-corners" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-corners">0</div>
+                            </div>
+
+                            <!-- Interwencje -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-saves">0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">INTERWENCJE BRAMKARZY</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-saves" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-saves" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-saves">0</div>
                             </div>
                         </div>
                     </section>
@@ -381,6 +496,68 @@
             </div>
         </div>
 
-        <script type="module" src="/static/app.js"></script>
+        <!-- MODAL: SZCZEGÓŁY I STATYSTYKI MECZU -->
+        <div id="match-details-modal" class="metro-modal-overlay hidden">
+            <div class="metro-modal-content match-details-modal-content">
+                <div class="metro-modal-header">
+                    <div class="metro-modal-title">
+                        <span>📊 SZCZEGÓŁY I STATYSTYKI MECZU</span>
+                    </div>
+                    <button id="close-match-details-modal-btn" class="metro-modal-close" type="button">&times;</button>
+                </div>
+                <div class="metro-modal-body">
+                    <!-- Scoreboard Banner -->
+                    <div class="match-details-banner">
+                        <div class="details-team home">
+                            <span id="md-home-badge" class="tile-badge">---</span>
+                            <span id="md-home-name" class="details-team-name">Gospodarze</span>
+                        </div>
+                        <div class="details-score-box">
+                            <span id="md-score" class="details-score">0 : 0</span>
+                            <span id="md-status" class="details-status">ZAKOŃCZONY</span>
+                        </div>
+                        <div class="details-team away">
+                            <span id="md-away-name" class="details-team-name">Goście</span>
+                            <span id="md-away-badge" class="tile-badge">---</span>
+                        </div>
+                    </div>
+
+                    <!-- Modal Tabs Navigation -->
+                    <div class="modal-tab-buttons match-details-tabs">
+                        <button type="button" class="modal-tab-btn active" id="btn-md-tab-stats">📈 Statystyki Drużynowe</button>
+                        <button type="button" class="modal-tab-btn" id="btn-md-tab-events">⏱️ Przebieg Meczu</button>
+                        <button type="button" class="modal-tab-btn" id="btn-md-tab-players">🏃 Gracze Gospodarzy</button>
+                        <button type="button" class="modal-tab-btn" id="btn-md-tab-away-players">🏃 Gracze Gości</button>
+                    </div>
+
+                    <!-- Tab content panels -->
+                    <div id="md-panel-stats" class="md-tab-panel">
+                        <div class="team-stats-grid" id="md-team-stats-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <div id="md-panel-events" class="md-tab-panel hidden">
+                        <div id="md-events-list" class="metro-events-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <div id="md-panel-players" class="md-tab-panel hidden">
+                        <div id="md-home-players-list" class="metro-players-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <div id="md-panel-away-players" class="md-tab-panel hidden">
+                        <div id="md-away-players-list" class="metro-players-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="/static/app.js?v=2"></script>
     </body>
 </html>

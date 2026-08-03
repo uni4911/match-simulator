@@ -51,12 +51,16 @@ function createPlayerStatCard(player, index) {
 
     const posSpan = document.createElement('span');
     const shortPos = getShortPosition(player.position);
-    posSpan.className = 'player-card-subpos';
+    const posClass = getPositionClass(player.position);
+    posSpan.className = `pos-badge ${posClass}`;
     posSpan.textContent = shortPos;
 
+    const nameRow = document.createElement('div');
+    nameRow.className = 'player-card-name-row';
+    nameRow.appendChild(posSpan);
+    nameRow.appendChild(nameSpan);
 
-    infoDiv.appendChild(nameSpan);
-    infoDiv.appendChild(posSpan);
+    infoDiv.appendChild(nameRow);
 
 
     const pillsDiv = document.createElement('div');

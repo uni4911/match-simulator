@@ -174,4 +174,20 @@ def test_new_match_states_execution(sample_home_team: MatchTeam, sample_away_tea
 
     long_shot_state = LongShot()
     next_state_ls = long_shot_state.execute(match)
-    assert next_state_ls is not None
+    assert next_state_ls is not None
+
+
+def test_play_match_tracks_team_stats(sample_home_team: MatchTeam, sample_away_team: MatchTeam):
+    mock_commentator = MagicMock()
+    match = Match(sample_home_team, sample_away_team)
+    engine = MatchEngine(mock_commentator, 0.1)
+    engine.play_match(match)
+
+    home_stats = sample_home_team.stats
+    away_stats = sample_away_team.stats
+
+    total_possession = home_stats.possession_time + away_stats.possession_time
+    assert total_possession > 0
+    assert pytest.approx(home_stats.get_possession_percentage(away_stats) + away_stats.get_possession_percentage(home_stats), abs=0.2) == 100.0
+    assert home_stats.passes >= 0
+    assert away_stats.passes >= 0

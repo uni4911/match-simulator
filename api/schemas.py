@@ -4,6 +4,21 @@ from typing import Optional
 from src.models import Team, LeagueTeamStats
 from src.engine import Match
 
+class TeamStatsMatchSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    possession_time: float = 0.0
+    possession_percentage: float = 50.0
+    shots_on_target: int = Field(default=0, ge=0)
+    shots_off_target: int = Field(default=0, ge=0)
+    total_shots: int = Field(default=0, ge=0)
+    fouls: int = Field(default=0, ge=0)
+    passes: int = Field(default=0, ge=0)
+    goals: int = Field(default=0, ge=0)
+    yellow_cards: int = Field(default=0, ge=0)
+    red_cards: int = Field(default=0, ge=0)
+    corners: int = Field(default=0, ge=0)
+    saves: int = Field(default=0, ge=0)
+
 class MatchEventSchema(BaseModel):
     second: int
     event_type: str
@@ -17,6 +32,8 @@ class MatchStatusSchema(BaseModel):
     current_minute: int
     is_finished: bool
     events: list[MatchEventSchema] = []
+    home_team_stats: Optional[TeamStatsMatchSchema] = None
+    away_team_stats: Optional[TeamStatsMatchSchema] = None
 
 class MatchPlayerStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -33,6 +50,8 @@ class MatchFullStatsSchema(BaseModel):
     away_team_name: str
     home_players: list[MatchPlayerStatsSchema]
     away_players: list[MatchPlayerStatsSchema]
+    home_team_stats: Optional[TeamStatsMatchSchema] = None
+    away_team_stats: Optional[TeamStatsMatchSchema] = None
 
 class PlayerSeasonStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -71,6 +90,11 @@ class LeagueMatchSchema(BaseModel):
     away_score: int
     is_finished: bool
     round_number: int = 1
+    home_team_stats: Optional[TeamStatsMatchSchema] = None
+    away_team_stats: Optional[TeamStatsMatchSchema] = None
+    events: list[MatchEventSchema] = []
+    home_players: list[MatchPlayerStatsSchema] = []
+    away_players: list[MatchPlayerStatsSchema] = []
 
 class LeagueTableResponse(BaseModel):
     name: str

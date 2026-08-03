@@ -375,6 +375,59 @@ class MatchPlayer:
         drain_amount:float = seconds * BASE_DRAIN_RATE * physical_factor * multiplier
         self.current_stamina = max(0.0,self.current_stamina - drain_amount)
          
+class TeamStatsMatch:
+    def __init__(self) -> None:
+        self.possession_time: float = 0.0
+        self.shots_on_target: int = 0
+        self.shots_off_target: int = 0
+        self.fouls: int = 0
+        self.passes: int = 0
+        self.goals: int = 0
+        self.yellow_cards: int = 0
+        self.red_cards: int = 0
+        self.corners: int = 0
+        self.saves: int = 0
+
+    @property
+    def total_shots(self) -> int:
+        return self.shots_on_target + self.shots_off_target
+
+    def get_possession_percentage(self, opponent_stats: Optional[TeamStatsMatch] = None) -> float:
+        if opponent_stats is None:
+            return 50.0
+        total_time = self.possession_time + opponent_stats.possession_time
+        if total_time <= 0:
+            return 50.0
+        return round((self.possession_time / total_time) * 100, 1)
+
+    def reset(self) -> None:
+        self.possession_time = 0.0
+        self.shots_on_target = 0
+        self.shots_off_target = 0
+        self.fouls = 0
+        self.passes = 0
+        self.goals = 0
+        self.yellow_cards = 0
+        self.red_cards = 0
+        self.corners = 0
+        self.saves = 0
+
+    def to_dict(self, opponent_stats: Optional[TeamStatsMatch] = None) -> dict[str, float | int]:
+        return {
+            "possession_time": round(self.possession_time, 1),
+            "possession_percentage": self.get_possession_percentage(opponent_stats),
+            "shots_on_target": self.shots_on_target,
+            "shots_off_target": self.shots_off_target,
+            "total_shots": self.total_shots,
+            "fouls": self.fouls,
+            "passes": self.passes,
+            "goals": self.goals,
+            "yellow_cards": self.yellow_cards,
+            "red_cards": self.red_cards,
+            "corners": self.corners,
+            "saves": self.saves,
+        }
+
 class MatchTeam:
     def __init__(self, team: Team, formation: list[Position]):
         self.team: Team = team
@@ -384,6 +437,7 @@ class MatchTeam:
         self.bench_players: list[MatchPlayer] = self._bench_players()
         self.substitution_limit: int = 5
         self.played_players: set[MatchPlayer] = set(self.players_on_field)
+        self.stats: TeamStatsMatch = TeamStatsMatch()
         starting_gk = next((mp for mp in self.match_players if isinstance(mp.player, Goalkeeper)), None)
         if starting_gk:
             self.played_players.add(starting_gk)
@@ -462,8 +516,8 @@ class MatchTeam:
     def get_cam(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
         return self._get_weighted_player(CAM_WEIGHTS, DEFAULT_CAM_WEIGHT, excluded_player)
 
-    def has_player(self, player: Player) -> bool:
-        return player in self.match_players
+    def has_player(self, player: Player | MatchPlayer) -> bool:
+        return any(mp == player or mp.player == player for mp in self.match_players)
 
     def get_penalty_taker(self) -> MatchPlayer:
         top_shooters = sorted(self.active_players, key=lambda player: player.shooting, reverse=True)[:3]

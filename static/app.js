@@ -14,7 +14,9 @@ import {
     openPlayerStatsModal,
     closePlayerStatsModal,
     setModalCategory,
-    setModalSearch
+    setModalSearch,
+    closeMatchDetailsModal,
+    switchMatchDetailsTab
 } from './js/league.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -119,9 +121,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+    document.querySelectorAll('#player-stats-modal .modal-tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const cat = e.target.getAttribute('data-category');
+            const cat = e.currentTarget.getAttribute('data-category');
             if (cat) setModalCategory(cat);
         });
     });
@@ -130,6 +132,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (searchInput) {
         searchInput.addEventListener('input', (e) => setModalSearch(e.target.value));
     }
+
+    const closeMdModalBtn = document.getElementById('close-match-details-modal-btn');
+    if (closeMdModalBtn) {
+        closeMdModalBtn.addEventListener('click', closeMatchDetailsModal);
+    }
+
+    const matchDetailsModal = document.getElementById('match-details-modal');
+    if (matchDetailsModal) {
+        matchDetailsModal.addEventListener('click', (e) => {
+            if (e.target === matchDetailsModal) closeMatchDetailsModal();
+        });
+    }
+
+    const btnMdStats = document.getElementById('btn-md-tab-stats');
+    const btnMdEvents = document.getElementById('btn-md-tab-events');
+    const btnMdPlayers = document.getElementById('btn-md-tab-players');
+    const btnMdAwayPlayers = document.getElementById('btn-md-tab-away-players');
+
+    if (btnMdStats) btnMdStats.addEventListener('click', () => switchMatchDetailsTab('stats'));
+    if (btnMdEvents) btnMdEvents.addEventListener('click', () => switchMatchDetailsTab('events'));
+    if (btnMdPlayers) btnMdPlayers.addEventListener('click', () => switchMatchDetailsTab('players'));
+    if (btnMdAwayPlayers) btnMdAwayPlayers.addEventListener('click', () => switchMatchDetailsTab('away-players'));
 
 
     const homeTab = document.getElementById('tab-home-stats');
