@@ -18,7 +18,7 @@ ATTACK_CHANCE: Final[float] = 0.70
 MIN_SECONDS_PASSED: Final[int] = 5
 MIN_SECONDS_PASSESD: Final[int] = MIN_SECONDS_PASSED
 MAX_SECONDS_PASSED: Final[int] = 15
-GOALKEEPER_SCORE_MODIFIER: Final[int] = 3
+GOALKEEPER_SCORE_MODIFIER: Final[float] = 2.3
 SHOT_ON_GOAL_CHANCE: Final[float] = 0.3
 FOUL_PUNISHMENTS: Final[list[str]] = ['yellow_card', 'red_card', 'normal_foul']
 FOUL_WEIGHTS_DURING_MIDPLAY: Final[list[float]] = [6.0, 0.1, 93.9]
@@ -49,11 +49,15 @@ class State(ABC):
 
     @staticmethod
     def winner_choose(attack: int, defence: int) -> bool:
-        exponent: int = 2
-        if attack ** exponent + defence ** exponent <= 0:
+        exponent: float = 2.5
+        if attack <= 0:
             return False
-        result = random.randint(1, attack ** exponent + defence ** exponent)
-        return result <= attack ** exponent
+        if defence <= 0:
+            return True
+        val_a = float(attack) ** exponent
+        val_d = float(defence) ** exponent
+        total = val_a + val_d
+        return random.random() < (val_a / total)
     
     @abstractmethod
     def execute(self, match: Match) -> 'State':
@@ -74,8 +78,11 @@ class MidfieldPlay(State):
         attacking_midfielder: MatchPlayer = match.player_with_ball
         defending_midfielder: MatchPlayer = match.defending_team.get_midfielder()
 
-        home_ball_possession_chance: int = int(attacking_midfielder.ball_possession_chance(match.team_with_ball.relative_strength_modifier))
-        away_ball_possession_chance: int = int(defending_midfielder.ball_take_over_chance(match.defending_team.relative_strength_modifier))
+        atk_mid_power = (match.team_with_ball.midfield_power / 75.0) if match.team_with_ball else 1.0
+        def_mid_power = (match.defending_team.midfield_power / 75.0) if match.defending_team else 1.0
+
+        home_ball_possession_chance: int = int(attacking_midfielder.ball_possession_chance(atk_mid_power))
+        away_ball_possession_chance: int = int(defending_midfielder.ball_take_over_chance(def_mid_power))
 
         winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
 
@@ -86,16 +93,18 @@ class MidfieldPlay(State):
                 match.pass_ball(receiver)
 
             roll = random.random()
-            if roll < 0.04:
+            if roll < 0.03:
                 return LongShot()
-            elif roll < 0.28:
+            elif roll < 0.22:
                 return WingAttack()
-            elif roll < 0.70:
+            elif roll < 0.65:
                 return BuildUp()
+            elif roll < 0.85:
+                return MidfieldPlay()
             else:
                 return Attack()
         else:
-            if random.random() < 0.06:
+            if random.random() < 0.05:
                 return AttackFoul(defending_midfielder, attacking_midfielder)
             else:
                 match.add_event(InterceptionEvent(match.current_second, defending_midfielder.player.name, match.defending_team.team.name))
@@ -123,11 +132,11 @@ class BuildUp(State):
             match.add_event(BuildUpEvent(match.current_second, match.team_with_ball.team.name, passer.player.name))
 
         roll = random.random()
-        if roll < 0.35:
+        if roll < 0.25:
             return Attack()
-        elif roll < 0.65:
+        elif roll < 0.55:
             return WingAttack()
-        elif roll < 0.85:
+        elif roll < 0.80:
             return MidfieldPlay()
         else:
             interceptor = match.defending_team.get_defender()
@@ -152,11 +161,11 @@ class WingAttack(State):
                 match.add_event(WingPlayEvent(match.current_second, winger.player.name, match.team_with_ball.team.name, "cross"))
                 receiver = match.team_with_ball.get_attacker(excluded_player=winger)
                 match.pass_ball(receiver)
-                if random.random() < 0.60:
+                if random.random() < 0.45:
                     return ShotOnGoal()
                 else:
                     return random.choices([CornerKick(), MidfieldPlay()], [25, 75], k=1)[0]
-            elif roll < 0.80:
+            elif roll < 0.78:
                 match.add_event(WingPlayEvent(match.current_second, winger.player.name, match.team_with_ball.team.name, "cut_inside"))
                 return ShotOnGoal()
             else:
@@ -219,8 +228,8 @@ class Attack(State):
         attacking_player: MatchPlayer = match.player_with_ball
         defending_player: MatchPlayer = match.defending_team.get_defender()
 
-        attack_score: int = attacking_player.shooting 
-        defence_score: int = defending_player.defending 
+        attack_score: int = int(attacking_player.shooting * 0.6 + attacking_player.dribbling * 0.4)
+        defence_score: int = int(defending_player.defending * 0.7 + defending_player.physical * 0.3)
         winner: bool = self.winner_choose(attack_score, defence_score)
 
         if winner:
@@ -239,7 +248,7 @@ class Attack(State):
                     receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
                 return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball)], [85, 15])[0]
-            elif roll < 0.85:
+            elif roll < 0.82:
                 return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball)], [85, 15])[0]
             else:
                 receiver = match.team_with_ball.get_midfielder(excluded_player=match.player_with_ball)
@@ -263,7 +272,7 @@ class ShotOnGoal(State):
         winner: bool = self.winner_choose(attack_score, goalkeeper_score)
         
         roll = random.random()
-        if roll < 0.35:
+        if roll < 0.36:
             if winner:
                 match.player_with_ball.goals += 1
                 if match.team_with_ball:
@@ -289,7 +298,7 @@ class ShotOnGoal(State):
                 match.potential_assistant = None
                 match.add_event(ShotSave(match.current_second, goalkeeper.name, match.team_with_ball.team.name))
                 return random.choices([CornerKick(), MidfieldPlay()], [15, 85], k=1)[0]
-        elif roll < 0.70:
+        elif roll < 0.72:
             if match.team_with_ball:
                 match.team_with_ball.stats.shots_off_target += 1
             match.potential_assistant = None
@@ -420,12 +429,12 @@ EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] 
     HalfTimeEvent: (30, 60),
     MatchEndEvent: (0, 0), 
     KickOff: (5, 10),          
-    MidfieldPlay: (4, 9),
-    BuildUp: (6, 14),
-    WingAttack: (5, 12),
+    MidfieldPlay: (7, 14),
+    BuildUp: (8, 16),
+    WingAttack: (6, 14),
     LongShot: (4, 8),      
-    Attack: (4, 10),           
-    ShotOnGoal: (2, 5),    
+    Attack: (5, 12),           
+    ShotOnGoal: (3, 6),    
     AttackFoul: (2, 5),    
     PenaltyKick: (20, 40),     
     DangerousFreekick: (15, 35),
