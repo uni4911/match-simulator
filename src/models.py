@@ -53,22 +53,47 @@ MIDFIELDER_WEIGHTS: Final[dict[Position, int]] = {
 DEFAULT_MIDFIELDER_WEIGHT = 1
 
 ATTACKER_WEIGHTS: Final[dict[Position, int]] = {
-    Position.LEFT_WING: 10,
-    Position.CENTRAL_FORWARD: 10,
-    Position.RIGHT_WING: 10,
-    Position.STRIKER: 10,
-    Position.CENTRAL_ATTACKING_MIDFIELDER: 8,
-    Position.CENTRAL_MIDFIELDER: 6,
-    Position.LEFT_MIDFIELDER: 6,
-    Position.RIGHT_MIDFIELDER: 6,
-    Position.CENTRAL_DEFENSIVE_MIDFIELDER: 4,
-    Position.LEFT_WING_BACK: 3,
-    Position.RIGHT_WING_BACK: 3,
-    Position.LEFT_BACK: 2,
-    Position.RIGHT_BACK: 2,
-    Position.CENTRE_BACK: 2
+    Position.STRIKER: 18,
+    Position.CENTRAL_FORWARD: 18,
+    Position.LEFT_WING: 7,
+    Position.RIGHT_WING: 7,
+    Position.CENTRAL_ATTACKING_MIDFIELDER: 4,
+    Position.CENTRAL_MIDFIELDER: 2,
+    Position.LEFT_MIDFIELDER: 2,
+    Position.RIGHT_MIDFIELDER: 2,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER: 1,
+    Position.LEFT_WING_BACK: 1,
+    Position.RIGHT_WING_BACK: 1,
+    Position.LEFT_BACK: 1,
+    Position.RIGHT_BACK: 1,
+    Position.CENTRE_BACK: 1
 }
 DEFAULT_ATTACKER_WEIGHT = 1
+
+
+WINGER_WEIGHTS: Final[dict[Position, int]] = {
+    Position.LEFT_WING: 10,
+    Position.RIGHT_WING: 10,
+    Position.LEFT_MIDFIELDER: 9,
+    Position.RIGHT_MIDFIELDER: 9,
+    Position.LEFT_WING_BACK: 6,
+    Position.RIGHT_WING_BACK: 6,
+    Position.STRIKER: 4,
+    Position.CENTRAL_FORWARD: 4,
+    Position.CENTRAL_ATTACKING_MIDFIELDER: 5,
+}
+DEFAULT_WINGER_WEIGHT = 1
+
+CAM_WEIGHTS: Final[dict[Position, int]] = {
+    Position.CENTRAL_ATTACKING_MIDFIELDER: 10,
+    Position.CENTRAL_MIDFIELDER: 8,
+    Position.LEFT_MIDFIELDER: 7,
+    Position.RIGHT_MIDFIELDER: 7,
+    Position.CENTRAL_FORWARD: 6,
+    Position.STRIKER: 4,
+}
+DEFAULT_CAM_WEIGHT = 1
+
 
 ATTACKING_POSITIONS = [Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING, Position.CENTRAL_FORWARD]
 MIDFIELD_POSITIONS = [Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER]
@@ -412,32 +437,39 @@ class MatchTeam:
             return starting_players
         
     
-    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> 'Player':
-        if excluded_player is None:
-            weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in self.active_players]          
-            return random.choices(self.active_players, weights,k=1)[0]
-        else:
-            filtered_players: list[MatchPlayer] = [player for player in self.active_players if player != excluded_player]
-            weights: list[int] = [weights_dict.get(player.player.position, default_weight) for player in filtered_players]          
-            return random.choices(filtered_players, weights,k=1)[0]
+    def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
+        candidates = self.active_players if excluded_player is None else [p for p in self.active_players if p != excluded_player]
+        if not candidates:
+            return self.active_players[0]
+        weights: list[int] = [weights_dict.get(player.assigned_position, weights_dict.get(player.player.position, default_weight)) for player in candidates]          
+        return random.choices(candidates, weights, k=1)[0]
              
     def get_goalkeeper(self) -> MatchPlayer:
-               return self.starting_goalkeeper
+        return self.starting_goalkeeper
     
     def get_defender(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
-        return  self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT, excluded_player)
+        return self._get_weighted_player(DEFENDER_WEIGHTS, DEFAULT_DEFENDER_WEIGHT, excluded_player)
     
     def get_midfielder(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
         return self._get_weighted_player(MIDFIELDER_WEIGHTS, DEFAULT_MIDFIELDER_WEIGHT, excluded_player)
     
     def get_attacker(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
-            return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT, excluded_player)
+        return self._get_weighted_player(ATTACKER_WEIGHTS, DEFAULT_ATTACKER_WEIGHT, excluded_player)
+
+    def get_winger(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
+        return self._get_weighted_player(WINGER_WEIGHTS, DEFAULT_WINGER_WEIGHT, excluded_player)
+
+    def get_cam(self, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
+        return self._get_weighted_player(CAM_WEIGHTS, DEFAULT_CAM_WEIGHT, excluded_player)
 
     def has_player(self, player: Player) -> bool:
         return player in self.match_players
 
-    def get_penalty_taker(self) ->  MatchPlayer:
-        return max(self.active_players, key=lambda player: player.shooting)
+    def get_penalty_taker(self) -> MatchPlayer:
+        top_shooters = sorted(self.active_players, key=lambda player: player.shooting, reverse=True)[:3]
+        weights = [p.shooting for p in top_shooters]
+        return random.choices(top_shooters, weights=weights, k=1)[0]
+
 
     def get_freekick_taker(self) -> MatchPlayer:
         return max(self.active_players, key=lambda player: player.passing)

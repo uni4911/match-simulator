@@ -1,6 +1,4 @@
-
 from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats
-from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433
 from src.engine import Match, MatchEngine
 
 class LeagueEngine:
@@ -15,7 +13,7 @@ class LeagueEngine:
 
         for i in range(0, number_of_teams - 1):
 
-            for j in range(0,number_of_teams // 2):
+            for j in range(0, number_of_teams // 2):
                 home_mt = MatchTeam(teams_list[j], FORMATION_433)
                 away_mt = MatchTeam(teams_list[number_of_teams - 1 - j], FORMATION_433)
                 self.league.fixtures.append(Match(home_mt, away_mt))
@@ -50,15 +48,14 @@ class LeagueEngine:
         away_score = match.away_score
 
         home_stats = self.league.table[home_team.team]
-        home_stats.register_match_result(home_score,away_score)
+        home_stats.register_match_result(home_score, away_score)
         away_stats = self.league.table[away_team.team]
-        away_stats.register_match_result(away_score,home_score)
-
+        away_stats.register_match_result(away_score, home_score)
 
         self.league.register_match_player_stats(match)
        
     def get_sorted_table(self) -> list[LeagueTeamStats]:
-        return sorted(self.league.table.values(), key=lambda team: (-team.points, -team.goals_difference, - team.goals_scored))
+        return sorted(self.league.table.values(), key=lambda team: (-team.points, -team.goals_difference, -team.goals_scored))
 
     def get_top_scorers(self, limit: int = 10) -> list[PlayerSeasonStats]:
         return sorted(self.league.player_stats.values(), key=lambda stats: stats.goals, reverse=True)[:limit]
@@ -69,10 +66,3 @@ class LeagueEngine:
     def get_sorted_player_stats(self, sort_by: str = "goals") -> list[PlayerSeasonStats]:
         key_func = lambda stats: getattr(stats, sort_by, stats.goals)
         return sorted(self.league.player_stats.values(), key=key_func, reverse=True)
-
-
-       
-    def get_sorted_table(self) -> list[LeagueTeamStats]:
-        return sorted(self.league.table.values(), key=lambda team: (-team.points, -team.goals_difference, - team.goals_scored))
-
-        

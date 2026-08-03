@@ -1,7 +1,4 @@
-
 import { getTeamInitials, getShortPosition, getPositionClass } from './helpers.js';
-
-import { getTeamInitials } from './helpers.js';
 import { renderMatchData, switchView, startLiveStream } from './match.js';
 import { fetchPlayerStats } from './stats.js';
 

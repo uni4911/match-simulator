@@ -14,9 +14,7 @@ import {
     openPlayerStatsModal,
     closePlayerStatsModal,
     setModalCategory,
-    setModalSearch,
-    selectAllTeams 
-
+    setModalSearch
 } from './js/league.js';
 
 document.addEventListener('DOMContentLoaded', async () => {

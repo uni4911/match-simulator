@@ -150,3 +150,28 @@ def test_process_injury_risk_adds_injury_event(sample_home_team: MatchTeam, samp
     injury_events = [e for e in match.match_events if isinstance(e, InjuryEvent)]
     assert len(injury_events) == 1
     assert injury_events[0].player == target_player.player.name
+
+def test_match_team_get_winger_and_get_cam(sample_home_team: MatchTeam):
+    winger = sample_home_team.get_winger()
+    cam = sample_home_team.get_cam()
+    assert winger is not None
+    assert cam is not None
+    assert winger in sample_home_team.active_players
+    assert cam in sample_home_team.active_players
+
+def test_new_match_states_execution(sample_home_team: MatchTeam, sample_away_team: MatchTeam):
+    from src.engine import BuildUp, WingAttack, LongShot
+    match = Match(sample_home_team, sample_away_team)
+    match.player_with_ball = sample_home_team.active_players[0]
+
+    buildup_state = BuildUp()
+    next_state = buildup_state.execute(match)
+    assert next_state is not None
+
+    wing_state = WingAttack()
+    next_state_wing = wing_state.execute(match)
+    assert next_state_wing is not None
+
+    long_shot_state = LongShot()
+    next_state_ls = long_shot_state.execute(match)
+    assert next_state_ls is not None

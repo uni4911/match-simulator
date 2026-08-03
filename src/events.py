@@ -70,3 +70,30 @@ class InjuryEvent(MatchEvent):
     def injuried_player(self) -> str:
         return self.player
 
+@dataclass(frozen=True)
+class LongShotGoal(GoalWithAssist):
+    pass
+
+@dataclass(frozen=True)
+class LongShotEvent(MatchEvent):
+    shooter: str
+    team: str
+    outcome: str
+
+@dataclass(frozen=True)
+class WingPlayEvent(MatchEvent):
+    winger: str
+    team: str
+    action_type: str
+
+@dataclass(frozen=True)
+class BuildUpEvent(MatchEvent):
+    team: str
+    passer: str
+
+@dataclass(frozen=True)
+class InterceptionEvent(MatchEvent):
+    interceptor: str
+    team: str
+
+

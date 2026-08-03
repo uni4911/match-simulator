@@ -52,6 +52,14 @@ engine = MatchEngine(commentator=commentator, speed_factor=0.1, event_bus=event_
 league: League | None = None
 league_engine: LeagueEngine | None = None
 
+IMPORTANT_EVENT_NAMES = {
+    'Goal', 'GoalWithAssist', 'PenaltyKickGoal', 'LongShotGoal',
+    'ShotSave', 'LongShotEvent',
+    'Foul', 'YellowCardFoul', 'RedCardFoul', 'DoubleYellowCard',
+    'Substitution', 'InjuryEvent', 'CornerKickEvent',
+    'KickoffEvent', 'HalfTimeEvent', 'MatchEndEvent'
+}
+
 def get_match_status_report():
     if not match:
         return {
@@ -69,6 +77,8 @@ def get_match_status_report():
 
     for event in match.match_events:
         event_name = type(event).__name__
+        if event_name not in IMPORTANT_EVENT_NAMES:
+            continue
         description = commentator.get_comment_text(event) or f"Zdarzenie: {event_name}"
 
         event_dict = {'second': event.second, 'event_type': event_name, 'description': description}
@@ -83,6 +93,7 @@ def get_match_status_report():
         'is_finished': match.current_second >= 5400,
         'events': api_events
     }
+
 
 async def match_event_generator():
     global match, league

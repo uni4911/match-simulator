@@ -3,13 +3,43 @@ from typing import Optional, TYPE_CHECKING
 from src.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
     Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
-    Substitution, MatchEvent, CornerKickEvent, HalfTimeEvent, InjuryEvent
+    Substitution, MatchEvent, CornerKickEvent, HalfTimeEvent, InjuryEvent,
+    LongShotGoal, LongShotEvent, WingPlayEvent, BuildUpEvent, InterceptionEvent
 )
 import random
 
 if TYPE_CHECKING:
     from src.engine import Match
     from src.event_bus import EventBus
+
+LONG_SHOT_GOAL_COMMENTS = [
+    "ALEZ PETARDA! {event.goalscorer} uderza z ponad 25 metrow i pilka wpada idealnie pod poprzeczke dla zespołu {event.team}!",
+    "CO ZA GOOOOL! {event.goalscorer} decyduje sie na strzal z dystansu i trafia niesamowicie w samo okienko!",
+    "BRAMKA SEZONU! Kapitalny strzal zza pola karnego, {event.goalscorer} zdobywa gola dla {event.team}!",
+    "GOAAAAL! Alez uderzenie z dystansu, {event.goalscorer} pokonuje bramkarza niesamowitym strzalem!",
+]
+
+LONG_SHOT_EVENT_COMMENTS = [
+    "{event.shooter} przymierza z dystansu! Pilka przelatuje minimalnie obok slupka!",
+    "Potezne uderzenie zza pola karnego! {event.shooter} probuje zaskoczyc bramkarza, ale ten pewnie broni!",
+    "{event.shooter} szuka miejsca do strzalu z dystansu... Mocne uderzenie, ale obronca blokuje ten strzal!",
+]
+
+WING_PLAY_COMMENTS = [
+    "{event.winger} napedza akcje skrzydlem! Dynamiczne wyjscie na pozycje i proby zagrania dla {event.team}!",
+    "Swietny drybling na skrzydle! {event.winger} mija obronce i zagrywa ostra pilke w pole karne!",
+    "{event.winger} zlamal akcje do srodka! Szuka otwartej przestrzeni do oddania strzalu lub podania!",
+]
+
+BUILD_UP_COMMENTS = [
+    "{event.team} cierpliwie buduje atak pozycyjny. {event.passer} wymienia krotkie podania w srodku pola.",
+    "Koronkowa akcja zespolu {event.team}! {event.passer} kontroluje tempo gry i rozrzuca pilke do partnerow.",
+]
+
+INTERCEPTION_COMMENTS = [
+    "Swietny odczyt gry! {event.interceptor} przecina podanie rywali i przejmuje pilke dla {event.team}!",
+    "Twarda i czysta interwencja! {event.interceptor} odbiera pilke w srodkowej strefie boiska.",
+]
 
 
 KICKOFF_EVENT_COMMENTS = [
@@ -163,8 +193,13 @@ INJURY_MINOR_COMMENTS = [
 EVENT_COMMENT_MAP: dict[type[MatchEvent], list[str]] = {
     KickoffEvent: KICKOFF_EVENT_COMMENTS,
     GoalWithAssist: GOAL_WITH_ASSIST_COMMENTS,
+    LongShotGoal: LONG_SHOT_GOAL_COMMENTS,
     Goal: GOAL_COMMENTS,
     ShotSave: SHOT_SAVE_COMMENTS,
+    LongShotEvent: LONG_SHOT_EVENT_COMMENTS,
+    WingPlayEvent: WING_PLAY_COMMENTS,
+    BuildUpEvent: BUILD_UP_COMMENTS,
+    InterceptionEvent: INTERCEPTION_COMMENTS,
     PenaltyKickGoal: PENALTY_KICK_GOAL_COMMENTS,
     Foul: FOUL_COMMENTS,
     YellowCardFoul: YELLOW_CARD_FOUL_COMMENTS,

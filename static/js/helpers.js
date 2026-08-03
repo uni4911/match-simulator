@@ -63,9 +63,18 @@ export function getEventIcon(eventType) {
         case 'Goal':
         case 'GoalWithAssist':
         case 'PenaltyKickGoal':
+        case 'LongShotGoal':
             return '⚽';
         case 'ShotSave':
             return '🧤';
+        case 'LongShotEvent':
+            return '🚀';
+        case 'WingPlayEvent':
+            return '⚡';
+        case 'BuildUpEvent':
+            return '🦶';
+        case 'InterceptionEvent':
+            return '🛡️';
         case 'YellowCardFoul':
         case 'DoubleYellowCard':
             return '🟨';
@@ -89,3 +98,4 @@ export function getEventIcon(eventType) {
             return '⏱️';
     }
 }
+

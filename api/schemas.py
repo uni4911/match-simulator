@@ -23,8 +23,8 @@ class MatchPlayerStatsSchema(BaseModel):
     name: str
     position: str
     goals: int = Field(default=0, ge=0)
-    assists: int = Field(default= 0, ge=0)
-    yellow_cards: int = Field(default=0,ge=0, le=2)
+    assists: int = Field(default=0, ge=0)
+    yellow_cards: int = Field(default=0, ge=0, le=2)
     has_red_card: bool
     current_stamina: float = Field(default=1.0, ge=0.0, le=1.0)
 
@@ -46,38 +46,23 @@ class PlayerSeasonStatsSchema(BaseModel):
     passes: int = Field(default=0, ge=0)
     clean_sheets: int = Field(default=0, ge=0)
 
-class LeagueTableResponse(BaseModel):
-    name: str
-    teams: list[str]
-    fixtures: list[LeagueMatchSchema]
-    table: list[LeagueTeamStatsSchema]
-    player_stats: list[PlayerSeasonStatsSchema] = []
-
-
-
-class LeagueTableResponse(BaseModel):
-    name: str
-    teams: list[str]
-    fixtures: list[LeagueMatchSchema]
-    table: list[LeagueTeamStatsSchema]
-
 class LeagueTeamStatsSchema(BaseModel):
-        model_config = ConfigDict(from_attributes=True)
-        team_name: str
-        goals_scored: int 
-        goals_conceded: int 
-        matches_played: int 
-        wins: int 
-        draws: int 
-        loses: int
+    model_config = ConfigDict(from_attributes=True)
+    team_name: str
+    goals_scored: int 
+    goals_conceded: int 
+    matches_played: int 
+    wins: int 
+    draws: int 
+    loses: int
 
-        @computed_field
-        def points(self) -> int:
-            return self.wins * 3 + self.draws * 1
-        
-        @computed_field
-        def goal_difference(self) -> int:
-            return self.goals_scored - self.goals_conceded
+    @computed_field
+    def points(self) -> int:
+        return self.wins * 3 + self.draws * 1
+    
+    @computed_field
+    def goal_difference(self) -> int:
+        return self.goals_scored - self.goals_conceded
 
 class LeagueMatchSchema(BaseModel):
     home_team_name: str
@@ -86,6 +71,13 @@ class LeagueMatchSchema(BaseModel):
     away_score: int
     is_finished: bool
     round_number: int = 1
+
+class LeagueTableResponse(BaseModel):
+    name: str
+    teams: list[str]
+    fixtures: list[LeagueMatchSchema]
+    table: list[LeagueTeamStatsSchema]
+    player_stats: list[PlayerSeasonStatsSchema] = []
 
 class CreateLeagueRequest(BaseModel):
     league_name: str = "Moja liga"
@@ -104,8 +96,3 @@ class PlayLeagueMatch(BaseModel):
 class MatchOptionsResponse(BaseModel):
     teams: list[str]
     formations: list[str]
-
-
-
-
-    
