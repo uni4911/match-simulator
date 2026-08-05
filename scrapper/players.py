@@ -4,6 +4,7 @@ import re
 from typing import Optional
 from bs4 import BeautifulSoup
 from scrapper.fetcher import fetch_html
+from scrapper.teams import detect_formation_from_squad_html
 
 # Mapping of SoFIFA position badges to domain Position enum names
 SOFIFA_POSITION_MAP = {
@@ -482,6 +483,10 @@ def scrape_players_for_teams(teams_file: str = "data/teams.json", output_file: s
             print(f"Skipping {team_name} due to fetch error.")
             continue
 
+        formation = detect_formation_from_squad_html(html)
+        team["formation"] = formation
+        print(f"  Found {team_name} formation: {formation}")
+
         players = parse_players_from_table(html, team_name=team_name)
         print(f"  Found {len(players)} players for {team_name}.")
         all_players.extend(players)
@@ -489,6 +494,12 @@ def scrape_players_for_teams(teams_file: str = "data/teams.json", output_file: s
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(all_players, f, ensure_ascii=False, indent=2)
+
+    # Re-save updated teams with formations
+    if os.path.exists(teams_file):
+        with open(teams_file, "w", encoding="utf-8") as f:
+            json.dump(teams, f, ensure_ascii=False, indent=2)
+        print(f"Updated {teams_file} with detected team formations.")
 
     print(f"Successfully saved {len(all_players)} players to {output_file}")
     return all_players

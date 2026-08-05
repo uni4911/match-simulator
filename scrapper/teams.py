@@ -51,6 +51,62 @@ def parse_teams_page(html: str) -> list[dict]:
 
     return teams
 
+def determine_formation_from_positions(starting_positions: list[str]) -> str:
+    """
+    Determines formation from a list of starting player position badges.
+    """
+    field_pos = [p for p in starting_positions if p != "GK"]
+    def_count = sum(1 for p in field_pos if p in ["LB", "LO", "CB", "ŚO", "RB", "PO", "LWB", "CLO", "RWB", "CPO"])
+    mid_count = sum(1 for p in field_pos if p in ["CDM", "ŚPD", "CM", "ŚP", "CAM", "ŚPO", "LM", "LP", "RM", "PP"])
+    att_count = sum(1 for p in field_pos if p in ["LW", "LS", "CF", "ŚN", "RW", "PS", "ST", "N"])
+
+    cdm_count = sum(1 for p in field_pos if p in ["CDM", "ŚPD"])
+    cam_count = sum(1 for p in field_pos if p in ["CAM", "ŚPO"])
+    winger_count = sum(1 for p in field_pos if p in ["LW", "LS", "RW", "PS"])
+    wide_mid_count = sum(1 for p in field_pos if p in ["LM", "LP", "RM", "PP"])
+
+    if def_count == 4 and mid_count == 3 and att_count == 3:
+        return "4-3-3"
+    elif def_count == 4 and mid_count == 4 and att_count == 2:
+        if cam_count >= 1 and (cdm_count >= 1 or cdm_count + mid_count >= 3) and wide_mid_count >= 1:
+            return "4-2-3-1"
+        elif cdm_count == 1 and cam_count == 1:
+            return "4-1-2-1-2"
+        else:
+            return "4-4-2"
+    elif def_count == 3 and mid_count == 5 and att_count == 2:
+        return "3-5-2"
+    elif def_count == 5 and mid_count == 3 and att_count == 2:
+        return "5-3-2"
+    elif def_count == 3 and mid_count == 4 and att_count == 3:
+        return "3-4-3"
+    elif def_count == 4 and (cdm_count >= 1 or cam_count >= 1):
+        if att_count == 1 or (att_count == 2 and winger_count == 0):
+            return "4-2-3-1"
+        return "4-3-3"
+    else:
+        if def_count == 3:
+            return "3-5-2" if att_count <= 2 else "3-4-3"
+        elif def_count == 5:
+            return "5-3-2"
+        elif att_count >= 3:
+            return "4-3-3"
+        else:
+            return "4-4-2"
+
+def detect_formation_from_squad_html(html: str) -> str:
+    """
+    Parses squad HTML table to get starting 11 positions and returns formation string.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.select("tbody tr")
+    starting_positions = []
+    for r in rows[:11]:
+        pos_span = r.select_one("td.pos span, span.pos, a.pos, td[data-col='pos'] span, .pos")
+        pos_text = pos_span.get_text(strip=True) if pos_span else "CM"
+        starting_positions.append(pos_text)
+    return determine_formation_from_positions(starting_positions)
+
 def clean_team_for_export(team: dict) -> dict:
     """
     Removes internal scraper IDs and metadata (sofifa_id, league_id, squad_size).
@@ -61,7 +117,8 @@ def clean_team_for_export(team: dict) -> dict:
         "overall": team["overall"],
         "attack": team["attack"],
         "midfield": team["midfield"],
-        "defense": team["defense"]
+        "defense": team["defense"],
+        "formation": team.get("formation", "4-3-3")
     }
 
 def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams.json") -> list[dict]:
