@@ -64,7 +64,7 @@ def test_severe_injury_forced_off(fresh_match_player: MatchPlayer):
 
 def test_all_formations_initialization():
     from src.models import AVAILABLE_FORMATIONS, Team
-    from src.loader import load_file
+    from src.db.loader import load_file
     players = load_file("data.json", "Python FC")
     team = Team("Python FC", players)
 

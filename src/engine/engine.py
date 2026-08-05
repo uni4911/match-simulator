@@ -4,12 +4,12 @@ from src.models import Team, FieldPlayer, Goalkeeper, Player, MatchTeam, MatchPl
 from enum import Enum, auto
 from typing import Optional, Final, Type
 from abc import ABC, abstractmethod
-from src.commentator import Commentator
-from src.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
+from src.events.commentator import Commentator
+from src.events.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
                         RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent,
                         Substitution, HalfTimeEvent, InjuryEvent, LongShotGoal, LongShotEvent,
                         WingPlayEvent, BuildUpEvent, InterceptionEvent)
-from src.event_bus import EventBus
+from src.events.event_bus import EventBus
 import math
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400

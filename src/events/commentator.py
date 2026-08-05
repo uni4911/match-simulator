@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
-from src.events import (
+from src.events.events import (
     KickoffEvent, Goal, GoalWithAssist, ShotSave, PenaltyKickGoal, 
     Foul, YellowCardFoul, RedCardFoul, DoubleYellowCard, MatchEndEvent,
     Substitution, MatchEvent, CornerKickEvent, HalfTimeEvent, InjuryEvent,
@@ -9,8 +9,8 @@ from src.events import (
 import random
 
 if TYPE_CHECKING:
-    from src.engine import Match
-    from src.event_bus import EventBus
+    from src.engine.engine import Match
+    from src.events.event_bus import EventBus
 
 LONG_SHOT_GOAL_COMMENTS = [
     "ALEZ PETARDA! {event.goalscorer} uderza z ponad 25 metrow i pilka wpada idealnie pod poprzeczke dla zespołu {event.team}!",

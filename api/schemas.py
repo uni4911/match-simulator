@@ -2,7 +2,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, ConfigDict, computed_field
 from typing import Optional
 from src.models import Team, LeagueTeamStats
-from src.engine import Match
+from src.engine.engine import Match
 
 class TeamStatsMatchSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -1,7 +1,7 @@
 import pytest
 from src.models import League, Team, FieldPlayer, Position, Goalkeeper
-from src.engine import MatchEngine
-from src.league_engine import LeagueEngine
+from src.engine.engine import MatchEngine
+from src.engine.league_engine import LeagueEngine
 
 def create_dummy_team(name: str) -> Team:
     gk = Goalkeeper(f"GK {name}", 80, 80, 70, 85, 60, 80)

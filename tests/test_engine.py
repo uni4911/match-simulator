@@ -1,11 +1,11 @@
 from unittest.mock import MagicMock
-from src.engine import MatchEngine, Match
+from src.engine.engine import MatchEngine, Match
 from src.models import (
     FieldPlayer, Goalkeeper, Position, Team, MatchTeam, MatchPlayer, FORMATION_433
 )
-from src.commentator import Commentator
+from src.events.commentator import Commentator
 import pytest
-from src.events import MatchEndEvent
+from src.events.events import MatchEndEvent
 
 @pytest.fixture
 def sample_home_team() -> MatchTeam:
@@ -138,7 +138,7 @@ def test_handle_injury_reduces_active_players_when_no_subs(sample_home_team: Mat
     assert len(sample_home_team.active_players) == initial_active - 1
 
 def test_process_injury_risk_adds_injury_event(sample_home_team: MatchTeam, sample_away_team: MatchTeam):
-    from src.events import InjuryEvent
+    from src.events.events import InjuryEvent
     match = Match(sample_home_team, sample_away_team)
     target_player = sample_home_team.players_on_field[0]
 
@@ -160,7 +160,7 @@ def test_match_team_get_winger_and_get_cam(sample_home_team: MatchTeam):
     assert cam in sample_home_team.active_players
 
 def test_new_match_states_execution(sample_home_team: MatchTeam, sample_away_team: MatchTeam):
-    from src.engine import BuildUp, WingAttack, LongShot
+    from src.engine.engine import BuildUp, WingAttack, LongShot
     match = Match(sample_home_team, sample_away_team)
     match.player_with_ball = sample_home_team.active_players[0]
 

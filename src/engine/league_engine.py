@@ -1,5 +1,5 @@
 from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats
-from src.engine import Match, MatchEngine
+from src.engine.engine import Match, MatchEngine
 
 class LeagueEngine:
     def __init__(self, league: League, match_engine: MatchEngine):

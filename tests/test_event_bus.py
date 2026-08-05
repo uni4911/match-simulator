@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
-from src.event_bus import EventBus
-from src.events import MatchEvent, Goal, YellowCardFoul, MatchEndEvent
+from src.events.event_bus import EventBus
+from src.events.events import MatchEvent, Goal, YellowCardFoul, MatchEndEvent
 
 def test_subscribe_and_publish_event():
     bus = EventBus()

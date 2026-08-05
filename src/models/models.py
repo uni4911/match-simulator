@@ -3,7 +3,7 @@ import random
 from enum import Enum, auto
 from typing import Optional, Final, TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.engine import Match
+    from src.engine.engine import Match
 
 
 class Position(Enum):
@@ -218,9 +218,12 @@ AVAILABLE_FORMATIONS: dict[str, list[Position]] = {
 
 BASE_DRAIN_RATE = 0.0001
 class Player:
-    def __init__(self, name: str, position: Position):
+    def __init__(self, name: str, position: Position, age: int = 20, nationality: str = "Unknown", height: int = 180):
         self.name :str = name
         self.position : Position= position
+        self.age: int = age
+        self.nationality: str = nationality
+        self.height: int = height
         self.fitness: float = 1.0
     
 class Team:
@@ -232,8 +235,8 @@ class Team:
         
 
 class FieldPlayer(Player):
-    def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, heading: int, height: int):
-        super().__init__(name, position)
+    def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, heading: int, height: int = 180, age: int = 20, nationality: str = "Unknown"):
+        super().__init__(name, position, age=age, nationality=nationality, height=height)
         self.base_pace : int = pace
         self.base_shooting : int = shooting
         self.base_passing : int = passing
@@ -241,7 +244,6 @@ class FieldPlayer(Player):
         self.base_defending : int = defending
         self.base_physical : int = physical
         self.heading: int = heading
-        self.height: int = height
 
 
     @property
@@ -259,8 +261,8 @@ class Goalkeeper(Player):
     REFLEX_MODIFIER: Final[float] = 0.6
     POSITION_MODIFIER: Final[float] = 0.4
 
-    def __init__(self, name: str, diving: int, handling: int, kicking: int, reflexes: int, speed: int, positioning: int):
-        super().__init__(name, Position.GOALKEEPER)
+    def __init__(self, name: str, diving: int, handling: int, kicking: int, reflexes: int, speed: int, positioning: int, age: int = 20, nationality: str = "Unknown", height: int = 188):
+        super().__init__(name, Position.GOALKEEPER, age=age, nationality=nationality, height=height)
         self.diving : int = diving
         self.handling : int = handling
         self.kicking : int = kicking

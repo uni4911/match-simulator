@@ -5,3 +5,5 @@
 .venv
 .pytest_chace
 .vscode
+*.db
+*.sqlite3

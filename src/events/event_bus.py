@@ -1,5 +1,5 @@
 from typing import Callable, Type
-from src.events import MatchEvent
+from src.events.events import MatchEvent
 
 class EventBus:
     def __init__(self) -> None:

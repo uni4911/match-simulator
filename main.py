@@ -6,16 +6,21 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from src.loader import load_all_teams
+from src.db.loader import load_all_teams
+from src.db.migrate import run_migration
 from src.models import AVAILABLE_FORMATIONS, FORMATION_433, League, PlayerSeasonStats
-from src.league_engine import LeagueEngine
-from src.event_bus import EventBus
-from src.engine import MatchTeam, Match, MatchEngine, EVENT_OR_STATE_DURATIONS
-from src.commentator import Commentator
+from src.engine.league_engine import LeagueEngine
+from src.events.event_bus import EventBus
+from src.engine.engine import MatchTeam, Match, MatchEngine, EVENT_OR_STATE_DURATIONS
+from src.events.commentator import Commentator
 from api.schemas import (MatchStatusSchema, StartMatchRequest, MatchOptionsResponse, MatchFullStatsSchema, 
                          MatchPlayerStatsSchema, LeagueTableResponse, CreateLeagueRequest, LeagueTeamStats,
                          PlayLeagueMatch, PlayerSeasonStatsSchema)
 
+try:
+    run_migration()
+except Exception as e:
+    print(f"Błąd podczas migracji bazy danych: {e}")
 
 json_filename = "data.json"
 try:

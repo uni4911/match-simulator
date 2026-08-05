@@ -1,8 +1,8 @@
 import pytest
 from src.models import (FieldPlayer, Goalkeeper, Position, MatchPlayer, 
                         MatchTeam, Team, League, PlayerSeasonStats)
-from src.engine import Match, MatchEngine
-from src.league_engine import LeagueEngine
+from src.engine.engine import Match, MatchEngine
+from src.engine.league_engine import LeagueEngine
 
 
 def test_player_season_stats_accumulation():
@@ -52,7 +52,7 @@ def test_goalkeeper_clean_sheet_tracking():
 
 
 def test_league_engine_player_stats_integration():
-    from src.loader import load_all_teams
+    from src.db.loader import load_all_teams
     loaded_teams = load_all_teams("data.json")
     teams = list(loaded_teams.values())[:2]
 
