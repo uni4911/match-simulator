@@ -11,13 +11,7 @@ def init_db() -> None:
                 conn.execute(text("ALTER TABLE players ADD COLUMN full_name VARCHAR(150)"))
             if "short_name" not in columns:
                 conn.execute(text("ALTER TABLE players ADD COLUMN short_name VARCHAR(50)"))
-            if "name" in columns:
-                conn.execute(text("UPDATE players SET full_name = name WHERE full_name IS NULL OR full_name = ''"))
-                conn.execute(text("UPDATE players SET short_name = name WHERE short_name IS NULL OR short_name = ''"))
-                try:
-                    conn.execute(text("ALTER TABLE players DROP COLUMN name"))
-                except Exception as e:
-                    print(f"Notice: Could not drop column name: {e}")
+            conn.execute(text("UPDATE players SET short_name = full_name WHERE short_name IS NULL OR short_name = ''"))
             conn.commit()
     Base.metadata.create_all(bind=engine)
 

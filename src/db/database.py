@@ -157,8 +157,8 @@ class PlayerModel(Base):
 
     def to_domain(self) -> Player:
         pos_enum = Position[self.position] if isinstance(self.position, str) and self.position in Position.__members__ else Position.CENTRAL_MIDFIELDER
-        fn = self.full_name
-        sn = self.short_name or self.full_name
+        fn = self.full_name or self.short_name or "Unknown Player"
+        sn = self.short_name or self.full_name or "Unknown Player"
         if pos_enum == Position.GOALKEEPER:
             gk = Goalkeeper(
                 full_name=fn,

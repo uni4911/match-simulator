@@ -148,6 +148,16 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+@app.middleware("http")
+async def add_no_cache_header(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 @app.get("/match/options", response_model=MatchOptionsResponse)
 def match_options():
     teams_list = []

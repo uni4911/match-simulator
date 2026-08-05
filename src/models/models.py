@@ -230,7 +230,7 @@ class Player:
 
     @property
     def name(self) -> str:
-        return self.full_name
+        return self.short_name or self.full_name
     
 class Team:
     def __init__(self, name: str, players: list[Player], league: str = "Inne"):
@@ -300,6 +300,8 @@ class MatchPlayer:
         self.is_injured: bool = False
         self.injury_severity: str = "none"  
         self.is_forced_off: bool = False
+        self.is_starter: bool = False
+        self.is_on_field: bool = False
 
     @property
     def is_injuried(self) -> bool:
@@ -337,13 +339,13 @@ class MatchPlayer:
         return base_mod
     @property 
     def name(self) -> str:
-            return self.player.name
+            return self.player.short_name or self.player.full_name
     @property 
     def full_name(self) -> str:
             return self.player.full_name
     @property 
     def short_name(self) -> str:
-            return self.player.short_name
+            return self.player.short_name or self.player.full_name
     @property
     def position(self) -> str:
         return self.assigned_position.name
@@ -352,31 +354,43 @@ class MatchPlayer:
         return self.yellow_card
     @property
     def pace(self) -> int:
-        return int(self.player.base_pace * self.stat_modifier)
+        b = getattr(self.player, "base_pace", getattr(self.player, "speed", 50))
+        return int(b * self.stat_modifier)
     @property
     def shooting(self) -> int:
-        return int(self.player.base_shooting * self.stat_modifier)
+        b = getattr(self.player, "base_shooting", 50)
+        return int(b * self.stat_modifier)
     @property
     def passing(self) -> int:
-        return int(self.player.base_passing * self.stat_modifier)
+        b = getattr(self.player, "base_passing", getattr(self.player, "kicking", 50))
+        return int(b * self.stat_modifier)
     @property
     def dribbling(self) -> int:
-        return int(self.player.base_dribbling * self.stat_modifier)
+        b = getattr(self.player, "base_dribbling", 50)
+        return int(b * self.stat_modifier)
     @property
     def defending(self) -> int:
-        return int(self.player.base_defending * self.stat_modifier)
+        b = getattr(self.player, "base_defending", 50)
+        return int(b * self.stat_modifier)
     @property
     def physical(self) -> int:
-        return int(self.player.base_physical * self.stat_modifier)
+        b = getattr(self.player, "base_physical", 50)
+        return int(b * self.stat_modifier)
     @property
     def heading(self) -> int:
-        return int(self.player.heading)
+        return int(getattr(self.player, "heading", 50))
     @property
     def height(self) -> int:
         return self.player.height
     @property
     def heading_score(self) -> int:
         return int((self.player.heading * 0.5) + (self.physical * 0.3) + (self.player.height * 0.2))
+
+    @property
+    def goalkeeping_score(self) -> int:
+        if isinstance(self.player, Goalkeeper):
+            return int(self.player.goalkeeping_score * self.stat_modifier)
+        return int(50 * self.stat_modifier)
 
          
     def ball_possession_chance(self, modifier: float) -> float:
@@ -388,9 +402,10 @@ class MatchPlayer:
 
     def drain_stamina(self, seconds: int, is_active: bool = False) -> None:
         multiplier = 2.5 if is_active else 1.0
-        physical_factor: float = 1.0 -(self.player.base_physical/200)
-        drain_amount:float = seconds * BASE_DRAIN_RATE * physical_factor * multiplier
-        self.current_stamina = max(0.0,self.current_stamina - drain_amount)
+        physical = getattr(self.player, "base_physical", getattr(self.player, "physical", 50))
+        physical_factor: float = 1.0 - (physical / 200)
+        drain_amount: float = seconds * BASE_DRAIN_RATE * physical_factor * multiplier
+        self.current_stamina = max(0.0, self.current_stamina - drain_amount)
          
 class TeamStatsMatch:
     def __init__(self) -> None:
@@ -453,16 +468,21 @@ class MatchTeam:
         self.match_players: list[MatchPlayer] = [MatchPlayer(player) for player in self.team.players]
         self.players_on_field: list[MatchPlayer] = self._starting_players()
         self.bench_players: list[MatchPlayer] = self._bench_players()
+        for p in self.bench_players:
+            p.is_starter = False
+            p.is_on_field = False
+
+        self.match_players = self.players_on_field + self.bench_players
         self.substitution_limit: int = 5
         self.played_players: set[MatchPlayer] = set(self.players_on_field)
         self.stats: TeamStatsMatch = TeamStatsMatch()
-        starting_gk = next((mp for mp in self.match_players if isinstance(mp.player, Goalkeeper)), None)
-        if starting_gk:
-            self.played_players.add(starting_gk)
 
     @property
     def starting_goalkeeper(self) -> Goalkeeper:
-        return max(self.team.goalkeepers, key=lambda goalkeeper: goalkeeper.overall) 
+        gk_mp = next((p for p in self.players_on_field if isinstance(p.player, Goalkeeper) or p.assigned_position == Position.GOALKEEPER), None)
+        if gk_mp and isinstance(gk_mp.player, Goalkeeper):
+            return gk_mp.player
+        return max(self.team.goalkeepers, key=lambda goalkeeper: goalkeeper.overall) if self.team.goalkeepers else Goalkeeper("Default GK")
 
     @property 
     def bench_goalkeepers(self) -> list[Goalkeeper]:
@@ -474,7 +494,7 @@ class MatchTeam:
 
     @property 
     def relative_strength_modifier(self) -> float:
-        return len(self.active_players)/10
+        return len(self.active_players)/11
 
     @property
     def midfield_power(self) -> int:
@@ -491,15 +511,25 @@ class MatchTeam:
             return [player for player in self.match_players if player not in self.players_on_field]
 
     def _starting_players(self) -> list[MatchPlayer]:
-    
             starting_players: list[MatchPlayer] = []
+
+            # 1. Pick goalkeeper
+            gks = [p for p in self.match_players if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER]
+            if gks:
+                best_gk = sorted(gks, key=lambda p: p.player.overall, reverse=True)[0]
+                best_gk.assigned_position = Position.GOALKEEPER
+                best_gk.is_starter = True
+                best_gk.is_on_field = True
+                starting_players.append(best_gk)
+
+            # 2. Pick field players
             for position in self.formation:
                 selected_player: MatchPlayer | None = None
                 players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
                 if players_on_position:
                     selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
                 else:
-                    for fallback_position in PREFERRED_FALLBACKS[position]:
+                    for fallback_position in PREFERRED_FALLBACKS.get(position, []):
                         players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
                         if players_on_position:
                             selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
@@ -513,6 +543,8 @@ class MatchTeam:
 
                 if selected_player is not None:
                     selected_player.assigned_position = position
+                    selected_player.is_starter = True
+                    selected_player.is_on_field = True
                     starting_players.append(selected_player)    
     
             return starting_players
@@ -549,19 +581,23 @@ class MatchTeam:
         return any(mp == player or mp.player == player for mp in self.match_players)
 
     def get_penalty_taker(self) -> MatchPlayer:
-        top_shooters = sorted(self.active_players, key=lambda player: player.shooting, reverse=True)[:3]
+        candidates = [p for p in self.active_players if isinstance(p.player, FieldPlayer)] or self.active_players
+        top_shooters = sorted(candidates, key=lambda player: player.shooting, reverse=True)[:3]
         weights = [p.shooting for p in top_shooters]
         return random.choices(top_shooters, weights=weights, k=1)[0]
 
-
     def get_freekick_taker(self) -> MatchPlayer:
-        return max(self.active_players, key=lambda player: player.passing)
+        candidates = [p for p in self.active_players if isinstance(p.player, FieldPlayer)] or self.active_players
+        return max(candidates, key=lambda player: player.passing)
 
     def get_corner_taker(self) -> MatchPlayer:
-        return max(self.active_players, key=lambda player: player.passing)
+        candidates = [p for p in self.active_players if isinstance(p.player, FieldPlayer)] or self.active_players
+        return max(candidates, key=lambda player: player.passing)
     
     def get_heading_player(self, excluded_player: MatchPlayer|None = None) -> MatchPlayer:
-        candidates = [player for player in self.active_players if player != excluded_player]
+        candidates = [player for player in self.active_players if player != excluded_player and isinstance(player.player, FieldPlayer)]
+        if not candidates:
+            candidates = [player for player in self.active_players if player != excluded_player]
         if not candidates:
             return self.active_players[0] if self.active_players else self.players_on_field[0]
         weights = [max(1.0, player.heading + ((player.height - 160) * 0.5)) for player in candidates]
@@ -583,6 +619,8 @@ class MatchTeam:
     def make_substitution(self, player_off: MatchPlayer, player_in: MatchPlayer) -> bool:
         if player_in in self.bench_players and player_off in self.players_on_field and not player_off.has_red_card and self.substitution_limit > 0:
             player_in.assigned_position = player_off.assigned_position
+            player_in.is_on_field = True
+            player_off.is_on_field = False
             self.players_on_field.append(player_in)
             self.players_on_field.remove(player_off)
             self.bench_players.append(player_off)
@@ -660,7 +698,7 @@ class PlayerSeasonStats:
 
     @property
     def player_name(self) -> str:
-        return self.player.name
+        return self.player.short_name or self.player.full_name
 
     @property
     def full_name(self) -> str:
@@ -668,7 +706,7 @@ class PlayerSeasonStats:
 
     @property
     def short_name(self) -> str:
-        return self.player.short_name
+        return self.player.short_name or self.player.full_name
 
     @property
     def position(self) -> str:

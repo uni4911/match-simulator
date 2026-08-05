@@ -46,6 +46,9 @@ class MatchPlayerStatsSchema(BaseModel):
     yellow_cards: int = Field(default=0, ge=0, le=2)
     has_red_card: bool
     current_stamina: float = Field(default=1.0, ge=0.0, le=1.0)
+    is_starter: bool = False
+    is_on_field: bool = False
+    is_injured: bool = False
 
 class MatchFullStatsSchema(BaseModel):
     home_team_name: str

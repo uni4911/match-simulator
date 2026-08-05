@@ -70,7 +70,7 @@ def test_all_formations_initialization():
 
     for name, formation in AVAILABLE_FORMATIONS.items():
         match_team = MatchTeam(team, formation)
-        assert len(match_team.players_on_field) == 10
+        assert len(match_team.players_on_field) == 11
         assert match_team.formation == formation
 
 
@@ -178,4 +178,40 @@ def test_league_team_stats_form_modifier_ceiling_and_floor():
         stats.register_match_result(0, 2)
     assert stats.form_modifier == 0.975
     assert len(stats.recent_results) == 5
+
+def test_match_team_starter_and_bench_status_tracking():
+    from src.models import Team, FieldPlayer, Goalkeeper, Position, FORMATION_433
+    gk1 = Goalkeeper("GK 1", 70, 70, 70, 80, 70, 80)
+    gk2 = Goalkeeper("GK 2", 60, 60, 60, 70, 60, 70)
+    field_players = [
+        FieldPlayer(f"Player {i}", pos, 70, 70, 70, 70, 70, 70, 70, 180)
+        for i, pos in enumerate(FORMATION_433)
+    ]
+    bench_fp1 = FieldPlayer("Bench 1", Position.STRIKER, 70, 70, 70, 70, 70, 70, 70, 180)
+    bench_fp2 = FieldPlayer("Bench 2", Position.CENTRE_BACK, 70, 70, 70, 70, 70, 70, 70, 180)
+
+    team = Team("Test Team", [gk1, gk2] + field_players + [bench_fp1, bench_fp2])
+    match_team = MatchTeam(team, FORMATION_433)
+
+    assert len(match_team.players_on_field) == 11  # 11 starting players on field (1 GK + 10 field players)
+    assert len(match_team.bench_players) == 3
+
+    for p in match_team.players_on_field:
+        assert p.is_starter is True
+        assert p.is_on_field is True
+
+    for p in match_team.bench_players:
+        assert p.is_starter is False
+        assert p.is_on_field is False
+
+    # Perform a substitution
+    starter = match_team.players_on_field[0]
+    bench_p = match_team.bench_players[0]
+    sub_success = match_team.make_substitution(starter, bench_p)
+
+    assert sub_success is True
+    assert starter.is_starter is True
+    assert starter.is_on_field is False
+    assert bench_p.is_starter is False
+    assert bench_p.is_on_field is True
 

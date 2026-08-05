@@ -32,9 +32,44 @@ export async function fetchPlayerStats() {
     }
 }
 
-function createPlayerStatCard(player, index) {
+export function createPlayerStatCard(player, index, forceBench = false) {
     const card = document.createElement('div');
-    card.className = `player-stat-card ${player.has_red_card ? 'has-red' : ''}`;
+
+    const hasStarterProp = player.is_starter !== undefined;
+    const isStarter = hasStarterProp ? player.is_starter : !forceBench;
+    const isOnField = player.is_on_field !== undefined ? player.is_on_field : isStarter;
+
+    let cardStatusClass = '';
+    let statusText = '';
+    let statusBadgeClass = '';
+
+    if (player.has_red_card) {
+        cardStatusClass = 'has-red';
+        statusText = 'CZERWONA KARTKA';
+        statusBadgeClass = 'red-card';
+    } else if (player.is_injured) {
+        cardStatusClass = 'is-injured';
+        statusText = 'KONTUZJA';
+        statusBadgeClass = 'injured';
+    } else if (isStarter && isOnField) {
+        cardStatusClass = 'is-starter';
+        statusText = 'NA BOISKU';
+        statusBadgeClass = 'on-field';
+    } else if (isStarter && !isOnField) {
+        cardStatusClass = 'subbed-off';
+        statusText = 'ZMIENIONY';
+        statusBadgeClass = 'sub-off';
+    } else if (!isStarter && isOnField) {
+        cardStatusClass = 'subbed-in';
+        statusText = 'WEJŚCIE Z ŁAWKI';
+        statusBadgeClass = 'sub-in';
+    } else {
+        cardStatusClass = 'is-bench';
+        statusText = 'NA ŁAWCE';
+        statusBadgeClass = 'bench';
+    }
+
+    card.className = `player-stat-card ${cardStatusClass}`;
 
     const mainRow = document.createElement('div');
     mainRow.className = 'player-card-main';
@@ -43,25 +78,31 @@ function createPlayerStatCard(player, index) {
     infoDiv.className = 'player-card-info';
     infoDiv.style.flexDirection = 'column';
     infoDiv.style.alignItems = 'flex-start';
-    infoDiv.style.gap = '0.15rem';
+    infoDiv.style.gap = '0.2rem';
 
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'player-card-name';
-    nameSpan.textContent = `${index + 1}. ${player.name || 'Zawodnik'}`;
-
-    const posSpan = document.createElement('span');
     const shortPos = getShortPosition(player.position);
     const posClass = getPositionClass(player.position);
-    posSpan.className = `pos-badge ${posClass}`;
-    posSpan.textContent = shortPos;
 
     const nameRow = document.createElement('div');
     nameRow.className = 'player-card-name-row';
+
+    const posSpan = document.createElement('span');
+    posSpan.className = `pos-badge ${posClass}`;
+    posSpan.textContent = shortPos;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'player-card-name';
+    nameSpan.textContent = `${index + 1}. ${player.short_name || player.name || player.player_name || player.full_name || 'Zawodnik'}`;
+
     nameRow.appendChild(posSpan);
     nameRow.appendChild(nameSpan);
 
-    infoDiv.appendChild(nameRow);
+    const statusBadgeSpan = document.createElement('span');
+    statusBadgeSpan.className = `player-status-badge ${statusBadgeClass}`;
+    statusBadgeSpan.textContent = statusText;
 
+    infoDiv.appendChild(nameRow);
+    infoDiv.appendChild(statusBadgeSpan);
 
     const pillsDiv = document.createElement('div');
     pillsDiv.className = 'player-stat-pills';
@@ -69,19 +110,19 @@ function createPlayerStatCard(player, index) {
     // Goal pill
     const goalPill = document.createElement('span');
     goalPill.className = `stat-pill goals ${player.goals > 0 ? 'active' : ''}`;
-    goalPill.textContent = `⚽ ${player.goals}`;
+    goalPill.textContent = `⚽ ${player.goals || 0}`;
     pillsDiv.appendChild(goalPill);
 
     // Assist pill
     const assistPill = document.createElement('span');
     assistPill.className = `stat-pill assists ${player.assists > 0 ? 'active' : ''}`;
-    assistPill.textContent = `🅰️ ${player.assists}`;
+    assistPill.textContent = `🅰️ ${player.assists || 0}`;
     pillsDiv.appendChild(assistPill);
 
     // Yellow Card pill
     const yellowPill = document.createElement('span');
     yellowPill.className = `stat-pill yellow ${player.yellow_cards > 0 ? 'active' : ''}`;
-    yellowPill.textContent = `🟨 ${player.yellow_cards}`;
+    yellowPill.textContent = `🟨 ${player.yellow_cards || 0}`;
     pillsDiv.appendChild(yellowPill);
 
     // Red Card pill
@@ -173,28 +214,39 @@ export function renderPlayerStats() {
 
     container.innerHTML = '';
 
+    const hasStarterAttr = players.some(p => p.is_starter !== undefined);
+
+    let starters = [];
+    let bench = [];
+
+    if (hasStarterAttr) {
+        starters = players.filter(p => p.is_starter);
+        bench = players.filter(p => !p.is_starter);
+    } else {
+        starters = players.slice(0, 11);
+        bench = players.slice(11);
+    }
+
     // Starting 11 Header
     const startersHeader = document.createElement('div');
-    startersHeader.className = 'stats-section-header';
-    startersHeader.textContent = `SKŁAD GŁÓWNY (${Math.min(11, players.length)})`;
+    startersHeader.className = 'stats-section-header starter';
+    startersHeader.innerHTML = `<span>⚽ SKŁAD GŁÓWNY (WYJŚCIOWA 11)</span> <span class="section-count-badge">${starters.length}</span>`;
     container.appendChild(startersHeader);
 
     // Starting 11 players
-    const starters = players.slice(0, 11);
     starters.forEach((player, i) => {
-        container.appendChild(createPlayerStatCard(player, i));
+        container.appendChild(createPlayerStatCard(player, i, false));
     });
 
     // Bench Header
-    if (players.length > 11) {
+    if (bench.length > 0) {
         const benchHeader = document.createElement('div');
         benchHeader.className = 'stats-section-header bench';
-        benchHeader.textContent = `REZERWOWI (${players.length - 11})`;
+        benchHeader.innerHTML = `<span>🪑 ŁAWKA REZERWOWYCH</span> <span class="section-count-badge">${bench.length}</span>`;
         container.appendChild(benchHeader);
 
-        const bench = players.slice(11);
         bench.forEach((player, i) => {
-            container.appendChild(createPlayerStatCard(player, i + 11));
+            container.appendChild(createPlayerStatCard(player, i + starters.length, true));
         });
     }
 }

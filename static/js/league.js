@@ -1,6 +1,6 @@
 import { getTeamInitials, getShortPosition, getPositionClass, getEventIcon } from './helpers.js';
 import { renderMatchData, switchView, startLiveStream } from './match.js';
-import { fetchPlayerStats } from './stats.js';
+import { fetchPlayerStats, createPlayerStatCard } from './stats.js';
 
 let currentLeagueData = null;
 let currentFilter = 'all'; // 'all', 'pending', 'finished'
@@ -948,7 +948,7 @@ function createCategoryCard(title, players, statFormatter, categoryKey) {
                 <div class="stat-player-left">
                     <span class="stat-player-rank">${rankBadge}</span>
                     <div class="stat-player-info">
-                        <span class="stat-player-name">${p.player_name}</span>
+                        <span class="stat-player-name">${p.short_name || p.player_name || p.name || p.full_name}</span>
                         <span class="stat-player-pos">${getShortPosition(p.position)}</span>
                     </div>
                 </div>
@@ -981,7 +981,7 @@ function updateModalTabButtons() {
     });
 }
 
-export function openPlayerStatsModal(category = 'goals') {
+export async function openPlayerStatsModal(category = 'goals') {
     currentModalCategory = category;
     currentModalSearch = '';
 
@@ -998,8 +998,8 @@ export function openPlayerStatsModal(category = 'goals') {
         modalSortKey = 'cleansheets';
         modalSortDir = 'desc';
     } else if (category === 'all') {
-        modalSortKey = 'goals';
-        modalSortDir = 'desc';
+        modalSortKey = 'name';
+        modalSortDir = 'asc';
     }
 
     const modal = document.getElementById('player-stats-modal');
@@ -1009,6 +1009,18 @@ export function openPlayerStatsModal(category = 'goals') {
     updateModalTabButtons();
 
     if (modal) modal.classList.remove('hidden');
+
+    if (!currentLeaguePlayerStats || currentLeaguePlayerStats.length === 0) {
+        try {
+            const resp = await fetch('/league/player-stats');
+            if (resp.ok) {
+                currentLeaguePlayerStats = await resp.json();
+            }
+        } catch (e) {
+            console.error('Failed to fetch league player stats:', e);
+        }
+    }
+
     renderModalTable();
 }
 
@@ -1069,10 +1081,11 @@ export function renderModalTable() {
 
     if (currentModalSearch.trim() !== '') {
         const query = currentModalSearch.toLowerCase().trim();
-        players = players.filter(p => 
-            (p.player_name && p.player_name.toLowerCase().includes(query)) || 
-            (p.position && p.position.toLowerCase().includes(query))
-        );
+        players = players.filter(p => {
+            const nameVal = p.short_name || p.player_name || p.name || p.full_name || '';
+            return (nameVal && nameVal.toLowerCase().includes(query)) || 
+                   (p.position && p.position.toLowerCase().includes(query));
+        });
     }
 
     if (currentModalCategory === 'cleansheets') {
@@ -1081,24 +1094,25 @@ export function renderModalTable() {
 
     players.sort((a, b) => {
         let cmp = 0;
+        const getPName = (x) => x.short_name || x.player_name || x.name || x.full_name || '';
         if (modalSortKey === 'goals') {
-            cmp = (b.goals - a.goals) || (b.assists - a.assists) || a.player_name.localeCompare(b.player_name);
+            cmp = (b.goals - a.goals) || (b.assists - a.assists) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'assists') {
-            cmp = (b.assists - a.assists) || (b.goals - a.goals) || a.player_name.localeCompare(b.player_name);
+            cmp = (b.assists - a.assists) || (b.goals - a.goals) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'cards') {
             const pointsA = (a.yellow_cards || 0) + (a.red_cards || 0) * 2;
             const pointsB = (b.yellow_cards || 0) + (b.red_cards || 0) * 2;
-            cmp = (pointsB - pointsA) || (b.red_cards - a.red_cards) || a.player_name.localeCompare(b.player_name);
+            cmp = (pointsB - pointsA) || (b.red_cards - a.red_cards) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'cleansheets') {
-            cmp = (b.clean_sheets - a.clean_sheets) || (b.matches_played - a.matches_played) || a.player_name.localeCompare(b.player_name);
+            cmp = (b.clean_sheets - a.clean_sheets) || (b.matches_played - a.matches_played) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'passes') {
-            cmp = (b.passes - a.passes) || (b.assists - a.assists) || a.player_name.localeCompare(b.player_name);
+            cmp = (b.passes - a.passes) || (b.assists - a.assists) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'matches') {
-            cmp = (b.matches_played - a.matches_played) || (b.goals - a.goals) || a.player_name.localeCompare(b.player_name);
+            cmp = (b.matches_played - a.matches_played) || (b.goals - a.goals) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'name') {
-            cmp = a.player_name.localeCompare(b.player_name);
+            cmp = getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'position') {
-            cmp = a.position.localeCompare(b.position) || a.player_name.localeCompare(b.player_name);
+            cmp = a.position.localeCompare(b.position) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'rank') {
             cmp = 0;
         }
@@ -1155,7 +1169,7 @@ export function renderModalTable() {
         return `
             <tr class="table-row">
                 <td class="text-center font-bold rank-cell ${isRank ? 'highlight-col' : ''}">${rankBadge}</td>
-                <td class="font-semibold ${isName ? 'highlight-col' : ''}">${p.player_name}</td>
+                <td class="font-semibold ${isName ? 'highlight-col' : ''}">${p.short_name || p.player_name || p.name || p.full_name}</td>
                 <td class="text-center text-sub font-semibold ${isPos ? 'highlight-col' : ''}">${getShortPosition(p.position)}</td>
                 <td class="text-center ${isMatches ? 'highlight-col font-bold' : ''}">${p.matches_played}</td>
                 <td class="text-center ${isGoals ? 'highlight-col font-bold points-cell' : ''}">${p.goals}</td>
@@ -1278,30 +1292,41 @@ export function openMatchDetailsModal(fixture) {
             c.innerHTML = `<div class="empty-stats">Brak szczegółowych danych zawodników drużyny ${title}</div>`;
             return;
         }
-        players.forEach((p, idx) => {
-            const card = document.createElement('div');
-            card.className = `player-stat-card ${p.has_red_card ? 'has-red' : ''}`;
-            const shortPos = getShortPosition(p.position);
-            const posClass = getPositionClass(p.position);
 
-            card.innerHTML = `
-                <div class="player-card-main">
-                    <div class="player-card-info">
-                        <div class="player-card-name-row">
-                            <span class="pos-badge ${posClass}">${shortPos}</span>
-                            <span class="player-card-name">${idx + 1}. ${p.name || p.player_name || 'Zawodnik'}</span>
-                        </div>
-                    </div>
-                    <div class="player-stat-pills">
-                        <span class="stat-pill goals ${p.goals > 0 ? 'active' : ''}">⚽ ${p.goals || 0}</span>
-                        <span class="stat-pill assists ${p.assists > 0 ? 'active' : ''}">🅰️ ${p.assists || 0}</span>
-                        <span class="stat-pill yellow ${p.yellow_cards > 0 ? 'active' : ''}">🟨 ${p.yellow_cards || 0}</span>
-                        ${p.has_red_card || p.red_cards > 0 ? '<span class="stat-pill red active">🟥</span>' : ''}
-                    </div>
-                </div>
-            `;
-            c.appendChild(card);
+        const hasStarterAttr = players.some(p => p.is_starter !== undefined);
+
+        let starters = [];
+        let bench = [];
+
+        if (hasStarterAttr) {
+            starters = players.filter(p => p.is_starter);
+            bench = players.filter(p => !p.is_starter);
+        } else {
+            starters = players.slice(0, 11);
+            bench = players.slice(11);
+        }
+
+        // Starting 11 Header
+        const startersHeader = document.createElement('div');
+        startersHeader.className = 'stats-section-header starter';
+        startersHeader.innerHTML = `<span>⚽ SKŁAD GŁÓWNY (WYJŚCIOWA 11)</span> <span class="section-count-badge">${starters.length}</span>`;
+        c.appendChild(startersHeader);
+
+        starters.forEach((p, idx) => {
+            c.appendChild(createPlayerStatCard(p, idx, false));
         });
+
+        // Bench Header
+        if (bench.length > 0) {
+            const benchHeader = document.createElement('div');
+            benchHeader.className = 'stats-section-header bench';
+            benchHeader.innerHTML = `<span>🪑 ŁAWKA REZERWOWYCH</span> <span class="section-count-badge">${bench.length}</span>`;
+            c.appendChild(benchHeader);
+
+            bench.forEach((p, idx) => {
+                c.appendChild(createPlayerStatCard(p, idx + starters.length, true));
+            });
+        }
     };
 
     renderPlayersInContainer('md-home-players-list', fixture.home_players, fixture.home_team_name);

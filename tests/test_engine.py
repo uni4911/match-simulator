@@ -26,7 +26,11 @@ def sample_home_team() -> MatchTeam:
         for i, pos in enumerate(FORMATION_433)
     ]
 
-    team = Team(name="Gospodarze FC", players=[gk] + field_players)
+    bench_players = [
+        FieldPlayer(name=f"Ławka Dom {i}", position=Position.CENTRAL_MIDFIELDER, pace=70, shooting=70, passing=70, dribbling=70, defending=70, physical=70, heading=70, height=180)
+        for i in range(3)
+    ]
+    team = Team(name="Gospodarze FC", players=[gk] + field_players + bench_players)
     return MatchTeam(team=team, formation=FORMATION_433)
 
 @pytest.fixture
@@ -48,7 +52,11 @@ def sample_away_team() -> MatchTeam:
         for i, pos in enumerate(FORMATION_433)
     ]
 
-    team = Team(name="Wyjazd FC", players=[gk] + field_players)
+    bench_players = [
+        FieldPlayer(name=f"Ławka Wyjazd {i}", position=Position.CENTRAL_MIDFIELDER, pace=70, shooting=70, passing=70, dribbling=70, defending=70, physical=70, heading=70, height=180)
+        for i in range(3)
+    ]
+    team = Team(name="Wyjazd FC", players=[gk] + field_players + bench_players)
     return MatchTeam(team=team, formation=FORMATION_433)
 
 
@@ -68,7 +76,7 @@ def test_team_active_players_decreases_after_red_card(sample_home_team):
     test_player = sample_home_team.players_on_field[0]
     test_player.receive_card('red_card')
 
-    assert len(sample_home_team.active_players) == 9
+    assert len(sample_home_team.active_players) == 10
     
     assert test_player not in sample_home_team.active_players
 
