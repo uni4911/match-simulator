@@ -128,4 +128,28 @@ def test_team_stats_match_reset_and_to_dict():
     stats.reset()
     assert stats.possession_time == 0.0
     assert stats.shots_on_target == 0
-    assert stats.fouls == 0
+    assert stats.fouls == 0
+
+
+def test_player_full_name_and_short_name():
+    player_default = FieldPlayer(
+        full_name="Robert Lewandowski",
+        position=Position.STRIKER,
+        pace=80, shooting=85, passing=70, dribbling=75, defending=30, physical=70, heading=70, height=180
+    )
+    assert player_default.full_name == "Robert Lewandowski"
+    assert player_default.short_name == "Robert Lewandowski"
+
+    player_custom = FieldPlayer(
+        full_name="Robert Lewandowski",
+        position=Position.STRIKER,
+        pace=80, shooting=85, passing=70, dribbling=75, defending=30, physical=70, heading=70, height=180,
+        short_name="Lewandowski"
+    )
+    assert player_custom.full_name == "Robert Lewandowski"
+    assert player_custom.short_name == "Lewandowski"
+
+    match_player = MatchPlayer(player_custom)
+    assert match_player.full_name == "Robert Lewandowski"
+    assert match_player.short_name == "Lewandowski"
+

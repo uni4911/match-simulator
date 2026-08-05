@@ -7,3 +7,6 @@
 .vscode
 *.db
 *.sqlite3
+/data/
+/output/
+*.csv

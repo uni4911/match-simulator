@@ -128,7 +128,8 @@ class PlayerModel(Base):
     team: Mapped[TeamModel | None] = relationship(back_populates="players")
     country: Mapped[CountryModel | None] = relationship(back_populates="players", lazy="joined")
 
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    full_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    short_name: Mapped[str] = mapped_column(String(50), nullable=False)
     position: Mapped[str] = mapped_column(String(50), nullable=False)
     age: Mapped[int] = mapped_column(default=20)
     nationality: Mapped[str] = mapped_column(String(100), default="Unknown")
@@ -155,9 +156,12 @@ class PlayerModel(Base):
 
     def to_domain(self) -> Player:
         pos_enum = Position[self.position] if isinstance(self.position, str) and self.position in Position.__members__ else Position.CENTRAL_MIDFIELDER
+        fn = self.full_name
+        sn = self.short_name or self.full_name
         if pos_enum == Position.GOALKEEPER:
             gk = Goalkeeper(
-                name=self.name,
+                full_name=fn,
+                short_name=sn,
                 diving=self.diving or 50,
                 handling=self.handling or 50,
                 kicking=self.kicking or 50,
@@ -172,7 +176,8 @@ class PlayerModel(Base):
             return gk
         else:
             fp = FieldPlayer(
-                name=self.name,
+                full_name=fn,
+                short_name=sn,
                 position=pos_enum,
                 pace=self.pace or 50,
                 shooting=self.shooting or 50,
@@ -190,9 +195,12 @@ class PlayerModel(Base):
 
     @classmethod
     def from_domain(cls, player: Player) -> PlayerModel:
+        fn = getattr(player, "full_name", getattr(player, "name", "Unknown"))
+        sn = getattr(player, "short_name", fn)
         if isinstance(player, Goalkeeper):
             return cls(
-                name=player.name,
+                full_name=fn,
+                short_name=sn,
                 position=player.position.name,
                 age=player.age,
                 nationality=player.nationality,
@@ -207,7 +215,8 @@ class PlayerModel(Base):
             )
         elif isinstance(player, FieldPlayer):
             return cls(
-                name=player.name,
+                full_name=fn,
+                short_name=sn,
                 position=player.position.name,
                 age=player.age,
                 nationality=player.nationality,
@@ -223,7 +232,8 @@ class PlayerModel(Base):
             )
         else:
             return cls(
-                name=player.name,
+                full_name=fn,
+                short_name=sn,
                 position=player.position.name,
                 age=player.age,
                 nationality=player.nationality,
@@ -232,4 +242,4 @@ class PlayerModel(Base):
             )
 
     def __repr__(self) -> str:
-        return f"<PlayerModel(id={self.id}, name='{self.name}', position='{self.position}')>"
+        return f"<PlayerModel(id={self.id}, full_name='{self.full_name}', short_name='{self.short_name}', position='{self.position}')>"

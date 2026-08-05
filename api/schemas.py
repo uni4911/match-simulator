@@ -38,6 +38,8 @@ class MatchStatusSchema(BaseModel):
 class MatchPlayerStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str
+    full_name: Optional[str] = None
+    short_name: Optional[str] = None
     position: str
     goals: int = Field(default=0, ge=0)
     assists: int = Field(default=0, ge=0)
@@ -56,6 +58,8 @@ class MatchFullStatsSchema(BaseModel):
 class PlayerSeasonStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     player_name: str
+    full_name: Optional[str] = None
+    short_name: Optional[str] = None
     position: str
     matches_played: int = Field(default=0, ge=0)
     goals: int = Field(default=0, ge=0)

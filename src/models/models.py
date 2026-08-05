@@ -218,13 +218,19 @@ AVAILABLE_FORMATIONS: dict[str, list[Position]] = {
 
 BASE_DRAIN_RATE = 0.0001
 class Player:
-    def __init__(self, name: str, position: Position, age: int = 20, nationality: str = "Unknown", height: int = 180):
-        self.name :str = name
-        self.position : Position= position
+    def __init__(self, full_name: Optional[str] = None, position: Position = Position.CENTRAL_MIDFIELDER, age: int = 20, nationality: str = "Unknown", height: int = 180, short_name: Optional[str] = None, name: Optional[str] = None):
+        resolved_full_name = full_name if full_name is not None else (name if name is not None else "Unknown Player")
+        self.full_name: str = resolved_full_name
+        self.short_name: str = short_name if short_name is not None else resolved_full_name
+        self.position: Position = position
         self.age: int = age
         self.nationality: str = nationality
         self.height: int = height
         self.fitness: float = 1.0
+
+    @property
+    def name(self) -> str:
+        return self.full_name
     
 class Team:
     def __init__(self, name: str, players: list[Player]):
@@ -235,8 +241,9 @@ class Team:
         
 
 class FieldPlayer(Player):
-    def __init__(self, name: str, position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, heading: int, height: int = 180, age: int = 20, nationality: str = "Unknown"):
-        super().__init__(name, position, age=age, nationality=nationality, height=height)
+    def __init__(self, full_name: Optional[str] = None, position: Position = Position.CENTRAL_MIDFIELDER, pace: int = 50, shooting: int = 50, passing: int = 50, dribbling: int = 50, defending: int = 50, physical: int = 50, heading: int = 50, height: int = 180, age: int = 20, nationality: str = "Unknown", short_name: Optional[str] = None, name: Optional[str] = None):
+        resolved_full_name = full_name if full_name is not None else (name if name is not None else "Unknown Player")
+        super().__init__(full_name=resolved_full_name, position=position, age=age, nationality=nationality, height=height, short_name=short_name)
         self.base_pace : int = pace
         self.base_shooting : int = shooting
         self.base_passing : int = passing
@@ -261,8 +268,9 @@ class Goalkeeper(Player):
     REFLEX_MODIFIER: Final[float] = 0.6
     POSITION_MODIFIER: Final[float] = 0.4
 
-    def __init__(self, name: str, diving: int, handling: int, kicking: int, reflexes: int, speed: int, positioning: int, age: int = 20, nationality: str = "Unknown", height: int = 188):
-        super().__init__(name, Position.GOALKEEPER, age=age, nationality=nationality, height=height)
+    def __init__(self, full_name: Optional[str] = None, diving: int = 50, handling: int = 50, kicking: int = 50, reflexes: int = 50, speed: int = 50, positioning: int = 50, age: int = 20, nationality: str = "Unknown", height: int = 188, short_name: Optional[str] = None, name: Optional[str] = None):
+        resolved_full_name = full_name if full_name is not None else (name if name is not None else "Unknown Player")
+        super().__init__(full_name=resolved_full_name, position=Position.GOALKEEPER, age=age, nationality=nationality, height=height, short_name=short_name)
         self.diving : int = diving
         self.handling : int = handling
         self.kicking : int = kicking
@@ -329,6 +337,12 @@ class MatchPlayer:
     @property 
     def name(self) -> str:
             return self.player.name
+    @property 
+    def full_name(self) -> str:
+            return self.player.full_name
+    @property 
+    def short_name(self) -> str:
+            return self.player.short_name
     @property
     def position(self) -> str:
         return self.assigned_position.name
@@ -486,9 +500,15 @@ class MatchTeam:
                             selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
                             break
                 if selected_player is None:
-                    selected_player = sorted([p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players],key=lambda player: player.player.overall,reverse=True)[0]
-                selected_player.assigned_position = position
-                starting_players.append(selected_player)    
+                    candidates = [p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players]
+                    if not candidates:
+                        candidates = [p for p in self.match_players if p not in starting_players]
+                    if candidates:
+                        selected_player = sorted(candidates, key=lambda player: player.player.overall, reverse=True)[0]
+
+                if selected_player is not None:
+                    selected_player.assigned_position = position
+                    starting_players.append(selected_player)    
     
             return starting_players
         
@@ -632,6 +652,14 @@ class PlayerSeasonStats:
     @property
     def player_name(self) -> str:
         return self.player.name
+
+    @property
+    def full_name(self) -> str:
+        return self.player.full_name
+
+    @property
+    def short_name(self) -> str:
+        return self.player.short_name
 
     @property
     def position(self) -> str:

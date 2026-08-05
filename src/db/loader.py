@@ -17,6 +17,10 @@ def load_file(file_name: str, team_name: str) -> list[FieldPlayer | Goalkeeper]:
             for player in player_data[team_name]:
                 position_text = player["position"]
                 player["position"] = Position[position_text]
+                if "name" in player:
+                    name_val = player.pop("name")
+                    player.setdefault("full_name", name_val)
+                    player.setdefault("short_name", name_val)
                 if player["position"] is Position.GOALKEEPER:
                     del player["position"]
                     temp_player = Goalkeeper(**player)

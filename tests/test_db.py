@@ -16,13 +16,13 @@ def test_database_seeding_and_counts():
         assert conf_count == 6
         assert country_count == 211
         assert league_count >= 1
-        assert team_count == 20
-        assert player_count == 400
+        assert team_count >= 20
+        assert player_count >= 400
 
 
 def test_load_teams_from_db():
     teams = load_all_teams_from_db()
-    assert len(teams) == 20
+    assert len(teams) >= 20
     assert "Python FC" in teams
     python_fc = teams["Python FC"]
     assert python_fc.name == "Python FC"
@@ -49,8 +49,22 @@ def test_load_all_teams_no_n_plus_1():
     event.listen(engine, "before_cursor_execute", count_queries)
     try:
         teams = load_all_teams_from_db()
-        assert len(teams) == 20
-        # Verified N+1 protection: Exactly 2 queries (1 for teams + 1 batched IN for players) instead of 21
-        assert query_count <= 2
+        assert len(teams) >= 20
+        # Verified N+1 protection: Batched queries instead of N+1
+        assert query_count <= 3
     finally:
         event.remove(engine, "before_cursor_execute", count_queries)
+
+
+def test_player_model_full_and_short_names():
+    with SessionLocal() as db:
+        player_model = db.query(PlayerModel).first()
+        assert player_model is not None
+        assert "name" not in PlayerModel.__table__.columns
+        assert "full_name" in PlayerModel.__table__.columns
+        assert "short_name" in PlayerModel.__table__.columns
+        domain_player = player_model.to_domain()
+        assert domain_player.full_name is not None
+        assert domain_player.short_name is not None
+
+

@@ -297,14 +297,9 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
 
     import os
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    file_path = file_name if os.path.isabs(file_name) or os.path.exists(file_name) else os.path.join(base_dir, "data", file_name)
-
-    if not os.path.exists(file_path):
-        print(f"Error: {file_path} not found.")
-        return 0, 0
-
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    teams_path = os.path.join(base_dir, "data", "teams.json")
+    players_path = os.path.join(base_dir, "data", "players.json")
+    legacy_path = file_name if os.path.isabs(file_name) or os.path.exists(file_name) else os.path.join(base_dir, "data", file_name)
 
     seeded_teams_count = 0
     seeded_players_count = 0
@@ -315,6 +310,84 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             select(TeamModel).options(selectinload(TeamModel.players))
         ).all()
     }
+
+    # Check if separated teams.json and players.json exist
+    if os.path.exists(teams_path) and os.path.exists(players_path):
+        with open(teams_path, "r", encoding="utf-8") as f:
+            teams_data = json.load(f)
+        with open(players_path, "r", encoding="utf-8") as f:
+            players_data = json.load(f)
+
+        for t_info in teams_data:
+            team_name = t_info["name"]
+            team_model = existing_teams.get(team_name)
+            team_country_name = TEAM_COUNTRIES.get(team_name, "England")
+            team_country = country_map.get(team_country_name)
+            team_country_id = team_country.id if team_country else None
+
+            if not team_model:
+                team_model = TeamModel(name=team_name, league_id=league.id, country_id=team_country_id)
+                db.add(team_model)
+                db.flush()
+                existing_teams[team_name] = team_model
+                seeded_teams_count += 1
+
+        # Map players to teams
+        for p_data in players_data:
+            team_name = p_data.get("team_name")
+            team_model = existing_teams.get(team_name)
+            if not team_model:
+                continue
+
+            existing_players_map = {p.full_name: p for p in team_model.players}
+            full_name = p_data.get("full_name") or p_data.get("short_name", "Unknown")
+            short_name = p_data.get("short_name") or full_name
+
+            if full_name in existing_players_map:
+                continue
+
+            player_country = country_map.get(p_data.get("nationality"), team_model.country)
+            player_country_id = player_country.id if player_country else team_model.country_id
+            position_str = p_data.get("position", "CENTRAL_MIDFIELDER")
+
+            player_model = PlayerModel(
+                team=team_model,
+                country_id=player_country_id,
+                full_name=full_name,
+                short_name=short_name,
+                position=position_str,
+                age=p_data.get("age", 24),
+                nationality=p_data.get("nationality", "Unknown"),
+                fitness=1.0,
+                form=1.0,
+                height=p_data.get("height", 180),
+                pace=p_data.get("pace"),
+                shooting=p_data.get("shooting"),
+                passing=p_data.get("passing"),
+                dribbling=p_data.get("dribbling"),
+                defence=p_data.get("defending"),
+                physical=p_data.get("physical"),
+                heading=p_data.get("heading"),
+                diving=p_data.get("diving"),
+                handling=p_data.get("handling"),
+                kicking=p_data.get("kicking"),
+                reflexes=p_data.get("reflexes"),
+                speed=p_data.get("speed"),
+                positioning=p_data.get("positioning")
+            )
+            db.add(player_model)
+            seeded_players_count += 1
+
+        db.commit()
+        return seeded_teams_count, seeded_players_count
+
+    # Fallback to legacy single file
+    if not os.path.exists(legacy_path):
+        print(f"Error: {legacy_path} not found.")
+        return 0, 0
+
+    with open(legacy_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
     for team_name, players_list in data.items():
         team_model = existing_teams.get(team_name)
@@ -332,10 +405,13 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             team_model.league_id = league.id
             team_model.country_id = team_country_id
 
-        existing_player_names = {p.name for p in team_model.players}
+        existing_players_map = {p.full_name: p for p in team_model.players}
 
         for p_data in players_list:
-            if p_data["name"] in existing_player_names:
+            full_name = p_data.get("full_name") or p_data.get("name", "Unknown")
+            short_name = p_data.get("short_name") or p_data.get("name", full_name)
+
+            if full_name in existing_players_map:
                 continue
 
             player_country = country_map.get(p_data.get("nationality"), team_country)
@@ -345,7 +421,8 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             player_model = PlayerModel(
                 team=team_model,
                 country_id=player_country_id,
-                name=p_data["name"],
+                full_name=full_name,
+                short_name=short_name,
                 position=position_str,
                 age=p_data.get("age", 20),
                 nationality=p_data.get("nationality", "Unknown"),
