@@ -360,6 +360,20 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             short_name = p_data.get("short_name") or full_name
 
             if full_name in existing_players_map:
+                existing_p = existing_players_map[full_name]
+                existing_p.pace = p_data.get("pace")
+                existing_p.shooting = p_data.get("shooting")
+                existing_p.passing = p_data.get("passing")
+                existing_p.dribbling = p_data.get("dribbling")
+                existing_p.defence = p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence")
+                existing_p.physical = p_data.get("physical")
+                existing_p.heading = p_data.get("heading")
+                existing_p.diving = p_data.get("diving")
+                existing_p.handling = p_data.get("handling")
+                existing_p.kicking = p_data.get("kicking")
+                existing_p.reflexes = p_data.get("reflexes")
+                existing_p.speed = p_data.get("speed")
+                existing_p.positioning = p_data.get("positioning")
                 continue
 
             player_country = country_map.get(p_data.get("nationality"), team_model.country)

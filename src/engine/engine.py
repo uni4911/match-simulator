@@ -18,7 +18,7 @@ ATTACK_CHANCE: Final[float] = 0.70
 MIN_SECONDS_PASSED: Final[int] = 5
 MIN_SECONDS_PASSESD: Final[int] = MIN_SECONDS_PASSED
 MAX_SECONDS_PASSED: Final[int] = 15
-GOALKEEPER_SCORE_MODIFIER: Final[float] = 2.3
+GOALKEEPER_SCORE_MODIFIER: Final[float] = 1.85
 SHOT_ON_GOAL_CHANCE: Final[float] = 0.3
 FOUL_PUNISHMENTS: Final[list[str]] = ['yellow_card', 'red_card', 'normal_foul']
 FOUL_WEIGHTS_DURING_MIDPLAY: Final[list[float]] = [6.0, 0.1, 93.9]
@@ -48,14 +48,16 @@ class MatchState(Enum):
 class State(ABC):
 
     @staticmethod
-    def winner_choose(attack: int, defence: int) -> bool:
-        exponent: float = 2.5
-        if attack <= 0:
+    def winner_choose(attack: float, defence: float, attack_boost: float = 1.0, defence_boost: float = 1.0) -> bool:
+        exponent: float = 2.6
+        atk_val = float(attack) * attack_boost
+        def_val = float(defence) * defence_boost
+        if atk_val <= 0:
             return False
-        if defence <= 0:
+        if def_val <= 0:
             return True
-        val_a = float(attack) ** exponent
-        val_d = float(defence) ** exponent
+        val_a = atk_val ** exponent
+        val_d = def_val ** exponent
         total = val_a + val_d
         return random.random() < (val_a / total)
     
@@ -78,13 +80,15 @@ class MidfieldPlay(State):
         attacking_midfielder: MatchPlayer = match.player_with_ball
         defending_midfielder: MatchPlayer = match.defending_team.get_midfielder()
 
-        atk_mid_power = (match.team_with_ball.midfield_power / 75.0) if match.team_with_ball else 1.0
-        def_mid_power = (match.defending_team.midfield_power / 75.0) if match.defending_team else 1.0
+        atk_mid_power = (match.team_with_ball.midfield_power / 70.0) if match.team_with_ball else 1.0
+        def_mid_power = (match.defending_team.midfield_power / 70.0) if match.defending_team else 1.0
 
         home_ball_possession_chance: int = int(attacking_midfielder.ball_possession_chance(atk_mid_power))
         away_ball_possession_chance: int = int(defending_midfielder.ball_take_over_chance(def_mid_power))
 
-        winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner = self.winner_choose(home_ball_possession_chance, away_ball_possession_chance, attack_boost=atk_boost, defence_boost=def_boost)
 
         if winner:
             match.player_with_ball = attacking_midfielder
@@ -92,12 +96,13 @@ class MidfieldPlay(State):
                 receiver = match.team_with_ball.get_midfielder(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
 
+            quality_factor = min(1.3, max(0.7, atk_mid_power))
             roll = random.random()
             if roll < 0.03:
                 return LongShot()
-            elif roll < 0.22:
+            elif roll < 0.03 + 0.22 * quality_factor:
                 return WingAttack()
-            elif roll < 0.65:
+            elif roll < 0.03 + (0.22 + 0.43) * quality_factor:
                 return BuildUp()
             elif roll < 0.85:
                 return MidfieldPlay()
@@ -131,10 +136,11 @@ class BuildUp(State):
         if random.random() < 0.30:
             match.add_event(BuildUpEvent(match.current_second, match.team_with_ball.team.name, passer.player.name))
 
+        quality_factor = min(1.3, max(0.7, (match.team_with_ball.midfield_power / 70.0) if match.team_with_ball else 1.0))
         roll = random.random()
-        if roll < 0.25:
+        if roll < 0.25 * quality_factor:
             return Attack()
-        elif roll < 0.55:
+        elif roll < (0.25 + 0.30) * quality_factor:
             return WingAttack()
         elif roll < 0.80:
             return MidfieldPlay()
@@ -153,7 +159,9 @@ class WingAttack(State):
         fullback = match.defending_team.get_defender()
         match.player_with_ball = winger
 
-        winner = self.winner_choose(winger.dribbling, fullback.defending)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner = self.winner_choose(winger.dribbling, fullback.defending, attack_boost=atk_boost, defence_boost=def_boost)
 
         if winner:
             roll = random.random()
@@ -186,9 +194,11 @@ class LongShot(State):
         goalkeeper = match.defending_team.get_goalkeeper()
 
         attack_score = int((shooter.shooting * 0.75) + (shooter.dribbling * 0.25))
-        goalkeeper_score = int(goalkeeper.goalkeeping_score * 2.2)
+        goalkeeper_score = int(goalkeeper.goalkeeping_score * GOALKEEPER_SCORE_MODIFIER)
 
-        winner = self.winner_choose(attack_score, goalkeeper_score)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner = self.winner_choose(attack_score, goalkeeper_score, attack_boost=atk_boost, defence_boost=def_boost)
 
         if random.random() < 0.35:
             if winner:
@@ -234,7 +244,9 @@ class Attack(State):
 
         attack_score: int = int(attacking_player.shooting * 0.6 + attacking_player.dribbling * 0.4)
         defence_score: int = int(defending_player.defending * 0.7 + defending_player.physical * 0.3)
-        winner: bool = self.winner_choose(attack_score, defence_score)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner: bool = self.winner_choose(attack_score, defence_score, attack_boost=atk_boost, defence_boost=def_boost)
 
         if winner:
             roll = random.random()
@@ -273,7 +285,9 @@ class ShotOnGoal(State):
         goalkeeper_score: int = int(goalkeeper.goalkeeping_score * GOALKEEPER_SCORE_MODIFIER)
         attack_score: int = match.player_with_ball.shooting 
 
-        winner: bool = self.winner_choose(attack_score, goalkeeper_score)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner: bool = self.winner_choose(attack_score, goalkeeper_score, attack_boost=atk_boost, defence_boost=def_boost)
         
         roll = random.random()
         if roll < 0.36:
@@ -321,7 +335,9 @@ class CornerKick(State):
         attacker = match.team_with_ball.get_heading_player(excluded_player=corner_kick_taker)
         defender = match.defending_team.get_heading_player()
 
-        winner = self.winner_choose(attacker.heading_score, defender.heading_score)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner = self.winner_choose(attacker.heading_score, defender.heading_score, attack_boost=atk_boost, defence_boost=def_boost)
         if winner:
             match.pass_ball(attacker)
             match.potential_assistant = corner_kick_taker
@@ -376,7 +392,9 @@ class PenaltyKick(State):
         penalty_taker: MatchPlayer = match.team_with_ball.get_penalty_taker()
         match.player_with_ball = penalty_taker
 
-        winner = self.winner_choose(penalty_taker.shooting * PENALTY_KICK_MODIFIER, goalkeeper.goalkeeping_score)
+        atk_boost = match.get_team_boost(match.team_with_ball)
+        def_boost = match.get_team_boost(match.defending_team)
+        winner = self.winner_choose(penalty_taker.shooting * PENALTY_KICK_MODIFIER, goalkeeper.goalkeeping_score, attack_boost=atk_boost, defence_boost=def_boost)
         if winner:
             if match.team_with_ball:
                 match.team_with_ball.stats.shots_on_target += 1
@@ -433,11 +451,11 @@ EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] 
     HalfTimeEvent: (30, 60),
     MatchEndEvent: (0, 0), 
     KickOff: (5, 10),          
-    MidfieldPlay: (7, 14),
-    BuildUp: (8, 16),
-    WingAttack: (6, 14),
+    MidfieldPlay: (12, 20),
+    BuildUp: (14, 24),
+    WingAttack: (10, 18),
     LongShot: (4, 8),      
-    Attack: (5, 12),           
+    Attack: (8, 16),           
     ShotOnGoal: (3, 6),    
     AttackFoul: (2, 5),    
     PenaltyKick: (20, 40),     
@@ -518,6 +536,16 @@ class Match:
         self.potential_assistant: MatchPlayer | None = None
         self.additional_time: int = 0
         self.half: int = 1
+
+    def get_home_boost(self, team: MatchTeam | None) -> float:
+        return 1.05 if team is not None and team == self.home_team else 1.0
+
+    def get_team_boost(self, team: MatchTeam | None) -> float:
+        if team is None:
+            return 1.0
+        home_factor = 1.05 if team == self.home_team else 1.0
+        form_factor = getattr(team, 'form_modifier', 1.0)
+        return home_factor * form_factor
 
     def advance_time(self, seconds: int) -> None:
         self.current_second += seconds

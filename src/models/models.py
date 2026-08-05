@@ -449,6 +449,7 @@ class MatchTeam:
     def __init__(self, team: Team, formation: list[Position]):
         self.team: Team = team
         self.formation: list[Position] = formation
+        self.form_modifier: float = 1.0
         self.match_players: list[MatchPlayer] = [MatchPlayer(player) for player in self.team.players]
         self.players_on_field: list[MatchPlayer] = self._starting_players()
         self.bench_players: list[MatchPlayer] = self._bench_players()
@@ -481,7 +482,10 @@ class MatchTeam:
         if not midfielders:
             return 1
         total_sum = sum(player.passing + player.dribbling + player.player.overall for player in midfielders)
-        return total_sum // len(midfielders)
+        avg = total_sum / len(midfielders)
+        scaled = int(((avg / 70.0) ** 2.0) * 70.0)
+        return max(1, scaled)
+
 
     def _bench_players(self) -> list[MatchPlayer]:
             return [player for player in self.match_players if player not in self.players_on_field]
@@ -517,8 +521,10 @@ class MatchTeam:
     def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
         candidates = self.active_players if excluded_player is None else [p for p in self.active_players if p != excluded_player]
         if not candidates:
-            return self.active_players[0]
-        weights: list[int] = [weights_dict.get(player.assigned_position, weights_dict.get(player.player.position, default_weight)) for player in candidates]          
+            return self.active_players[0] if self.active_players else self.players_on_field[0]
+        weights: list[int] = [weights_dict.get(player.assigned_position, weights_dict.get(player.player.position, default_weight)) for player in candidates]
+        if sum(weights) <= 0:
+            weights = [1] * len(candidates)
         return random.choices(candidates, weights, k=1)[0]
              
     def get_goalkeeper(self) -> MatchPlayer:
@@ -556,8 +562,10 @@ class MatchTeam:
     
     def get_heading_player(self, excluded_player: MatchPlayer|None = None) -> MatchPlayer:
         candidates = [player for player in self.active_players if player != excluded_player]
-        weights = [player.heading + ((player.height - 160) * 0.5) for player in candidates]
-        return random.choices(candidates, weights,k=1)[0]
+        if not candidates:
+            return self.active_players[0] if self.active_players else self.players_on_field[0]
+        weights = [max(1.0, player.heading + ((player.height - 160) * 0.5)) for player in candidates]
+        return random.choices(candidates, weights, k=1)[0]
         
         
       
@@ -586,7 +594,7 @@ class MatchTeam:
             return False
 
     def check_and_make_auto_substitution(self) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
-        if self.substitution_limit <= 0 or not self.bench_players:
+        if self.substitution_limit <= 0 or not self.bench_players or not self.active_players:
             return None
     
         injured_on_field = [p for p in self.active_players if p.is_injured]
@@ -679,7 +687,7 @@ class PlayerSeasonStats:
 
 
 class LeagueTeamStats:
-    def __init__(self,team: Team):
+    def __init__(self, team: Team):
         self.team: Team = team
         self.goals_scored: int = 0
         self.goals_conceded: int = 0
@@ -687,11 +695,25 @@ class LeagueTeamStats:
         self.wins: int = 0
         self.draws: int = 0
         self.loses: int = 0
+        self.recent_results: list[str] = []
 
     @property
     def points(self) -> int:
         return self.wins * 3 + self.draws * 1
-        
+
+    @property
+    def form_modifier(self) -> float:
+        if not self.recent_results:
+            return 1.0
+        last_5 = self.recent_results[-5:]
+        pts_map = {'W': 3, 'D': 1, 'L': 0}
+        total_pts = sum(pts_map.get(res, 0) for res in last_5)
+        max_possible = len(last_5) * 3
+        if max_possible == 0:
+            return 1.0
+        ratio = total_pts / max_possible
+        return round(0.975 + (ratio * 0.05), 3)
+
     @property
     def goals_difference(self) -> int:
         return self.goals_scored - self.goals_conceded
@@ -701,17 +723,21 @@ class LeagueTeamStats:
         return self.team.name
 
     def register_match_result(self, goals_scored: int, goals_conceded: int) -> None:
-
         diff = goals_scored - goals_conceded
         self.goals_scored += goals_scored
         self.goals_conceded += goals_conceded
         self.matches_played += 1
 
-        match diff:
-            case diff if diff > 0:
-                self.wins += 1
-            case diff if diff < 0:
-                self.loses += 1
-            case 0:
-                self.draws += 1
+        if diff > 0:
+            self.wins += 1
+            self.recent_results.append('W')
+        elif diff < 0:
+            self.loses += 1
+            self.recent_results.append('L')
+        else:
+            self.draws += 1
+            self.recent_results.append('D')
+
+        if len(self.recent_results) > 5:
+            self.recent_results.pop(0)
 

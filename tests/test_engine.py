@@ -190,4 +190,46 @@ def test_play_match_tracks_team_stats(sample_home_team: MatchTeam, sample_away_t
     assert total_possession > 0
     assert pytest.approx(home_stats.get_possession_percentage(away_stats) + away_stats.get_possession_percentage(home_stats), abs=0.2) == 100.0
     assert home_stats.passes >= 0
-    assert away_stats.passes >= 0
+    assert away_stats.passes >= 0
+
+
+def test_strong_team_outperforms_weak_team():
+    strong_gk = Goalkeeper("Strong GK", 88, 88, 80, 90, 75, 88)
+    strong_bench_gk = Goalkeeper("Strong Bench GK", 80, 80, 75, 80, 70, 80)
+    strong_players = [
+        FieldPlayer(f"Strong P{i}", pos, pace=88, shooting=86, passing=88, dribbling=87, defending=85, physical=84, heading=82, height=185)
+        for i, pos in enumerate(FORMATION_433)
+    ]
+    strong_bench = [
+        FieldPlayer(f"Strong Bench P{i}", FORMATION_433[i % len(FORMATION_433)], pace=82, shooting=80, passing=82, dribbling=82, defending=80, physical=80, heading=80, height=180)
+        for i in range(5)
+    ]
+    strong_team = MatchTeam(Team("Strong FC", [strong_gk, strong_bench_gk] + strong_players + strong_bench), FORMATION_433)
+
+    weak_gk = Goalkeeper("Weak GK", 60, 60, 55, 62, 50, 60)
+    weak_bench_gk = Goalkeeper("Weak Bench GK", 55, 55, 50, 58, 45, 55)
+    weak_players = [
+        FieldPlayer(f"Weak P{i}", pos, pace=62, shooting=58, passing=60, dribbling=59, defending=60, physical=60, heading=60, height=178)
+        for i, pos in enumerate(FORMATION_433)
+    ]
+    weak_bench = [
+        FieldPlayer(f"Weak Bench P{i}", FORMATION_433[i % len(FORMATION_433)], pace=58, shooting=55, passing=58, dribbling=55, defending=55, physical=55, heading=55, height=175)
+        for i in range(5)
+    ]
+    weak_team = MatchTeam(Team("Weak FC", [weak_gk, weak_bench_gk] + weak_players + weak_bench), FORMATION_433)
+
+    engine = MatchEngine()
+    strong_wins = 0
+    total_matches = 20
+
+    for _ in range(total_matches):
+        st = MatchTeam(Team("Strong FC", [strong_gk, strong_bench_gk] + strong_players + strong_bench), FORMATION_433)
+        wt = MatchTeam(Team("Weak FC", [weak_gk, weak_bench_gk] + weak_players + weak_bench), FORMATION_433)
+        match = Match(st, wt)
+        engine.play_match(match)
+        if match.home_score > match.away_score:
+            strong_wins += 1
+
+    win_rate = strong_wins / total_matches
+    assert win_rate >= 0.70
+

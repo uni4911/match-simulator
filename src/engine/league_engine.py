@@ -45,11 +45,16 @@ class LeagueEngine:
         self.league.fixtures = first_round_matches + second_round_matches
         
     def play_match(self, match: Match) -> None:
+        home_team = match.home_team
+        away_team = match.away_team
+
+        if self.league and home_team.team in self.league.table:
+            home_team.form_modifier = self.league.table[home_team.team].form_modifier
+        if self.league and away_team.team in self.league.table:
+            away_team.form_modifier = self.league.table[away_team.team].form_modifier
 
         self.match_engine.play_match(match)
 
-        home_team = match.home_team
-        away_team = match.away_team
         home_score = match.home_score
         away_score = match.away_score
 

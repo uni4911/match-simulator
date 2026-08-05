@@ -152,4 +152,30 @@ def test_player_full_name_and_short_name():
     match_player = MatchPlayer(player_custom)
     assert match_player.full_name == "Robert Lewandowski"
     assert match_player.short_name == "Lewandowski"
+
+
+def test_league_team_stats_form_modifier_ceiling_and_floor():
+    from src.models import LeagueTeamStats, Team
+    team = Team("Test FC", [])
+    stats = LeagueTeamStats(team)
+
+    # Initial form
+    assert stats.form_modifier == 1.0
+
+    # 5 Wins -> Ceiling +2.5% (1.025)
+    for _ in range(5):
+        stats.register_match_result(2, 0)
+    assert stats.form_modifier == 1.025
+    assert len(stats.recent_results) == 5
+
+    # 6th Win -> still 5 recent_results and still 1.025 ceiling
+    stats.register_match_result(1, 0)
+    assert stats.form_modifier == 1.025
+    assert len(stats.recent_results) == 5
+
+    # 5 Losses -> Floor -2.5% (0.975)
+    for _ in range(5):
+        stats.register_match_result(0, 2)
+    assert stats.form_modifier == 0.975
+    assert len(stats.recent_results) == 5
 
