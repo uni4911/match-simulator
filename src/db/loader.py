@@ -3,7 +3,7 @@ import json
 import os
 from typing import Optional
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, selectinload, joinedload
 from src.models import Position, Goalkeeper, FieldPlayer, Team, Player
 from src.db.database import SessionLocal, TeamModel, PlayerModel, Base, engine
 
@@ -53,7 +53,21 @@ def load_team(team_name: str, file_name: str = "data.json") -> Team:
         return team_from_db
 
     players = load_file(file_name, team_name)
-    return Team(team_name, players)
+    league_name = "Inne"
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    teams_json_path = os.path.join(base_dir, "data", "teams.json")
+    if os.path.exists(teams_json_path):
+        try:
+            with open(teams_json_path, "r", encoding="utf-8") as f:
+                teams_info = json.load(f)
+                for t in teams_info:
+                    if t.get("name") == team_name:
+                        league_name = t.get("league", "Inne")
+                        break
+        except Exception:
+            pass
+
+    return Team(team_name, players, league=league_name)
 
 
 def load_all_teams(file_name: str = "data.json") -> dict[str, Team]:
@@ -77,7 +91,7 @@ def load_team_from_db(team_name: str, session: Optional[Session] = None) -> Opti
         close_session = True
 
     try:
-        stmt = select(TeamModel).options(selectinload(TeamModel.players)).where(TeamModel.name == team_name)
+        stmt = select(TeamModel).options(selectinload(TeamModel.players), joinedload(TeamModel.league)).where(TeamModel.name == team_name)
         team_model = session.execute(stmt).scalar_one_or_none()
         if team_model is None:
             return None
@@ -94,7 +108,7 @@ def load_all_teams_from_db(session: Optional[Session] = None) -> dict[str, Team]
         close_session = True
 
     try:
-        stmt = select(TeamModel).options(selectinload(TeamModel.players))
+        stmt = select(TeamModel).options(selectinload(TeamModel.players), joinedload(TeamModel.league))
         team_models = session.execute(stmt).scalars().all()
         teams = {}
         for tm in team_models:

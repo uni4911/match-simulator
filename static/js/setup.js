@@ -43,23 +43,54 @@ export async function loadMatchOptions() {
         const homeFormSelect = document.getElementById('home-formation-select');
         const awayFormSelect = document.getElementById('away-formation-select');
 
-        if (homeSelect && awaySelect && data.teams) {
+        if (homeSelect && awaySelect && (data.teams_detailed || data.teams)) {
             homeSelect.innerHTML = '';
             awaySelect.innerHTML = '';
 
-            data.teams.forEach((team) => {
-                const optHome = document.createElement('option');
-                optHome.value = team;
-                optHome.textContent = team;
-                homeSelect.appendChild(optHome);
+            if (data.teams_detailed && data.teams_detailed.length > 0) {
+                const grouped = {};
+                data.teams_detailed.forEach(t => {
+                    const lg = t.league || 'Inne';
+                    if (!grouped[lg]) grouped[lg] = [];
+                    grouped[lg].push(t.name);
+                });
 
-                const optAway = document.createElement('option');
-                optAway.value = team;
-                optAway.textContent = team;
-                awaySelect.appendChild(optAway);
-            });
+                Object.keys(grouped).sort().forEach(leagueName => {
+                    const groupHome = document.createElement('optgroup');
+                    groupHome.label = leagueName;
+                    const groupAway = document.createElement('optgroup');
+                    groupAway.label = leagueName;
 
-            if (data.teams.length >= 2) {
+                    grouped[leagueName].sort((a, b) => a.localeCompare(b)).forEach(teamName => {
+                        const optHome = document.createElement('option');
+                        optHome.value = teamName;
+                        optHome.textContent = teamName;
+                        groupHome.appendChild(optHome);
+
+                        const optAway = document.createElement('option');
+                        optAway.value = teamName;
+                        optAway.textContent = teamName;
+                        groupAway.appendChild(optAway);
+                    });
+
+                    homeSelect.appendChild(groupHome);
+                    awaySelect.appendChild(groupAway);
+                });
+            } else {
+                data.teams.forEach((team) => {
+                    const optHome = document.createElement('option');
+                    optHome.value = team;
+                    optHome.textContent = team;
+                    homeSelect.appendChild(optHome);
+
+                    const optAway = document.createElement('option');
+                    optAway.value = team;
+                    optAway.textContent = team;
+                    awaySelect.appendChild(optAway);
+                });
+            }
+
+            if (data.teams && data.teams.length >= 2) {
                 homeSelect.selectedIndex = 0;
                 awaySelect.selectedIndex = 1;
             }

@@ -55,18 +55,18 @@ DEFAULT_MIDFIELDER_WEIGHT = 1
 ATTACKER_WEIGHTS: Final[dict[Position, int]] = {
     Position.STRIKER: 18,
     Position.CENTRAL_FORWARD: 18,
-    Position.LEFT_WING: 7,
-    Position.RIGHT_WING: 7,
-    Position.CENTRAL_ATTACKING_MIDFIELDER: 4,
+    Position.LEFT_WING: 8,
+    Position.RIGHT_WING: 8,
+    Position.CENTRAL_ATTACKING_MIDFIELDER: 5,
     Position.CENTRAL_MIDFIELDER: 2,
-    Position.LEFT_MIDFIELDER: 2,
-    Position.RIGHT_MIDFIELDER: 2,
+    Position.LEFT_MIDFIELDER: 3,
+    Position.RIGHT_MIDFIELDER: 3,
     Position.CENTRAL_DEFENSIVE_MIDFIELDER: 1,
-    Position.LEFT_WING_BACK: 1,
-    Position.RIGHT_WING_BACK: 1,
-    Position.LEFT_BACK: 1,
-    Position.RIGHT_BACK: 1,
-    Position.CENTRE_BACK: 1
+    Position.LEFT_WING_BACK: 0,
+    Position.RIGHT_WING_BACK: 0,
+    Position.LEFT_BACK: 0,
+    Position.RIGHT_BACK: 0,
+    Position.CENTRE_BACK: 0
 }
 DEFAULT_ATTACKER_WEIGHT = 1
 
@@ -233,8 +233,9 @@ class Player:
         return self.full_name
     
 class Team:
-    def __init__(self, name: str, players: list[Player]):
+    def __init__(self, name: str, players: list[Player], league: str = "Inne"):
         self.name : str = name 
+        self.league : str = league
         self.players : list[MatchPlayer] = players
         self.starting_players : list['Player'] = [field_player for field_player in self.players if isinstance(field_player, FieldPlayer)]
         self.goalkeepers : list['Player'] = [player for player in self.players if isinstance(player, Goalkeeper)]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import random 
-from src.models import Team, FieldPlayer, Goalkeeper, Player, MatchTeam, MatchPlayer, TeamStatsMatch
+from src.models import Team, FieldPlayer, Goalkeeper, Player, MatchTeam, MatchPlayer, TeamStatsMatch, DEFENCE_POSITIONS
 from enum import Enum, auto
 from typing import Optional, Final, Type
 from abc import ABC, abstractmethod
@@ -225,6 +225,10 @@ class LongShot(State):
 
 class Attack(State):
     def execute(self, match: Match) -> 'State':
+        if match.player_with_ball.assigned_position in DEFENCE_POSITIONS:
+            receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
+            match.pass_ball(receiver)
+
         attacking_player: MatchPlayer = match.player_with_ball
         defending_player: MatchPlayer = match.defending_team.get_defender()
 

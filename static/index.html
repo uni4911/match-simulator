@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Match Simulator</title>
-        <link rel="stylesheet" href="/static/style.css?v=2">
+        <link rel="stylesheet" href="/static/style.css?v=3">
     </head>
     <body>
         <div class="metro-wrapper">
@@ -321,12 +321,49 @@
                                 <label class="metro-label">
                                     <span class="label-icon">🛡️</span> WYBIERZ DRUŻYNY W LIDZE (MINIMUM 2)
                                 </label>
-                                <div class="selection-quick-btns">
-                                    <button type="button" id="select-all-teams-btn" class="metro-btn-sm">Zaznacz wszystkie</button>
-                                    <button type="button" id="deselect-all-teams-btn" class="metro-btn-sm">Odznacz wszystkie</button>
+                                <div id="league-teams-count-badge" class="tile-badge-info">0 DRUŻYN</div>
+                            </div>
+
+                            <!-- Team Selection Toolbar -->
+                            <div class="team-selection-toolbar">
+                                <div class="toolbar-row search-filter-row">
+                                    <div class="search-box-wrapper">
+                                        <span class="search-icon">🔍</span>
+                                        <input type="text" id="league-team-search" class="metro-search-input" placeholder="Szukaj drużyny lub ligi (np. Real, Premier League)..." autocomplete="off">
+                                        <button type="button" id="clear-search-btn" class="clear-search-btn hidden" title="Wyczyść wyszukiwanie">✕</button>
+                                    </div>
+                                    <div class="toolbar-select-group">
+                                        <label for="league-filter-select" class="toolbar-label">Filtruj ligę:</label>
+                                        <select id="league-filter-select" class="metro-select-sm">
+                                            <option value="ALL">Wszystkie ligi</option>
+                                        </select>
+                                    </div>
+                                    <div class="toolbar-select-group">
+                                        <label for="league-group-select" class="toolbar-label">Widok:</label>
+                                        <select id="league-group-select" class="metro-select-sm">
+                                            <option value="grouped">Grupuj wg ligi</option>
+                                            <option value="flat">Lista płaska A-Z</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="toolbar-row actions-counter-row">
+                                    <div class="selection-quick-btns">
+                                        <button type="button" id="select-visible-teams-btn" class="metro-btn-sm primary-sm">Zaznacz widoczne</button>
+                                        <button type="button" id="deselect-visible-teams-btn" class="metro-btn-sm">Odznacz widoczne</button>
+                                        <button type="button" id="select-all-teams-btn" class="metro-btn-sm">Zaznacz wszystkie</button>
+                                        <button type="button" id="deselect-all-teams-btn" class="metro-btn-sm">Odznacz wszystkie</button>
+                                    </div>
+                                    <div class="selection-status-info">
+                                        <label class="metro-checkbox-label-sm">
+                                            <input type="checkbox" id="show-only-selected-checkbox">
+                                            <span>Tylko wybrane (<strong id="selected-count-number">0</strong>)</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="league-team-checkboxes" class="league-teams-grid">
+
+                            <div id="league-team-checkboxes" class="league-teams-container">
                                 <!-- Zostanie wypełnione dynamicznie JS -->
                             </div>
                         </div>

@@ -7,6 +7,15 @@ let currentFilter = 'all'; // 'all', 'pending', 'finished'
 let currentSelectedRound = 1;
 let isSimulatingAll = false;
 
+let allLeagueTeamsDetailed = [];
+let selectedTeamNames = new Set();
+let collapsedLeagues = new Set();
+let teamSearchQuery = '';
+let teamLeagueFilter = 'ALL';
+let teamViewMode = 'grouped';
+let teamShowOnlySelected = false;
+let isTeamEventsBound = false;
+
 export async function initLeagueView() {
     await loadLeagueTeamOptions();
     await fetchLeagueTable();
@@ -20,36 +29,373 @@ export async function loadLeagueTeamOptions() {
         const response = await fetch('/match/options');
         const data = await response.json();
 
-        if (data.teams && data.teams.length > 0) {
-            container.innerHTML = '';
-            data.teams.forEach((teamName) => {
-                const label = document.createElement('label');
-                label.className = 'team-checkbox-card';
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'league-team-select';
-                checkbox.value = teamName;
-                checkbox.checked = true;
-
-                const badge = document.createElement('span');
-                badge.className = 'team-checkbox-badge';
-                badge.textContent = getTeamInitials(teamName);
-
-                const text = document.createElement('span');
-                text.className = 'team-checkbox-name';
-                text.textContent = teamName;
-
-                label.appendChild(checkbox);
-                label.appendChild(badge);
-                label.appendChild(text);
-
-                container.appendChild(label);
-            });
+        if (data.teams_detailed && data.teams_detailed.length > 0) {
+            allLeagueTeamsDetailed = data.teams_detailed;
+        } else if (data.teams && data.teams.length > 0) {
+            allLeagueTeamsDetailed = data.teams.map(t => ({ name: t, league: 'Inne' }));
+        } else {
+            allLeagueTeamsDetailed = [];
         }
+
+        if (selectedTeamNames.size === 0) {
+            allLeagueTeamsDetailed.forEach(t => selectedTeamNames.add(t.name));
+        }
+
+        populateLeagueFilterDropdown(data.leagues);
+        bindTeamSelectionEvents();
+        renderLeagueTeamSelection();
     } catch (err) {
         console.error('Błąd podczas ładowania drużyn do ligi:', err);
     }
+}
+
+function populateLeagueFilterDropdown(leaguesList) {
+    const selectEl = document.getElementById('league-filter-select');
+    if (!selectEl) return;
+
+    const counts = {};
+    allLeagueTeamsDetailed.forEach(t => {
+        counts[t.league] = (counts[t.league] || 0) + 1;
+    });
+
+    const sortedLeagues = leaguesList && leaguesList.length > 0
+        ? leaguesList
+        : Object.keys(counts).sort();
+
+    selectEl.innerHTML = '';
+
+    const allOpt = document.createElement('option');
+    allOpt.value = 'ALL';
+    allOpt.textContent = `Wszystkie ligi (${allLeagueTeamsDetailed.length})`;
+    selectEl.appendChild(allOpt);
+
+    sortedLeagues.forEach(lg => {
+        const cnt = counts[lg] || 0;
+        if (cnt > 0) {
+            const opt = document.createElement('option');
+            opt.value = lg;
+            opt.textContent = `${lg} (${cnt})`;
+            selectEl.appendChild(opt);
+        }
+    });
+
+    selectEl.value = teamLeagueFilter;
+}
+
+let searchDebounceTimer = null;
+
+function bindTeamSelectionEvents() {
+    if (isTeamEventsBound) return;
+    isTeamEventsBound = true;
+
+    const searchInput = document.getElementById('league-team-search');
+    const clearBtn = document.getElementById('clear-search-btn');
+    const filterSelect = document.getElementById('league-filter-select');
+    const groupSelect = document.getElementById('league-group-select');
+    const showOnlySelectedCheckbox = document.getElementById('show-only-selected-checkbox');
+
+    const selectVisibleBtn = document.getElementById('select-visible-teams-btn');
+    const deselectVisibleBtn = document.getElementById('deselect-visible-teams-btn');
+    const selectAllBtn = document.getElementById('select-all-teams-btn');
+    const deselectAllBtn = document.getElementById('deselect-all-teams-btn');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchDebounceTimer);
+            const val = e.target.value.trim().toLowerCase();
+            if (clearBtn) {
+                if (val.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+            }
+            searchDebounceTimer = setTimeout(() => {
+                teamSearchQuery = val;
+                renderLeagueTeamSelection();
+            }, 120);
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            teamSearchQuery = '';
+            clearBtn.classList.add('hidden');
+            renderLeagueTeamSelection();
+        });
+    }
+
+    if (filterSelect) {
+        filterSelect.addEventListener('change', (e) => {
+            teamLeagueFilter = e.target.value;
+            renderLeagueTeamSelection();
+        });
+    }
+
+    if (groupSelect) {
+        groupSelect.addEventListener('change', (e) => {
+            teamViewMode = e.target.value;
+            renderLeagueTeamSelection();
+        });
+    }
+
+    if (showOnlySelectedCheckbox) {
+        showOnlySelectedCheckbox.addEventListener('change', (e) => {
+            teamShowOnlySelected = e.target.checked;
+            renderLeagueTeamSelection();
+        });
+    }
+
+    if (selectVisibleBtn) {
+        selectVisibleBtn.addEventListener('click', () => {
+            const visibleTeams = getCurrentlyFilteredTeams();
+            visibleTeams.forEach(t => selectedTeamNames.add(t.name));
+            renderLeagueTeamSelection();
+        });
+    }
+
+    if (deselectVisibleBtn) {
+        deselectVisibleBtn.addEventListener('click', () => {
+            const visibleTeams = getCurrentlyFilteredTeams();
+            visibleTeams.forEach(t => selectedTeamNames.delete(t.name));
+            renderLeagueTeamSelection();
+        });
+    }
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => selectAllTeams(true));
+    }
+
+    if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', () => selectAllTeams(false));
+    }
+}
+
+function getCurrentlyFilteredTeams() {
+    return allLeagueTeamsDetailed.filter(team => {
+        if (teamLeagueFilter !== 'ALL' && team.league !== teamLeagueFilter) {
+            return false;
+        }
+
+        if (teamShowOnlySelected && !selectedTeamNames.has(team.name)) {
+            return false;
+        }
+
+        if (teamSearchQuery) {
+            const nameMatch = team.name.toLowerCase().includes(teamSearchQuery);
+            const leagueMatch = team.league.toLowerCase().includes(teamSearchQuery);
+            if (!nameMatch && !leagueMatch) return false;
+        }
+
+        return true;
+    });
+}
+
+export function selectAllTeams(select = true) {
+    if (select) {
+        allLeagueTeamsDetailed.forEach(t => selectedTeamNames.add(t.name));
+    } else {
+        selectedTeamNames.clear();
+    }
+    renderLeagueTeamSelection();
+}
+
+function updateSelectionCounters() {
+    const selectedCountNum = document.getElementById('selected-count-number');
+    const countBadge = document.getElementById('league-teams-count-badge');
+    const totalSelected = selectedTeamNames.size;
+    const totalAvailable = allLeagueTeamsDetailed.length;
+
+    if (selectedCountNum) selectedCountNum.textContent = totalSelected;
+    if (countBadge) {
+        countBadge.textContent = `${totalSelected} WYBRANYCH Z ${totalAvailable}`;
+        if (totalSelected >= 2) {
+            countBadge.className = 'tile-badge-info';
+        } else {
+            countBadge.className = 'tile-badge-warning';
+        }
+    }
+}
+
+export function renderLeagueTeamSelection() {
+    const container = document.getElementById('league-team-checkboxes');
+    if (!container) return;
+
+    updateSelectionCounters();
+
+    const filteredTeams = getCurrentlyFilteredTeams();
+    const fragment = document.createDocumentFragment();
+
+    if (filteredTeams.length === 0) {
+        container.innerHTML = `<div class="no-teams-found">Brak drużyn spełniających kryteria wyszukiwania.</div>`;
+        return;
+    }
+
+    if (teamViewMode === 'grouped') {
+        const grouped = {};
+        filteredTeams.forEach(t => {
+            if (!grouped[t.league]) grouped[t.league] = [];
+            grouped[t.league].push(t);
+        });
+
+        const sortedLeagues = Object.keys(grouped).sort();
+        const isFiltering = Boolean(teamSearchQuery || teamLeagueFilter !== 'ALL' || teamShowOnlySelected);
+
+        sortedLeagues.forEach(leagueName => {
+            const teamsInLeague = grouped[leagueName];
+            const isCollapsed = isFiltering ? collapsedLeagues.has(leagueName) : (collapsedLeagues.size === 0 ? true : collapsedLeagues.has(leagueName));
+
+            const selectedInLeague = teamsInLeague.filter(t => selectedTeamNames.has(t.name)).length;
+
+            const block = document.createElement('div');
+            block.className = 'league-group-block';
+
+            const header = document.createElement('div');
+            header.className = 'league-group-header';
+
+            const titleBlock = document.createElement('div');
+            titleBlock.className = 'league-group-title';
+
+            const countEl = document.createElement('span');
+            countEl.className = 'league-group-count';
+            countEl.textContent = `${selectedInLeague} / ${teamsInLeague.length} wybranych`;
+
+            titleBlock.innerHTML = `<span>🏆 ${leagueName}</span>`;
+            titleBlock.appendChild(countEl);
+
+            const actionsBlock = document.createElement('div');
+            actionsBlock.className = 'league-group-actions';
+
+            const selectLeagueBtn = document.createElement('button');
+            selectLeagueBtn.type = 'button';
+            selectLeagueBtn.className = 'metro-btn-sm primary-sm';
+            selectLeagueBtn.textContent = 'Zaznacz ligę';
+            selectLeagueBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                teamsInLeague.forEach(t => selectedTeamNames.add(t.name));
+                renderLeagueTeamSelection();
+            });
+
+            const deselectLeagueBtn = document.createElement('button');
+            deselectLeagueBtn.type = 'button';
+            deselectLeagueBtn.className = 'metro-btn-sm';
+            deselectLeagueBtn.textContent = 'Odznacz ligę';
+            deselectLeagueBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                teamsInLeague.forEach(t => selectedTeamNames.delete(t.name));
+                renderLeagueTeamSelection();
+            });
+
+            const toggleIcon = document.createElement('span');
+            toggleIcon.style.fontSize = '0.8rem';
+            toggleIcon.style.color = '#8a99ad';
+            toggleIcon.textContent = isCollapsed ? '▼' : '▲';
+
+            actionsBlock.appendChild(selectLeagueBtn);
+            actionsBlock.appendChild(deselectLeagueBtn);
+            actionsBlock.appendChild(toggleIcon);
+
+            header.appendChild(titleBlock);
+            header.appendChild(actionsBlock);
+
+            const body = document.createElement('div');
+            body.className = `league-group-body ${isCollapsed ? 'collapsed' : ''}`;
+
+            const grid = document.createElement('div');
+            grid.className = 'league-teams-grid';
+
+            header.addEventListener('click', () => {
+                const nowCollapsed = !body.classList.contains('collapsed');
+                if (nowCollapsed) {
+                    body.classList.add('collapsed');
+                    toggleIcon.textContent = '▼';
+                    collapsedLeagues.add(leagueName);
+                } else {
+                    body.classList.remove('collapsed');
+                    toggleIcon.textContent = '▲';
+                    collapsedLeagues.delete(leagueName);
+                    if (grid.children.length === 0) {
+                        teamsInLeague.sort((a, b) => a.name.localeCompare(b.name)).forEach(team => {
+                            const card = createTeamCheckboxCard(team, countEl, teamsInLeague);
+                            grid.appendChild(card);
+                        });
+                    }
+                }
+            });
+
+            if (!isCollapsed) {
+                teamsInLeague.sort((a, b) => a.name.localeCompare(b.name)).forEach(team => {
+                    const card = createTeamCheckboxCard(team, countEl, teamsInLeague);
+                    grid.appendChild(card);
+                });
+            }
+
+            body.appendChild(grid);
+            block.appendChild(header);
+            block.appendChild(body);
+            fragment.appendChild(block);
+        });
+    } else {
+        const grid = document.createElement('div');
+        grid.className = 'league-teams-grid';
+
+        filteredTeams.sort((a, b) => a.name.localeCompare(b.name)).forEach(team => {
+            const card = createTeamCheckboxCard(team, null, null, true);
+            grid.appendChild(card);
+        });
+
+        fragment.appendChild(grid);
+    }
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
+}
+
+function createTeamCheckboxCard(team, leagueGroupCountEl = null, teamsInLeague = null, showSubLeague = false) {
+    const isChecked = selectedTeamNames.has(team.name);
+
+    const label = document.createElement('label');
+    label.className = `team-checkbox-card ${isChecked ? 'selected' : ''}`;
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.name = 'league-team-select';
+    checkbox.value = team.name;
+    checkbox.checked = isChecked;
+
+    checkbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            selectedTeamNames.add(team.name);
+            label.classList.add('selected');
+        } else {
+            selectedTeamNames.delete(team.name);
+            label.classList.remove('selected');
+        }
+        updateSelectionCounters();
+        if (leagueGroupCountEl && teamsInLeague) {
+            const selCount = teamsInLeague.filter(t => selectedTeamNames.has(t.name)).length;
+            leagueGroupCountEl.textContent = `${selCount} / ${teamsInLeague.length} wybranych`;
+        }
+    });
+
+    const badge = document.createElement('span');
+    badge.className = 'team-checkbox-badge';
+    badge.textContent = getTeamInitials(team.name);
+
+    const text = document.createElement('span');
+    text.className = 'team-checkbox-name';
+    text.textContent = team.name;
+
+    label.appendChild(checkbox);
+    label.appendChild(badge);
+    label.appendChild(text);
+
+    if (showSubLeague && team.league) {
+        const sub = document.createElement('span');
+        sub.className = 'team-checkbox-league-sub';
+        sub.textContent = team.league;
+        label.appendChild(sub);
+    }
+
+    return label;
 }
 
 export async function fetchLeagueTable() {
@@ -103,14 +449,18 @@ export function showLeagueActiveView() {
 export async function createNewLeague() {
     const nameInput = document.getElementById('league-name-input');
     const doubleRoundCheckbox = document.getElementById('league-double-round-checkbox');
-    const checkboxes = document.querySelectorAll('input[name="league-team-select"]:checked');
 
     const leagueName = nameInput ? nameInput.value.trim() || 'Moja liga' : 'Moja liga';
     const doubleRound = doubleRoundCheckbox ? doubleRoundCheckbox.checked : false;
-    const selectedTeams = Array.from(checkboxes).map(cb => cb.value);
+    const selectedTeams = Array.from(selectedTeamNames);
 
     if (selectedTeams.length < 2) {
         alert('Musisz wybrać co najmniej 2 drużyny, aby utworzyć ligę!');
+        return;
+    }
+
+    if (selectedTeams.length > 64) {
+        alert('Maksymalna liczba drużyn w jednej lidze to 64! Odznacz część drużyn (np. przefiltruj wg konkretnej ligi), aby utworzyć rozgrywki.');
         return;
     }
 
@@ -531,10 +881,6 @@ export async function playAllLeagueMatches() {
     }
 }
 
-export function selectAllTeams(select = true) {
-    const checkboxes = document.querySelectorAll('input[name="league-team-select"]');
-    checkboxes.forEach(cb => cb.checked = select);
-}
 
 /* ==========================================================================
    PLAYER SEASON STATS & MODAL RENDERERS

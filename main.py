@@ -150,8 +150,20 @@ app.add_middleware(
 
 @app.get("/match/options", response_model=MatchOptionsResponse)
 def match_options():
+    teams_list = []
+    teams_detailed = []
+    leagues_set = set()
+
+    for team_name, team_obj in loaded_teams.items():
+        teams_list.append(team_name)
+        lg = getattr(team_obj, "league", "Inne") or "Inne"
+        teams_detailed.append({"name": team_name, "league": lg})
+        leagues_set.add(lg)
+
     return {
-        "teams": list(loaded_teams.keys()),
+        "teams": teams_list,
+        "teams_detailed": teams_detailed,
+        "leagues": sorted(list(leagues_set)),
         "formations": list(AVAILABLE_FORMATIONS.keys())
     }
 
@@ -275,6 +287,9 @@ def _get_league_response(league_obj):
 @app.post("/league/start", response_model=LeagueTableResponse)
 def league_start(req: CreateLeagueRequest):
     global league, league_engine
+
+    if len(req.league_teams) > 64:
+        raise HTTPException(400, detail="Maksymalna liczba drużyn w jednej lidze to 64. Wybierz mniejszą liczbę drużyn.")
 
     for team in req.league_teams:
         if team not in loaded_teams:

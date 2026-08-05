@@ -101,7 +101,8 @@ class TeamModel(Base):
 
     def to_domain(self) -> Team:
         domain_players = [p.to_domain() for p in self.players]
-        return Team(self.name, domain_players)
+        league_name = self.league.name if self.league else "Inne"
+        return Team(self.name, domain_players, league=league_name)
 
     @classmethod
     def from_domain(cls, team: Team) -> TeamModel:

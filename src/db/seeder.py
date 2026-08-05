@@ -311,6 +311,11 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
         ).all()
     }
 
+    existing_leagues = {
+        l.name: l
+        for l in db.scalars(select(LeagueModel)).all()
+    }
+
     # Check if separated teams.json and players.json exist
     if os.path.exists(teams_path) and os.path.exists(players_path):
         with open(teams_path, "r", encoding="utf-8") as f:
@@ -320,17 +325,28 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
 
         for t_info in teams_data:
             team_name = t_info["name"]
+            raw_league = t_info.get("league") or "Developer Super League"
+            if raw_league not in existing_leagues:
+                target_league = LeagueModel(name=raw_league)
+                db.add(target_league)
+                db.flush()
+                existing_leagues[raw_league] = target_league
+            else:
+                target_league = existing_leagues[raw_league]
+
             team_model = existing_teams.get(team_name)
             team_country_name = TEAM_COUNTRIES.get(team_name, "England")
             team_country = country_map.get(team_country_name)
             team_country_id = team_country.id if team_country else None
 
             if not team_model:
-                team_model = TeamModel(name=team_name, league_id=league.id, country_id=team_country_id)
+                team_model = TeamModel(name=team_name, league_id=target_league.id, country_id=team_country_id)
                 db.add(team_model)
                 db.flush()
                 existing_teams[team_name] = team_model
                 seeded_teams_count += 1
+            elif team_model.league_id != target_league.id:
+                team_model.league_id = target_league.id
 
         # Map players to teams
         for p_data in players_data:
@@ -365,7 +381,7 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 shooting=p_data.get("shooting"),
                 passing=p_data.get("passing"),
                 dribbling=p_data.get("dribbling"),
-                defence=p_data.get("defending"),
+                defence=p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence"),
                 physical=p_data.get("physical"),
                 heading=p_data.get("heading"),
                 diving=p_data.get("diving"),
@@ -433,7 +449,7 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 shooting=p_data.get("shooting"),
                 passing=p_data.get("passing"),
                 dribbling=p_data.get("dribbling"),
-                defence=p_data.get("defending"),
+                defence=p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence"),
                 physical=p_data.get("physical"),
                 heading=p_data.get("heading"),
                 diving=p_data.get("diving"),

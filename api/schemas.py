@@ -109,7 +109,7 @@ class LeagueTableResponse(BaseModel):
 
 class CreateLeagueRequest(BaseModel):
     league_name: str = "Moja liga"
-    league_teams: list[str] = Field(min_length=2)
+    league_teams: list[str] = Field(min_length=2, max_length=64)
     double_round: bool = False
        
 class StartMatchRequest(BaseModel):
@@ -121,6 +121,12 @@ class StartMatchRequest(BaseModel):
 class PlayLeagueMatch(BaseModel):
     match_index: int
 
+class TeamDetailSchema(BaseModel):
+    name: str
+    league: str = "Inne"
+
 class MatchOptionsResponse(BaseModel):
     teams: list[str]
+    teams_detailed: list[TeamDetailSchema] = []
+    leagues: list[str] = []
     formations: list[str]
