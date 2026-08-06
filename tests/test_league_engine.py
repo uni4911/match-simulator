@@ -46,3 +46,22 @@ def test_fixture_generation_odd_teams():
     
     for team_name, count in team_match_counts.items():
         assert count == 36
+
+def test_fixture_generation_randomness():
+    teams = [create_dummy_team(f"Team {i}") for i in range(10)]
+    
+    league1 = League(name="League 1", teams=list(teams))
+    engine1 = LeagueEngine(league1, MatchEngine())
+    engine1.generate_fixture(double_round=True)
+    
+    league2 = League(name="League 2", teams=list(teams))
+    engine2 = LeagueEngine(league2, MatchEngine())
+    engine2.generate_fixture(double_round=True)
+    
+    # Compare fixture pairings order between the two generated leagues
+    pairings1 = [(m.home_team.team.name, m.away_team.team.name) for m in league1.fixtures]
+    pairings2 = [(m.home_team.team.name, m.away_team.team.name) for m in league2.fixtures]
+    
+    # Assert that the fixtures are not identical in sequence
+    assert pairings1 != pairings2
+

@@ -37,9 +37,7 @@ export async function loadLeagueTeamOptions() {
             allLeagueTeamsDetailed = [];
         }
 
-        if (selectedTeamNames.size === 0) {
-            allLeagueTeamsDetailed.forEach(t => selectedTeamNames.add(t.name));
-        }
+        // Teams are NOT selected by default. User must search and pick teams.
 
         populateLeagueFilterDropdown(data.leagues);
         bindTeamSelectionEvents();
@@ -98,6 +96,7 @@ function bindTeamSelectionEvents() {
     const deselectVisibleBtn = document.getElementById('deselect-visible-teams-btn');
     const selectAllBtn = document.getElementById('select-all-teams-btn');
     const deselectAllBtn = document.getElementById('deselect-all-teams-btn');
+    const clearSelectedBtn = document.getElementById('clear-selected-teams-btn');
 
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -167,6 +166,13 @@ function bindTeamSelectionEvents() {
     if (deselectAllBtn) {
         deselectAllBtn.addEventListener('click', () => selectAllTeams(false));
     }
+
+    if (clearSelectedBtn) {
+        clearSelectedBtn.addEventListener('click', () => {
+            selectedTeamNames.clear();
+            renderLeagueTeamSelection();
+        });
+    }
 }
 
 function getCurrentlyFilteredTeams() {
@@ -198,7 +204,73 @@ export function selectAllTeams(select = true) {
     renderLeagueTeamSelection();
 }
 
+export function renderSelectedTeamsList() {
+    const listContainer = document.getElementById('selected-teams-list');
+    const countEl = document.getElementById('selected-teams-count');
+    const clearBtn = document.getElementById('clear-selected-teams-btn');
+
+    if (countEl) {
+        countEl.textContent = selectedTeamNames.size;
+    }
+
+    if (clearBtn) {
+        if (selectedTeamNames.size > 0) {
+            clearBtn.classList.remove('hidden');
+        } else {
+            clearBtn.classList.add('hidden');
+        }
+    }
+
+    if (!listContainer) return;
+
+    if (selectedTeamNames.size === 0) {
+        listContainer.innerHTML = '<div class="selected-teams-empty">Nie wybrano jeszcze żadnej drużyny. Wyszukaj drużyny poniżej i dodaj je do ligi.</div>';
+        return;
+    }
+
+    listContainer.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    const teamMap = new Map();
+    allLeagueTeamsDetailed.forEach(t => teamMap.set(t.name, t));
+
+    Array.from(selectedTeamNames).forEach(teamName => {
+        const teamObj = teamMap.get(teamName) || { name: teamName, league: 'Inne' };
+
+        const chip = document.createElement('div');
+        chip.className = 'selected-team-chip';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'chip-team-name';
+        nameSpan.textContent = teamObj.name;
+
+        const leagueSpan = document.createElement('span');
+        leagueSpan.className = 'chip-league';
+        leagueSpan.textContent = teamObj.league;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'chip-remove';
+        removeBtn.title = `Usuń ${teamObj.name} z ligi`;
+        removeBtn.textContent = '✕';
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedTeamNames.delete(teamName);
+            renderLeagueTeamSelection();
+        });
+
+        chip.appendChild(nameSpan);
+        chip.appendChild(leagueSpan);
+        chip.appendChild(removeBtn);
+        fragment.appendChild(chip);
+    });
+
+    listContainer.appendChild(fragment);
+}
+
 function updateSelectionCounters() {
+    renderSelectedTeamsList();
+
     const selectedCountNum = document.getElementById('selected-count-number');
     const countBadge = document.getElementById('league-teams-count-badge');
     const totalSelected = selectedTeamNames.size;
@@ -220,6 +292,20 @@ export function renderLeagueTeamSelection() {
     if (!container) return;
 
     updateSelectionCounters();
+
+    const isSearching = Boolean(teamSearchQuery.trim().length > 0);
+    const hasFilter = teamLeagueFilter !== 'ALL' || teamShowOnlySelected;
+
+    if (!isSearching && !hasFilter) {
+        container.innerHTML = `
+            <div class="search-prompt-box">
+                <span class="search-prompt-icon">🔍</span>
+                <div class="search-prompt-title">Wyszukaj drużyny do ligi</div>
+                <div class="search-prompt-desc">Wpisz nazwę drużyny lub ligi w polu wyszukiwania powyżej (np. <em>Real</em>, <em>Premier League</em>), aby wyświetlić dostępne zespoły.</div>
+            </div>
+        `;
+        return;
+    }
 
     const filteredTeams = getCurrentlyFilteredTeams();
     const fragment = document.createDocumentFragment();

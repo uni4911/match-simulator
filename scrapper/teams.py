@@ -29,6 +29,16 @@ def parse_teams_page(html: str) -> list[dict]:
         league_link = row.select_one('a[href^="/league/"]')
         league_name = league_link.get_text(strip=True) if league_link else ""
 
+        flag_img = row.select_one('img.flag')
+        raw_country = flag_img.get("title", "") if flag_img else ""
+        from scrapper.players import SOFIFA_NATIONALITY_MAP
+        country = SOFIFA_NATIONALITY_MAP.get(raw_country, raw_country)
+
+        if league_name and country:
+            full_league_name = f"{league_name} ({country})"
+        else:
+            full_league_name = league_name
+
         oa_td = row.select_one('td[data-col="oa"]')
         at_td = row.select_one('td[data-col="at"]')
         md_td = row.select_one('td[data-col="md"]')
@@ -42,7 +52,9 @@ def parse_teams_page(html: str) -> list[dict]:
         teams.append({
             "sofifa_id": sofifa_id,
             "name": name,
-            "league": league_name,
+            "league": full_league_name,
+            "raw_league": league_name,
+            "country": country,
             "overall": overall,
             "attack": attack,
             "midfield": midfield,
@@ -114,6 +126,7 @@ def clean_team_for_export(team: dict) -> dict:
     return {
         "name": team["name"],
         "league": team["league"],
+        "country": team.get("country", ""),
         "overall": team["overall"],
         "attack": team["attack"],
         "midfield": team["midfield"],

@@ -1,3 +1,4 @@
+import random
 from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats
 from src.engine.engine import Match, MatchEngine
 
@@ -9,38 +10,54 @@ class LeagueEngine:
     def generate_fixture(self, double_round: bool = False): 
         self.league.fixtures.clear()
         teams_list = list(self.league.teams)
+        random.shuffle(teams_list)
+        
         if len(teams_list) % 2 != 0:
             teams_list.append(None)
 
         number_of_teams = len(teams_list)
+        leg1_rounds = []
 
         for i in range(0, number_of_teams - 1):
-
+            round_matches = []
             for j in range(0, number_of_teams // 2):
                 home_team = teams_list[j]
                 away_team = teams_list[number_of_teams - 1 - j]
                 if home_team is not None and away_team is not None:
+                    if random.choice([True, False]):
+                        home_team, away_team = away_team, home_team
                     home_mt = MatchTeam(home_team, FORMATION_433)
                     away_mt = MatchTeam(away_team, FORMATION_433)
-                    self.league.fixtures.append(Match(home_mt, away_mt))
+                    round_matches.append(Match(home_mt, away_mt))
+            
+            random.shuffle(round_matches)
+            leg1_rounds.append(round_matches)
     
             first_team = teams_list[0]
             rest_of_teams = teams_list[1:]
             rotate_rest = [rest_of_teams[-1]] + rest_of_teams[:-1]
             teams_list = [first_team] + rotate_rest
 
-        first_round_matches = list(self.league.fixtures)
+        random.shuffle(leg1_rounds)
+
+        first_round_matches = []
+        for r_matches in leg1_rounds:
+            first_round_matches.extend(r_matches)
+
         second_round_matches = []
-
         if double_round:
-            for match in first_round_matches:
-                old_home_team = match.home_team.team
-                old_away_team = match.away_team.team
+            for r_matches in leg1_rounds:
+                leg2_r_matches = []
+                for match in r_matches:
+                    old_home_team = match.home_team.team
+                    old_away_team = match.away_team.team
 
-                new_home_mt = MatchTeam(old_away_team, FORMATION_433)
-                new_away_mt = MatchTeam(old_home_team, FORMATION_433)
-                new_match = Match(new_home_mt, new_away_mt)
-                second_round_matches.append(new_match)
+                    new_home_mt = MatchTeam(old_away_team, FORMATION_433)
+                    new_away_mt = MatchTeam(old_home_team, FORMATION_433)
+                    new_match = Match(new_home_mt, new_away_mt)
+                    leg2_r_matches.append(new_match)
+                random.shuffle(leg2_r_matches)
+                second_round_matches.extend(leg2_r_matches)
 
         self.league.fixtures = first_round_matches + second_round_matches
         

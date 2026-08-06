@@ -326,18 +326,21 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
         for t_info in teams_data:
             team_name = t_info["name"]
             raw_league = t_info.get("league") or "Developer Super League"
+            team_country_name = t_info.get("country") or TEAM_COUNTRIES.get(team_name, "England")
+            team_country = country_map.get(team_country_name)
+            team_country_id = team_country.id if team_country else None
+
             if raw_league not in existing_leagues:
-                target_league = LeagueModel(name=raw_league)
+                target_league = LeagueModel(name=raw_league, country_id=team_country_id)
                 db.add(target_league)
                 db.flush()
                 existing_leagues[raw_league] = target_league
             else:
                 target_league = existing_leagues[raw_league]
+                if target_league.country_id is None and team_country_id:
+                    target_league.country_id = team_country_id
 
             team_model = existing_teams.get(team_name)
-            team_country_name = TEAM_COUNTRIES.get(team_name, "England")
-            team_country = country_map.get(team_country_name)
-            team_country_id = team_country.id if team_country else None
 
             if not team_model:
                 team_model = TeamModel(name=team_name, league_id=target_league.id, country_id=team_country_id)
@@ -345,8 +348,9 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 db.flush()
                 existing_teams[team_name] = team_model
                 seeded_teams_count += 1
-            elif team_model.league_id != target_league.id:
+            else:
                 team_model.league_id = target_league.id
+                team_model.country_id = team_country_id
 
         # Map players to teams
         for p_data in players_data:
