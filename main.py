@@ -306,6 +306,9 @@ def league_start(req: CreateLeagueRequest):
             raise HTTPException(400, f"Nie znaleziono drużyny {team}")
 
     selected_teams = [loaded_teams[name] for name in req.league_teams]
+    for team_obj in selected_teams:
+        for player in team_obj.players:
+            player.fitness = 1.0
 
     league = League(name=req.league_name, teams=selected_teams)
     for team_obj in selected_teams:

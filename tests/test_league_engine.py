@@ -65,3 +65,54 @@ def test_fixture_generation_randomness():
     # Assert that the fixtures are not identical in sequence
     assert pairings1 != pairings2
 
+
+def test_player_rotation_and_substitutions():
+    # Team with 1 GK + 16 Field Players (squad depth allows rotation)
+    gk = Goalkeeper("GK Team A", 80, 80, 70, 85, 60, 80)
+    field_players = [
+        FieldPlayer(f"Starter {i}", Position.CENTRAL_MIDFIELDER, 80, 80, 80, 80, 80, 80, 80, 180) for i in range(10)
+    ] + [
+        FieldPlayer(f"Backup {i}", Position.CENTRAL_MIDFIELDER, 76, 76, 76, 76, 76, 76, 76, 180) for i in range(6)
+    ]
+    team_a = Team("Team A", [gk] + field_players)
+
+    gkB = Goalkeeper("GK Team B", 80, 80, 70, 85, 60, 80)
+    field_playersB = [
+        FieldPlayer(f"Opponent {i}", Position.CENTRAL_MIDFIELDER, 75, 75, 75, 75, 75, 75, 75, 180) for i in range(15)
+    ]
+    team_b = Team("Team B", [gkB] + field_playersB)
+
+    league = League(name="Rotation Test League", teams=[team_a, team_b])
+    engine = LeagueEngine(league, MatchEngine())
+
+    # Simulate 8 matches between Team A and Team B
+    starters_per_match = []
+    substitutions_made = 0
+
+    for _ in range(8):
+        engine.generate_fixture(double_round=False)
+        m = league.fixtures[0]
+        engine.play_match(m)
+
+        sub_events = [e for e in m.match_events if e.__class__.__name__ == 'Substitution']
+        for sub in sub_events:
+            # Ensure Goalkeeper was NEVER substituted off
+            assert "GK Team A" not in sub.subbed_off, "Goalkeeper should never be substituted for stamina/tactical reasons"
+            assert "GK Team B" not in sub.subbed_off, "Goalkeeper should never be substituted for stamina/tactical reasons"
+
+        substitutions_made += len(sub_events)
+        starters = [p.player.full_name for p in m.home_team.players_on_field if p.is_starter]
+        starters_per_match.append(set(starters))
+
+    # Verify substitutions took place during matches
+    assert substitutions_made > 0, "Substitutions should occur during matches"
+
+    # Verify starting lineup rotated across matches (different starting sets across rounds)
+    unique_lineups = len(set(frozenset(s) for s in starters_per_match))
+    assert unique_lineups > 1, "Starting 11 must rotate across fixtures due to fitness changes"
+
+    # Check that player fitnesses stay within realistic bounds [0.50, 1.00]
+    for p in team_a.players:
+        assert 0.50 <= p.fitness <= 1.00
+
+

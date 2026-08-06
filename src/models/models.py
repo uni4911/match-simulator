@@ -337,6 +337,10 @@ class MatchPlayer:
         if self.is_injured and self.injury_severity == "minor":
             base_mod *= 0.80 
         return base_mod
+
+    @property
+    def effective_overall(self) -> float:
+        return self.player.overall * (0.80 + 0.20 * self.current_stamina)
     @property 
     def name(self) -> str:
             return self.player.short_name or self.player.full_name
@@ -476,6 +480,7 @@ class MatchTeam:
         self.substitution_limit: int = 5
         self.played_players: set[MatchPlayer] = set(self.players_on_field)
         self.stats: TeamStatsMatch = TeamStatsMatch()
+        self.last_substitution_second: int = -999
 
     @property
     def starting_goalkeeper(self) -> Goalkeeper:
@@ -513,33 +518,45 @@ class MatchTeam:
     def _starting_players(self) -> list[MatchPlayer]:
             starting_players: list[MatchPlayer] = []
 
+            def is_gk(p: MatchPlayer) -> bool:
+                return isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER
+
+            def is_field_player(p: MatchPlayer) -> bool:
+                return not is_gk(p)
+
             # 1. Pick goalkeeper
-            gks = [p for p in self.match_players if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER]
+            gks = [p for p in self.match_players if is_gk(p)]
             if gks:
-                best_gk = sorted(gks, key=lambda p: p.player.overall, reverse=True)[0]
+                best_gk = sorted(gks, key=lambda p: (p.effective_overall, p.player.overall), reverse=True)[0]
                 best_gk.assigned_position = Position.GOALKEEPER
                 best_gk.is_starter = True
                 best_gk.is_on_field = True
                 starting_players.append(best_gk)
 
-            # 2. Pick field players
+            # 2. Pick field players (STRICTLY non-Goalkeepers)
             for position in self.formation:
                 selected_player: MatchPlayer | None = None
-                players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == position and player not in starting_players]
+                players_on_position: list[MatchPlayer] = [
+                    player for player in self.match_players 
+                    if is_field_player(player) and player.player.position == position and player not in starting_players
+                ]
                 if players_on_position:
-                    selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
+                    selected_player = sorted(players_on_position, key=lambda player: (player.effective_overall, player.player.overall), reverse=True)[0]
                 else:
                     for fallback_position in PREFERRED_FALLBACKS.get(position, []):
-                        players_on_position: list[MatchPlayer] = [player for player in self.match_players if player.player.position == fallback_position and player not in starting_players]
+                        players_on_position = [
+                            player for player in self.match_players 
+                            if is_field_player(player) and player.player.position == fallback_position and player not in starting_players
+                        ]
                         if players_on_position:
-                            selected_player = sorted(players_on_position, key=lambda player: player.player.overall, reverse=True)[0]
+                            selected_player = sorted(players_on_position, key=lambda player: (player.effective_overall, player.player.overall), reverse=True)[0]
                             break
                 if selected_player is None:
-                    candidates = [p for p in self.match_players if isinstance(p.player, FieldPlayer) and p not in starting_players]
+                    candidates = [p for p in self.match_players if is_field_player(p) and isinstance(p.player, FieldPlayer) and p not in starting_players]
                     if not candidates:
-                        candidates = [p for p in self.match_players if p not in starting_players]
+                        candidates = [p for p in self.match_players if is_field_player(p) and p not in starting_players]
                     if candidates:
-                        selected_player = sorted(candidates, key=lambda player: player.player.overall, reverse=True)[0]
+                        selected_player = sorted(candidates, key=lambda player: (player.effective_overall, player.player.overall), reverse=True)[0]
 
                 if selected_player is not None:
                     selected_player.assigned_position = position
@@ -551,7 +568,9 @@ class MatchTeam:
         
     
     def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:
-        candidates = self.active_players if excluded_player is None else [p for p in self.active_players if p != excluded_player]
+        base_candidates = self.active_players if excluded_player is None else [p for p in self.active_players if p != excluded_player]
+        field_candidates = [p for p in base_candidates if not isinstance(p.player, Goalkeeper) and p.assigned_position != Position.GOALKEEPER]
+        candidates = field_candidates if field_candidates else base_candidates
         if not candidates:
             return self.active_players[0] if self.active_players else self.players_on_field[0]
         weights: list[int] = [weights_dict.get(player.assigned_position, weights_dict.get(player.player.position, default_weight)) for player in candidates]
@@ -616,7 +635,7 @@ class MatchTeam:
         for player in self.match_players:
             player.current_stamina = min(1.0, player.current_stamina + amount)
 
-    def make_substitution(self, player_off: MatchPlayer, player_in: MatchPlayer) -> bool:
+    def make_substitution(self, player_off: MatchPlayer, player_in: MatchPlayer, current_second: int = 0) -> bool:
         if player_in in self.bench_players and player_off in self.players_on_field and not player_off.has_red_card and self.substitution_limit > 0:
             player_in.assigned_position = player_off.assigned_position
             player_in.is_on_field = True
@@ -627,11 +646,13 @@ class MatchTeam:
             self.bench_players.remove(player_in)
             self.played_players.add(player_in)
             self.substitution_limit -= 1
+            if current_second > 0:
+                self.last_substitution_second = current_second
             return True
         else:
             return False
 
-    def check_and_make_auto_substitution(self) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
+    def check_and_make_auto_substitution(self, current_second: int = 0) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
         if self.substitution_limit <= 0 or not self.bench_players or not self.active_players:
             return None
     
@@ -639,28 +660,62 @@ class MatchTeam:
         if injured_on_field:
             player_off = injured_on_field[0]
         else:
-            player_off = min(self.active_players, key=lambda player: player.current_stamina)
-            if player_off.current_stamina > 0.75:
+            # Tactical/stamina substitutions ONLY allowed in the 2nd half (after minute 47 / 2850s)
+            if current_second < 2850:
                 return None
 
-        player_in = next((player for player in self.bench_players if player.player.position == player_off.assigned_position), None)
-        if player_in is None:
-            player_in = next((player for player in self.bench_players if not isinstance(player.player, Goalkeeper)), None)
-        if player_in and self.make_substitution(player_off, player_in):
+            # Minimum 5-minute (300 seconds) cooldown between tactical substitutions per team
+            if hasattr(self, 'last_substitution_second') and (current_second - self.last_substitution_second < 300):
+                return None
+
+            # Exclude goalkeepers from stamina/tactical substitutions (never sub GK during game unless injured)
+            field_players_on_field = [
+                p for p in self.active_players 
+                if not isinstance(p.player, Goalkeeper) and p.assigned_position != Position.GOALKEEPER
+            ]
+            if not field_players_on_field:
+                return None
+
+            player_off = min(field_players_on_field, key=lambda player: player.current_stamina)
+            
+            # Progressive 2nd half substitution thresholds to spread subs across 2nd half
+            if current_second >= 4300: # ~71+ mins
+                stamina_threshold = 0.88
+            elif current_second >= 3400: # ~56+ mins
+                stamina_threshold = 0.83
+            else: # ~47-55 mins
+                stamina_threshold = 0.77
+
+            if player_off.current_stamina > stamina_threshold:
+                return None
+
+        if isinstance(player_off.player, Goalkeeper) or player_off.assigned_position == Position.GOALKEEPER:
+            player_in = next((player for player in self.bench_players if isinstance(player.player, Goalkeeper) or player.player.position == Position.GOALKEEPER), None)
+        else:
+            player_in = next((player for player in self.bench_players if player.player.position == player_off.assigned_position and not isinstance(player.player, Goalkeeper)), None)
+            if player_in is None:
+                player_in = next((player for player in self.bench_players if not isinstance(player.player, Goalkeeper) and player.player.position != Position.GOALKEEPER), None)
+
+        if player_in and self.make_substitution(player_off, player_in, current_second):
             return (player_off, player_in)
         return None
 
-    def handle_injury(self, injured_player: MatchPlayer, severity: str = "severe") -> Optional[tuple[MatchPlayer, MatchPlayer]]:
+    def handle_injury(self, injured_player: MatchPlayer, severity: str = "severe", current_second: int = 0) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
         injured_player.is_injured = True
         injured_player.injury_severity = severity
         if severity == "severe":
             injured_player.is_forced_off = True
 
         if severity == "severe" and self.substitution_limit > 0 and self.bench_players:
-            player_in = next((p for p in self.bench_players if p.player.position == injured_player.assigned_position), None)
-            if player_in is None:
-                player_in = next((p for p in self.bench_players if not isinstance(p.player, Goalkeeper)), None)
-            if player_in and self.make_substitution(injured_player, player_in):
+            if isinstance(injured_player.player, Goalkeeper) or injured_player.assigned_position == Position.GOALKEEPER:
+                player_in = next((p for p in self.bench_players if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER), None)
+                if player_in is None:
+                    player_in = self.bench_players[0]
+            else:
+                player_in = next((p for p in self.bench_players if p.player.position == injured_player.assigned_position and not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER), None)
+                if player_in is None:
+                    player_in = next((p for p in self.bench_players if not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER), None)
+            if player_in and self.make_substitution(injured_player, player_in, current_second):
                 return (injured_player, player_in)
         return None
 
@@ -669,7 +724,7 @@ class League:
         self.name: str = name 
         self.teams: list[Team] = teams if teams is not None else []
         self.fixtures: list[Match] = []
-        self.table: dict[Team, LeagueTeamStats] = {}
+        self.table: dict[Team, LeagueTeamStats] = {team: LeagueTeamStats(team) for team in self.teams}
         self.player_stats: dict[Player, PlayerSeasonStats] = {}
 
     def register_match_player_stats(self, match: Match) -> None:

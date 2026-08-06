@@ -214,4 +214,27 @@ def test_match_team_starter_and_bench_status_tracking():
     assert starter.is_on_field is False
     assert bench_p.is_starter is False
     assert bench_p.is_on_field is True
+
+
+def test_goalkeeper_never_assigned_to_field_position():
+    from src.models import Team, FieldPlayer, Goalkeeper, Position, FORMATION_433
+    gk1 = Goalkeeper("Primary GK", 85, 85, 75, 90, 70, 85)
+    gk2 = Goalkeeper("Backup GK", 80, 80, 70, 85, 65, 80)
+    gk3 = Goalkeeper("Third GK", 75, 75, 65, 80, 60, 75)
+
+    # Team has 3 Goalkeepers and only 9 field players (missing 1 field player position)
+    field_players = [
+        FieldPlayer(f"Field {i}", pos, 70, 70, 70, 70, 70, 70, 70, 180)
+        for i, pos in enumerate(FORMATION_433[:9])
+    ]
+
+    team = Team("GK Test Team", [gk1, gk2, gk3] + field_players)
+    match_team = MatchTeam(team, FORMATION_433)
+
+    # Check assigned position of every starting player on field
+    for p in match_team.players_on_field:
+        if isinstance(p.player, Goalkeeper):
+            assert p.assigned_position == Position.GOALKEEPER, f"Goalkeeper {p.name} assigned to field position {p.assigned_position}"
+        else:
+            assert p.assigned_position != Position.GOALKEEPER
 

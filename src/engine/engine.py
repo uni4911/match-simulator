@@ -489,7 +489,7 @@ class MatchEngine:
 
             while match.current_second <= target_second:
                 for team in [match.home_team, match.away_team]:
-                    sub_result = team.check_and_make_auto_substitution()
+                    sub_result = team.check_and_make_auto_substitution(match.current_second)
                     if sub_result is not None:
                         player_off, player_in = sub_result
                         match.add_event(Substitution(match.current_second, team.team.name, player_in.player.name, player_off.player.name))

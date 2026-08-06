@@ -9,6 +9,13 @@ class LeagueEngine:
 
     def generate_fixture(self, double_round: bool = False): 
         self.league.fixtures.clear()
+        
+        # Reset all player fitness levels to 100% (1.0) for the start of the season schedule
+        for team in self.league.teams:
+            if team:
+                for player in team.players:
+                    player.fitness = 1.0
+
         teams_list = list(self.league.teams)
         random.shuffle(teams_list)
         
@@ -62,6 +69,10 @@ class LeagueEngine:
         self.league.fixtures = first_round_matches + second_round_matches
         
     def play_match(self, match: Match) -> None:
+        # Re-select line-up right before kickoff using latest player fitness levels
+        match.home_team = MatchTeam(match.home_team.team, match.home_team.formation)
+        match.away_team = MatchTeam(match.away_team.team, match.away_team.formation)
+
         home_team = match.home_team
         away_team = match.away_team
 
@@ -71,6 +82,23 @@ class LeagueEngine:
             away_team.form_modifier = self.league.table[away_team.team].form_modifier
 
         self.match_engine.play_match(match)
+
+        # Update fitness across fixtures: mild fatigue loss for participants (~4-5%), recovery for rested players (+10-12%)
+        for mt in (home_team, away_team):
+            played_player_ids = set()
+            for mp in mt.match_players:
+                if mp in mt.played_players or mp.is_starter:
+                    played_player_ids.add(id(mp.player))
+                    fatigue_loss = (1.0 - mp.current_stamina) * 0.12
+                    mp.player.fitness = max(0.55, round(mp.player.fitness - fatigue_loss, 3))
+                else:
+                    # Bench players who didn't play recover fitness
+                    mp.player.fitness = min(1.0, round(mp.player.fitness + 0.10, 3))
+
+            # Non-match squad players recover full rest bonus (+12% per round)
+            for p in mt.team.players:
+                if id(p) not in played_player_ids:
+                    p.fitness = min(1.0, round(p.fitness + 0.12, 3))
 
         home_score = match.home_score
         away_score = match.away_score

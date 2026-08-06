@@ -240,4 +240,29 @@ def test_strong_team_outperforms_weak_team():
 
     win_rate = strong_wins / total_matches
     assert win_rate >= 0.70
+
+
+def test_substitutions_are_spaced_out():
+    gk1 = Goalkeeper("GK 1", 85, 85, 75, 90, 70, 85)
+    field1 = [FieldPlayer(f"P1_{i}", pos, 80, 80, 80, 80, 80, 80, 80, 180) for i, pos in enumerate(FORMATION_433)]
+    bench1 = [FieldPlayer(f"B1_{i}", pos, 75, 75, 75, 75, 75, 75, 75, 180) for i, pos in enumerate(FORMATION_433[:5])]
+    team_a = MatchTeam(Team("Team A", [gk1] + field1 + bench1), FORMATION_433)
+
+    gk2 = Goalkeeper("GK 2", 85, 85, 75, 90, 70, 85)
+    field2 = [FieldPlayer(f"P2_{i}", pos, 80, 80, 80, 80, 80, 80, 80, 180) for i, pos in enumerate(FORMATION_433)]
+    bench2 = [FieldPlayer(f"B2_{i}", pos, 75, 75, 75, 75, 75, 75, 75, 180) for i, pos in enumerate(FORMATION_433[:5])]
+    team_b = MatchTeam(Team("Team B", [gk2] + field2 + bench2), FORMATION_433)
+
+    match = Match(team_a, team_b)
+    MatchEngine().play_match(match)
+
+    sub_events_a = [e for e in match.match_events if e.__class__.__name__ == 'Substitution' and e.team == "Team A"]
+    sub_events_b = [e for e in match.match_events if e.__class__.__name__ == 'Substitution' and e.team == "Team B"]
+
+    # Verify per-team substitutions are spaced at least 250 seconds apart (no back-to-back same-second subs)
+    for subs in (sub_events_a, sub_events_b):
+        if len(subs) > 1:
+            for i in range(1, len(subs)):
+                time_diff = subs[i].second - subs[i-1].second
+                assert time_diff >= 250, f"Substitutions for {subs[i].team} occurred too close together ({time_diff}s apart)"
 
