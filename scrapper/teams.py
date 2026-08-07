@@ -63,42 +63,142 @@ def parse_teams_page(html: str) -> list[dict]:
 
     return teams
 
+POSITION_STANDARD_MAP = {
+    "GK": "GK", "BR": "GK", "GOALKEEPER": "GK",
+    "LB": "LB", "LO": "LB", "LEFT_BACK": "LB",
+    "CB": "CB", "ŚO": "CB", "LŚO": "CB", "PŚO": "CB", "LCB": "CB", "RCB": "CB", "CENTRE_BACK": "CB",
+    "RB": "RB", "PO": "RB", "RIGHT_BACK": "RB",
+    "LWB": "LWB", "CLO": "LWB", "LEFT_WING_BACK": "LWB",
+    "RWB": "RWB", "CPO": "RWB", "RIGHT_WING_BACK": "RWB",
+    "CDM": "CDM", "ŚPD": "CDM", "LDP": "CDM", "PDP": "CDM", "LDM": "CDM", "RDM": "CDM", "CENTRAL_DEFENSIVE_MIDFIELDER": "CDM",
+    "CM": "CM", "ŚP": "CM", "LCM": "CM", "RCM": "CM", "LŚP": "CM", "PŚP": "CM", "CENTRAL_MIDFIELDER": "CM",
+    "CAM": "CAM", "ŚPO": "CAM", "LAM": "CAM", "RAM": "CAM", "CENTRAL_ATTACKING_MIDFIELDER": "CAM",
+    "LM": "LM", "LP": "LM", "LEFT_MIDFIELDER": "LM",
+    "RM": "RM", "PP": "RM", "RIGHT_MIDFIELDER": "RM",
+    "LW": "LW", "LS": "LW", "LEFT_WING": "LW",
+    "RW": "RW", "PS": "RW", "RIGHT_WING": "RW",
+    "CF": "CF", "ŚN": "CF", "LF": "CF", "RF": "CF", "CENTRAL_FORWARD": "CF",
+    "ST": "ST", "N": "ST", "STRIKER": "ST"
+}
+
 def determine_formation_from_positions(starting_positions: list[str]) -> str:
     """
-    Determines formation from a list of starting player position badges.
+    Determines formation from a list of starting player position badges,
+    differentiating 4-3-3 types (Narrow, Holding, Attack, Defend, False 9, Flat)
+    as well as other common tactical formations.
     """
-    field_pos = [p for p in starting_positions if p != "GK"]
-    def_count = sum(1 for p in field_pos if p in ["LB", "LO", "CB", "ŚO", "RB", "PO", "LWB", "CLO", "RWB", "CPO"])
-    mid_count = sum(1 for p in field_pos if p in ["CDM", "ŚPD", "CM", "ŚP", "CAM", "ŚPO", "LM", "LP", "RM", "PP"])
-    att_count = sum(1 for p in field_pos if p in ["LW", "LS", "CF", "ŚN", "RW", "PS", "ST", "N"])
+    std_positions = []
+    for p in starting_positions:
+        norm = POSITION_STANDARD_MAP.get(p.upper(), "")
+        if not norm:
+            p_upper = p.upper()
+            if "GK" in p_upper or "BR" in p_upper: norm = "GK"
+            elif "CB" in p_upper or "ŚO" in p_upper: norm = "CB"
+            elif "LB" in p_upper or "LO" in p_upper: norm = "LB"
+            elif "RB" in p_upper or "PO" in p_upper: norm = "RB"
+            elif "CDM" in p_upper or "SPD" in p_upper or "DP" in p_upper: norm = "CDM"
+            elif "CAM" in p_upper or "SPO" in p_upper: norm = "CAM"
+            elif "CM" in p_upper or "SP" in p_upper: norm = "CM"
+            elif "LM" in p_upper or "LP" in p_upper: norm = "LM"
+            elif "RM" in p_upper or "PP" in p_upper: norm = "RM"
+            elif "LW" in p_upper or "LS" in p_upper: norm = "LW"
+            elif "RW" in p_upper or "PS" in p_upper: norm = "RW"
+            elif "CF" in p_upper or "SN" in p_upper: norm = "CF"
+            elif "ST" in p_upper or "N" in p_upper: norm = "ST"
+            else: norm = "CM"
+        if norm != "GK":
+            std_positions.append(norm)
 
-    cdm_count = sum(1 for p in field_pos if p in ["CDM", "ŚPD"])
-    cam_count = sum(1 for p in field_pos if p in ["CAM", "ŚPO"])
-    winger_count = sum(1 for p in field_pos if p in ["LW", "LS", "RW", "PS"])
-    wide_mid_count = sum(1 for p in field_pos if p in ["LM", "LP", "RM", "PP"])
+    def_count = sum(1 for p in std_positions if p in ["LB", "CB", "RB", "LWB", "RWB"])
+    mid_count = sum(1 for p in std_positions if p in ["CDM", "CM", "CAM", "LM", "RM"])
+    att_count = sum(1 for p in std_positions if p in ["LW", "RW", "CF", "ST"])
 
-    if def_count == 4 and mid_count == 3 and att_count == 3:
-        return "4-3-3"
-    elif def_count == 4 and mid_count == 4 and att_count == 2:
-        if cam_count >= 1 and (cdm_count >= 1 or cdm_count + mid_count >= 3) and wide_mid_count >= 1:
-            return "4-2-3-1"
-        elif cdm_count == 1 and cam_count == 1:
-            return "4-1-2-1-2"
+    cdm_count = std_positions.count("CDM")
+    cm_count = std_positions.count("CM")
+    cam_count = std_positions.count("CAM")
+    wide_mid_count = std_positions.count("LM") + std_positions.count("RM")
+    winger_count = std_positions.count("LW") + std_positions.count("RW")
+    cf_count = std_positions.count("CF")
+    st_count = std_positions.count("ST")
+    strikers_total = cf_count + st_count
+
+    # 4 Defenders
+    if def_count == 4:
+        if (mid_count == 3 and att_count == 3) or (mid_count >= 3 and winger_count >= 2):
+            if winger_count == 0 and (cam_count >= 2 or (cam_count >= 1 and cf_count >= 1)):
+                return "4-3-3 Narrow"
+            elif cdm_count >= 2:
+                return "4-3-3 Defend"
+            elif cdm_count == 1 and cam_count == 0:
+                if cf_count >= 1:
+                    return "4-3-3 False 9"
+                return "4-3-3 Holding"
+            elif cam_count >= 1 and cdm_count == 0:
+                return "4-3-3 Attack"
+            elif cf_count >= 1 and cdm_count >= 1:
+                return "4-3-3 False 9"
+            else:
+                return "4-3-3"
+        elif winger_count == 0 and att_count >= 2 and (mid_count + cam_count >= 5):
+            return "4-3-3 Narrow"
+        elif mid_count == 4 and att_count == 2:
+            if cdm_count >= 1 and cam_count >= 1 and wide_mid_count >= 1:
+                return "4-1-2-1-2 Wide"
+            elif cdm_count >= 1 and cam_count >= 1:
+                return "4-1-2-1-2"
+            elif cdm_count >= 1 and cam_count == 0 and wide_mid_count == 0:
+                return "4-4-2 Diamond"
+            else:
+                return "4-4-2"
+        elif mid_count == 5 and att_count == 1:
+            if winger_count == 0 and cam_count >= 2:
+                return "4-2-3-1 Narrow"
+            elif cdm_count == 1 and wide_mid_count >= 2:
+                return "4-1-4-1"
+            elif cm_count >= 3 and wide_mid_count >= 2:
+                return "4-5-1"
+            else:
+                return "4-2-3-1"
+        elif mid_count == 4 and strikers_total == 2 and winger_count == 0:
+            return "4-3-1-2"
+        elif mid_count == 2 and att_count == 4:
+            return "4-2-4"
         else:
-            return "4-4-2"
-    elif def_count == 3 and mid_count == 5 and att_count == 2:
-        return "3-5-2"
-    elif def_count == 5 and mid_count == 3 and att_count == 2:
-        return "5-3-2"
-    elif def_count == 3 and mid_count == 4 and att_count == 3:
-        return "3-4-3"
-    elif def_count == 4 and (cdm_count >= 1 or cam_count >= 1):
-        if att_count == 1 or (att_count == 2 and winger_count == 0):
-            return "4-2-3-1"
-        return "4-3-3"
+            if att_count >= 3:
+                return "4-3-3 Narrow" if winger_count == 0 else "4-3-3"
+            elif att_count == 2:
+                return "4-4-2"
+            else:
+                return "4-2-3-1"
+
+    # 3 Defenders
+    elif def_count == 3:
+        if mid_count == 5 and att_count == 2:
+            if cam_count >= 1 and wide_mid_count >= 2:
+                return "3-4-1-2"
+            return "3-5-2"
+        elif mid_count == 4 and att_count == 3:
+            if cam_count >= 2 or cf_count >= 2:
+                return "3-4-2-1"
+            return "3-4-3"
+        elif att_count >= 3:
+            return "3-4-3"
+        else:
+            return "3-5-2"
+
+    # 5 Defenders
+    elif def_count == 5:
+        if mid_count == 4 and att_count == 1:
+            return "5-4-1"
+        elif mid_count == 2 and att_count == 3:
+            return "5-2-3"
+        else:
+            return "5-3-2"
+
+    # Default fallback
     else:
         if def_count == 3:
-            return "3-5-2" if att_count <= 2 else "3-4-3"
+            return "3-5-2"
         elif def_count == 5:
             return "5-3-2"
         elif att_count >= 3:
@@ -134,8 +234,7 @@ def clean_team_for_export(team: dict) -> dict:
         "formation": team.get("formation", "4-3-3")
     }
 
-def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams.json") -> list[dict]:
-  
+def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams.json", fetch_formations: bool = True) -> list[dict]:
     all_teams = []
     page = 0
     pages_limit_str = f"up to {max_pages} page(s)" if max_pages is not None else "all available pages"
@@ -160,13 +259,25 @@ def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams
             break
 
         print(f"Page {page + 1}: found {len(teams)} teams.")
+
+        if fetch_formations:
+            for idx, team in enumerate(teams, 1):
+                sofifa_id = team.get("sofifa_id")
+                if sofifa_id:
+                    team_url = f"https://sofifa.com/team/{sofifa_id}/"
+                    t_html = fetch_html(team_url, delay=0.2)
+                    if t_html:
+                        team["formation"] = detect_formation_from_squad_html(t_html)
+                    else:
+                        team["formation"] = "4-3-3"
+                else:
+                    team["formation"] = "4-3-3"
+
         all_teams.extend(teams)
         page += 1
 
-    # Clean teams for JSON storage
     clean_teams = [clean_team_for_export(t) for t in all_teams]
 
- 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(clean_teams, f, ensure_ascii=False, indent=2)
@@ -183,3 +294,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     scrape_teams(max_pages=args.max_pages, output_file=args.out)
+

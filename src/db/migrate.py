@@ -5,6 +5,11 @@ from src.db.database import engine, Base, SessionLocal, ConfederationModel, Coun
 def init_db() -> None:
     with engine.connect() as conn:
         inspector = inspect(engine)
+        if "teams" in inspector.get_table_names():
+            columns = [c["name"] for c in inspector.get_columns("teams")]
+            if "formation" not in columns:
+                conn.execute(text("ALTER TABLE teams ADD COLUMN formation VARCHAR(50) DEFAULT '4-3-3'"))
+                conn.commit()
         if "players" in inspector.get_table_names():
             columns = [c["name"] for c in inspector.get_columns("players")]
             if "full_name" not in columns:

@@ -1,5 +1,5 @@
 import random
-from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats
+from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats, get_formation_positions
 from src.engine.engine import Match, MatchEngine
 
 class LeagueEngine:
@@ -33,8 +33,10 @@ class LeagueEngine:
                 if home_team is not None and away_team is not None:
                     if random.choice([True, False]):
                         home_team, away_team = away_team, home_team
-                    home_mt = MatchTeam(home_team, FORMATION_433)
-                    away_mt = MatchTeam(away_team, FORMATION_433)
+                    home_form = get_formation_positions(getattr(home_team, "formation", "4-3-3"))
+                    away_form = get_formation_positions(getattr(away_team, "formation", "4-3-3"))
+                    home_mt = MatchTeam(home_team, home_form)
+                    away_mt = MatchTeam(away_team, away_form)
                     round_matches.append(Match(home_mt, away_mt))
             
             random.shuffle(round_matches)
@@ -59,8 +61,10 @@ class LeagueEngine:
                     old_home_team = match.home_team.team
                     old_away_team = match.away_team.team
 
-                    new_home_mt = MatchTeam(old_away_team, FORMATION_433)
-                    new_away_mt = MatchTeam(old_home_team, FORMATION_433)
+                    new_home_form = get_formation_positions(getattr(old_away_team, "formation", "4-3-3"))
+                    new_away_form = get_formation_positions(getattr(old_home_team, "formation", "4-3-3"))
+                    new_home_mt = MatchTeam(old_away_team, new_home_form)
+                    new_away_mt = MatchTeam(old_home_team, new_away_form)
                     new_match = Match(new_home_mt, new_away_mt)
                     leg2_r_matches.append(new_match)
                 random.shuffle(leg2_r_matches)

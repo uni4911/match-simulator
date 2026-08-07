@@ -565,7 +565,7 @@ class Match:
             severity = "severe" if random.random() < 0.30 else "minor"
             player_team = self.home_team if self.home_team.has_player(player) else self.away_team
 
-            sub_result = player_team.handle_injury(player, severity=severity)
+            sub_result = player_team.handle_injury(player, severity=severity, current_second=self.current_second)
 
             self.add_event(InjuryEvent(
                 second=self.current_second,
@@ -577,7 +577,7 @@ class Match:
 
             if sub_result is not None:
                 p_off, p_in = sub_result
-                self.add_event(Substitution(self.current_second, player_team.team.name, p_in.player.name, p_off.player.name))
+                self.add_event(Substitution(self.current_second, player_team.team.name, p_in.player.name, p_off.player.name, reason="injury"))
 
     @property
     def team_with_ball(self) -> MatchTeam | None:

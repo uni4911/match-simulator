@@ -165,13 +165,49 @@ PREFERRED_FALLBACKS: dict[Position, list[Position]] = {
 
 FORMATION_433 = [
     Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
-    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
     Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
+]
+
+FORMATION_433_HOLDING = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
+]
+
+FORMATION_433_ATTACK = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
+]
+
+FORMATION_433_DEFEND = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
+]
+
+FORMATION_433_FALSE9 = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.LEFT_WING, Position.CENTRAL_FORWARD, Position.RIGHT_WING
+]
+
+FORMATION_433_NARROW = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.STRIKER
 ]
 
 FORMATION_442 = [
     Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
     Position.LEFT_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_MIDFIELDER,
+    Position.STRIKER, Position.CENTRAL_FORWARD
+]
+
+FORMATION_442_DIAMOND = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
     Position.STRIKER, Position.CENTRAL_FORWARD
 ]
 
@@ -182,10 +218,11 @@ FORMATION_4231 = [
     Position.STRIKER
 ]
 
-FORMATION_352 = [
-    Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK,
-    Position.LEFT_WING_BACK, Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_WING_BACK,
-    Position.STRIKER, Position.CENTRAL_FORWARD
+FORMATION_4231_NARROW = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER,
+    Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.STRIKER
 ]
 
 FORMATION_41212 = [
@@ -194,10 +231,41 @@ FORMATION_41212 = [
     Position.STRIKER, Position.CENTRAL_FORWARD
 ]
 
-FORMATION_532 = [
-    Position.LEFT_WING_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_WING_BACK,
-    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
-    Position.STRIKER, Position.STRIKER
+FORMATION_41212_WIDE = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.STRIKER, Position.CENTRAL_FORWARD
+]
+
+FORMATION_4312 = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.STRIKER, Position.CENTRAL_FORWARD
+]
+
+FORMATION_4141 = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_DEFENSIVE_MIDFIELDER,
+    Position.LEFT_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_MIDFIELDER,
+    Position.STRIKER
+]
+
+FORMATION_451 = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.LEFT_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.RIGHT_MIDFIELDER,
+    Position.STRIKER
+]
+
+FORMATION_424 = [
+    Position.LEFT_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.LEFT_WING, Position.STRIKER, Position.STRIKER, Position.RIGHT_WING
+]
+
+FORMATION_352 = [
+    Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK,
+    Position.LEFT_WING_BACK, Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_WING_BACK,
+    Position.STRIKER, Position.CENTRAL_FORWARD
 ]
 
 FORMATION_343 = [
@@ -206,15 +274,84 @@ FORMATION_343 = [
     Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
 ]
 
+FORMATION_3412 = [
+    Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK,
+    Position.LEFT_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_MIDFIELDER,
+    Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.STRIKER, Position.CENTRAL_FORWARD
+]
+
+FORMATION_3421 = [
+    Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK,
+    Position.LEFT_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_MIDFIELDER,
+    Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER,
+    Position.STRIKER
+]
+
+FORMATION_532 = [
+    Position.LEFT_WING_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_WING_BACK,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.STRIKER, Position.STRIKER
+]
+
+FORMATION_541 = [
+    Position.LEFT_WING_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_WING_BACK,
+    Position.LEFT_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.RIGHT_MIDFIELDER,
+    Position.STRIKER
+]
+
+FORMATION_523 = [
+    Position.LEFT_WING_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.CENTRE_BACK, Position.RIGHT_WING_BACK,
+    Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+    Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING
+]
+
 AVAILABLE_FORMATIONS: dict[str, list[Position]] = {
     "4-3-3": FORMATION_433,
+    "4-3-3 Holding": FORMATION_433_HOLDING,
+    "4-3-3 Attack": FORMATION_433_ATTACK,
+    "4-3-3 Defend": FORMATION_433_DEFEND,
+    "4-3-3 False 9": FORMATION_433_FALSE9,
+    "4-3-3 Narrow": FORMATION_433_NARROW,
     "4-4-2": FORMATION_442,
+    "4-4-2 Diamond": FORMATION_442_DIAMOND,
     "4-2-3-1": FORMATION_4231,
-    "3-5-2": FORMATION_352,
+    "4-2-3-1 Narrow": FORMATION_4231_NARROW,
     "4-1-2-1-2": FORMATION_41212,
-    "5-3-2": FORMATION_532,
+    "4-1-2-1-2 Wide": FORMATION_41212_WIDE,
+    "4-3-1-2": FORMATION_4312,
+    "4-1-4-1": FORMATION_4141,
+    "4-5-1": FORMATION_451,
+    "4-2-4": FORMATION_424,
+    "3-5-2": FORMATION_352,
     "3-4-3": FORMATION_343,
+    "3-4-1-2": FORMATION_3412,
+    "3-4-2-1": FORMATION_3421,
+    "5-3-2": FORMATION_532,
+    "5-4-1": FORMATION_541,
+    "5-2-3": FORMATION_523,
 }
+
+def get_formation_positions(formation_name: str) -> list[Position]:
+    if formation_name in AVAILABLE_FORMATIONS:
+        return AVAILABLE_FORMATIONS[formation_name]
+    cleaned = formation_name.lower().replace(" ", "").replace("-", "")
+    for k, v in AVAILABLE_FORMATIONS.items():
+        if k.lower().replace(" ", "").replace("-", "") == cleaned:
+            return v
+    if formation_name.startswith("4-3-3"):
+        return FORMATION_433
+    elif formation_name.startswith("4-4-2"):
+        return FORMATION_442
+    elif formation_name.startswith("4-2-3-1"):
+        return FORMATION_4231
+    elif formation_name.startswith("3-5-2"):
+        return FORMATION_352
+    elif formation_name.startswith("5-3-2"):
+        return FORMATION_532
+    elif formation_name.startswith("3-4-3"):
+        return FORMATION_343
+    return FORMATION_433
 
 BASE_DRAIN_RATE = 0.0001
 class Player:
@@ -227,15 +364,18 @@ class Player:
         self.nationality: str = nationality
         self.height: int = height
         self.fitness: float = 1.0
+        self.form: float = 1.0
 
     @property
     def name(self) -> str:
         return self.short_name or self.full_name
+
     
 class Team:
-    def __init__(self, name: str, players: list[Player], league: str = "Inne"):
+    def __init__(self, name: str, players: list[Player], league: str = "Inne", formation: str = "4-3-3"):
         self.name : str = name 
         self.league : str = league
+        self.formation : str = formation
         self.players : list[MatchPlayer] = players
         self.starting_players : list['Player'] = [field_player for field_player in self.players if isinstance(field_player, FieldPlayer)]
         self.goalkeepers : list['Player'] = [player for player in self.players if isinstance(player, Goalkeeper)]
@@ -509,53 +649,50 @@ class MatchTeam:
             return [player for player in self.match_players if player not in self.players_on_field]
 
     def _starting_players(self) -> list[MatchPlayer]:
-            starting_players: list[MatchPlayer] = []
+        starting_players: list[MatchPlayer] = []
 
-            def is_gk(p: MatchPlayer) -> bool:
-                return isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER
+        def is_gk(p: MatchPlayer) -> bool:
+            return isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER
 
-            def is_field_player(p: MatchPlayer) -> bool:
-                return not is_gk(p)
+        def is_field_player(p: MatchPlayer) -> bool:
+            return not is_gk(p)
 
-            gks = [p for p in self.match_players if is_gk(p)]
-            if gks:
-                best_gk = max(gks, key=lambda p: (p.effective_overall, p.player.overall))
-                best_gk.assigned_position = Position.GOALKEEPER
-                best_gk.is_starter = True
-                best_gk.is_on_field = True
-                starting_players.append(best_gk)
+        def position_suitability(player_pos: Position, target_pos: Position) -> float:
+            if player_pos == target_pos:
+                return 1.0
+            elif target_pos in PREFERRED_FALLBACKS.get(player_pos, []) or player_pos in PREFERRED_FALLBACKS.get(target_pos, []):
+                return 0.90
+            elif (player_pos in ATTACKING_POSITIONS and target_pos in ATTACKING_POSITIONS) or \
+                 (player_pos in MIDFIELD_POSITIONS and target_pos in MIDFIELD_POSITIONS) or \
+                 (player_pos in DEFENCE_POSITIONS and target_pos in DEFENCE_POSITIONS):
+                return 0.82
+            else:
+                return 0.65
 
-            for position in self.formation:
-                selected_player: MatchPlayer | None = None
-                players_on_position: list[MatchPlayer] = [
-                    player for player in self.match_players 
-                    if is_field_player(player) and player.player.position == position and player not in starting_players
-                ]
-                if players_on_position:
-                    selected_player = max(players_on_position, key=lambda player: (player.effective_overall, player.player.overall))
-                else:
-                    for fallback_position in PREFERRED_FALLBACKS.get(position, []):
-                        players_on_position = [
-                            player for player in self.match_players 
-                            if is_field_player(player) and player.player.position == fallback_position and player not in starting_players
-                        ]
-                        if players_on_position:
-                            selected_player = max(players_on_position, key=lambda player: (player.effective_overall, player.player.overall))
-                            break
-                if selected_player is None:
-                    candidates = [p for p in self.match_players if is_field_player(p) and isinstance(p.player, FieldPlayer) and p not in starting_players]
-                    if not candidates:
-                        candidates = [p for p in self.match_players if is_field_player(p) and p not in starting_players]
-                    if candidates:
-                        selected_player = max(candidates, key=lambda player: (player.effective_overall, player.player.overall))
+        gks = [p for p in self.match_players if is_gk(p)]
+        if gks:
+            best_gk = max(gks, key=lambda p: (p.effective_overall, p.player.overall))
+            best_gk.assigned_position = Position.GOALKEEPER
+            best_gk.is_starter = True
+            best_gk.is_on_field = True
+            starting_players.append(best_gk)
 
-                if selected_player is not None:
-                    selected_player.assigned_position = position
-                    selected_player.is_starter = True
-                    selected_player.is_on_field = True
-                    starting_players.append(selected_player)    
-    
-            return starting_players
+        field_candidates = [p for p in self.match_players if is_field_player(p)]
+
+        for position in self.formation:
+            available = [p for p in field_candidates if p not in starting_players]
+            if not available:
+                break
+            selected_player = max(available, key=lambda p: (
+                p.effective_overall * position_suitability(p.player.position, position),
+                p.player.overall
+            ))
+            selected_player.assigned_position = position
+            selected_player.is_starter = True
+            selected_player.is_on_field = True
+            starting_players.append(selected_player)
+
+        return starting_players
         
     
     def _get_weighted_player(self, weights_dict: dict[Position, int], default_weight: int, excluded_player: Optional[MatchPlayer] = None) -> MatchPlayer:

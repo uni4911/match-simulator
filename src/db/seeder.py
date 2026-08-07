@@ -341,9 +341,10 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                     target_league.country_id = team_country_id
 
             team_model = existing_teams.get(team_name)
+            team_formation = t_info.get("formation", "4-3-3")
 
             if not team_model:
-                team_model = TeamModel(name=team_name, league_id=target_league.id, country_id=team_country_id)
+                team_model = TeamModel(name=team_name, league_id=target_league.id, country_id=team_country_id, formation=team_formation)
                 db.add(team_model)
                 db.flush()
                 existing_teams[team_name] = team_model
@@ -351,8 +352,9 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             else:
                 team_model.league_id = target_league.id
                 team_model.country_id = team_country_id
+                team_model.formation = team_formation
 
-        # Map players to teams
+  
         for p_data in players_data:
             team_name = p_data.get("team_name")
             team_model = existing_teams.get(team_name)

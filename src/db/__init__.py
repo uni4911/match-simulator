@@ -9,6 +9,10 @@ from .database import (
     TeamModel,
     PlayerModel,
 )
+from .mappers import (
+    PlayerMapper,
+    TeamMapper,
+)
 from .loader import (
     load_file,
     get_team_names,
@@ -18,4 +22,5 @@ from .loader import (
     load_all_teams_from_db,
     save_team_to_db,
 )
+
 

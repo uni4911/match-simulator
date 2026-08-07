@@ -256,8 +256,8 @@ def test_substitutions_are_spaced_out():
     match = Match(team_a, team_b)
     MatchEngine().play_match(match)
 
-    sub_events_a = [e for e in match.match_events if e.__class__.__name__ == 'Substitution' and e.team == "Team A"]
-    sub_events_b = [e for e in match.match_events if e.__class__.__name__ == 'Substitution' and e.team == "Team B"]
+    sub_events_a = [e for e in match.match_events if e.__class__.__name__ == 'Substitution' and getattr(e, 'reason', 'tactical') == 'tactical' and e.team == "Team A"]
+    sub_events_b = [e for e in match.match_events if e.__class__.__name__ == 'Substitution' and getattr(e, 'reason', 'tactical') == 'tactical' and e.team == "Team B"]
 
     # Verify per-team substitutions are spaced at least 250 seconds apart (no back-to-back same-second subs)
     for subs in (sub_events_a, sub_events_b):

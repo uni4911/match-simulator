@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from src.db.loader import load_all_teams
 from src.db.migrate import run_migration
-from src.models import AVAILABLE_FORMATIONS, FORMATION_433, League, PlayerSeasonStats
+from src.models import AVAILABLE_FORMATIONS, FORMATION_433, League, PlayerSeasonStats, get_formation_positions
 from src.engine.league_engine import LeagueEngine
 from src.events.event_bus import EventBus
 from src.engine.engine import MatchTeam, Match, MatchEngine, EVENT_OR_STATE_DURATIONS
@@ -47,8 +47,10 @@ event_bus = EventBus()
 commentator = Commentator(event_bus=event_bus)
 
 if home_team_obj and away_team_obj:
-    match_home = MatchTeam(home_team_obj, FORMATION_433)
-    match_away = MatchTeam(away_team_obj, FORMATION_433)
+    home_form = get_formation_positions(getattr(home_team_obj, "formation", "4-3-3"))
+    away_form = get_formation_positions(getattr(away_team_obj, "formation", "4-3-3"))
+    match_home = MatchTeam(home_team_obj, home_form)
+    match_away = MatchTeam(away_team_obj, away_form)
     match = Match(match_home, match_away, event_bus=event_bus)
 else:
     match = None
@@ -185,11 +187,13 @@ def start_match(req: StartMatchRequest):
     if req.away_team_name not in loaded_teams:
         raise HTTPException(status_code=400, detail=f"Nie znaleziono drużyny: {req.away_team_name}")
 
-    home_form = AVAILABLE_FORMATIONS.get(req.home_formation, FORMATION_433)
-    away_form = AVAILABLE_FORMATIONS.get(req.away_formation, FORMATION_433)
+    home_team_obj = loaded_teams[req.home_team_name]
+    away_team_obj = loaded_teams[req.away_team_name]
+    home_form = get_formation_positions(req.home_formation) if req.home_formation in AVAILABLE_FORMATIONS else get_formation_positions(getattr(home_team_obj, "formation", "4-3-3"))
+    away_form = get_formation_positions(req.away_formation) if req.away_formation in AVAILABLE_FORMATIONS else get_formation_positions(getattr(away_team_obj, "formation", "4-3-3"))
 
-    home_match_team = MatchTeam(loaded_teams[req.home_team_name], home_form)
-    away_match_team = MatchTeam(loaded_teams[req.away_team_name], away_form)
+    home_match_team = MatchTeam(home_team_obj, home_form)
+    away_match_team = MatchTeam(away_team_obj, away_form)
 
     event_bus = EventBus()
     commentator = Commentator(event_bus=event_bus)
