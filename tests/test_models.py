@@ -246,4 +246,44 @@ def test_goalkeeper_never_assigned_to_field_position():
             assert p.assigned_position == Position.GOALKEEPER, f"Goalkeeper {p.name} assigned to field position {p.assigned_position}"
         else:
             assert p.assigned_position != Position.GOALKEEPER
+
+
+def test_positional_substitutions_select_appropriate_replacement():
+    from src.models import Team, FieldPlayer, Goalkeeper, Position, FORMATION_433
+    gk = Goalkeeper("GK", 85, 85, 75, 90, 70, 85)
+    
+    # 10 field starters matching formation positions exactly
+    starters = [
+        FieldPlayer(f"Starter {i}", pos, 85, 85, 85, 85, 85, 85, 85, 180)
+        for i, pos in enumerate(FORMATION_433)
+    ]
+    # Set the forward to Kylian Mbappe
+    starters[-1] = FieldPlayer("Kylian Mbappe", Position.CENTRAL_FORWARD, 91, 91, 91, 91, 91, 91, 91, 178)
+    
+    # Bench has Dean Huijsen (CB) listed FIRST, and Endrick (ST) listed SECOND
+    huijsen = FieldPlayer("Dean Huijsen", Position.CENTRE_BACK, 78, 78, 78, 78, 78, 78, 78, 192)
+    endrick = FieldPlayer("Endrick", Position.STRIKER, 80, 80, 80, 80, 80, 80, 80, 173)
+
+    team = Team("Real Madrid", [gk] + starters + [huijsen, endrick])
+    match_team = MatchTeam(team, FORMATION_433)
+
+    # Find Mbappé in match team players on field
+    mbappe_mp = next(p for p in match_team.players_on_field if p.player.full_name == "Kylian Mbappe")
+
+    # Ensure bench has Huijsen and Endrick
+    bench_names = [p.player.full_name for p in match_team.bench_players]
+    assert "Dean Huijsen" in bench_names
+    assert "Endrick" in bench_names
+
+    # Find best substitute for Mbappé
+    best_sub = match_team.get_best_substitute(mbappe_mp)
+    assert best_sub is not None
+    assert best_sub.player.full_name == "Endrick", f"Expected Endrick for Mbappe, but got {best_sub.player.full_name}"
+
+    # Verify when defender is subbed off, Huijsen is chosen
+    defender_mp = next(p for p in match_team.players_on_field if p.assigned_position in (Position.CENTRE_BACK, Position.LEFT_BACK, Position.RIGHT_BACK))
+    best_def_sub = match_team.get_best_substitute(defender_mp)
+    assert best_def_sub is not None
+    assert best_def_sub.player.full_name == "Dean Huijsen", f"Expected Dean Huijsen for defender, but got {best_def_sub.player.full_name}"
+
 

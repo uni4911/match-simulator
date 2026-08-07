@@ -464,7 +464,12 @@ class MatchEngine:
                     sub_result = team.check_and_make_auto_substitution(match.current_second)
                     if sub_result is not None:
                         player_off, player_in = sub_result
-                        match.add_event(Substitution(match.current_second, team.team.name, player_in.player.name, player_off.player.name))
+                        if match.player_with_ball == player_off:
+                            match.player_with_ball = player_in
+                        if match.potential_assistant == player_off:
+                            match.potential_assistant = player_in
+                        reason = "injury" if player_off.is_injured else "tactical"
+                        match.add_event(Substitution(match.current_second, team.team.name, player_in.player.name, player_off.player.name, reason=reason))
                     
                     for player in team.active_players:
                         if player.current_stamina < 0.35 and not player.is_injured:
@@ -577,6 +582,10 @@ class Match:
 
             if sub_result is not None:
                 p_off, p_in = sub_result
+                if self.player_with_ball == p_off:
+                    self.player_with_ball = p_in
+                if self.potential_assistant == p_off:
+                    self.potential_assistant = p_in
                 self.add_event(Substitution(self.current_second, player_team.team.name, p_in.player.name, p_off.player.name, reason="injury"))
 
     @property

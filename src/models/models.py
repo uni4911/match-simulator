@@ -780,6 +780,53 @@ class MatchTeam:
         else:
             return False
 
+    def get_best_substitute(self, player_off: MatchPlayer) -> Optional[MatchPlayer]:
+        if not self.bench_players:
+            return None
+
+        # Handle Goalkeepers separately
+        if isinstance(player_off.player, Goalkeeper) or player_off.assigned_position == Position.GOALKEEPER:
+            gks = [p for p in self.bench_players if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER]
+            if gks:
+                return max(gks, key=lambda p: (p.effective_overall, p.player.overall))
+            return max(self.bench_players, key=lambda p: (p.effective_overall, p.player.overall))
+
+        field_bench = [p for p in self.bench_players if not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER]
+        candidates = field_bench if field_bench else list(self.bench_players)
+
+        def suitability(c_pos: Position, t_pos: Position) -> float:
+            if c_pos == t_pos:
+                return 1.0
+            if t_pos in PREFERRED_FALLBACKS.get(c_pos, []) or c_pos in PREFERRED_FALLBACKS.get(t_pos, []):
+                return 0.90
+            if (c_pos in ATTACKING_POSITIONS and t_pos in ATTACKING_POSITIONS) or \
+               (c_pos in MIDFIELD_POSITIONS and t_pos in MIDFIELD_POSITIONS) or \
+               (c_pos in DEFENCE_POSITIONS and t_pos in DEFENCE_POSITIONS):
+                return 0.80
+            if (c_pos in MIDFIELD_POSITIONS and t_pos in ATTACKING_POSITIONS) or \
+               (c_pos in ATTACKING_POSITIONS and t_pos in MIDFIELD_POSITIONS):
+                if c_pos in (Position.CENTRAL_ATTACKING_MIDFIELDER, Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER) or \
+                   t_pos in (Position.CENTRAL_ATTACKING_MIDFIELDER, Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER):
+                    return 0.65
+                return 0.55
+            if (c_pos in MIDFIELD_POSITIONS and t_pos in DEFENCE_POSITIONS) or \
+               (c_pos in DEFENCE_POSITIONS and t_pos in MIDFIELD_POSITIONS):
+                if c_pos in (Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK) or \
+                   t_pos in (Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK):
+                    return 0.65
+                return 0.55
+            return 0.20
+
+        def score(candidate: MatchPlayer) -> float:
+            c_pos = candidate.player.position
+            s = max(
+                suitability(c_pos, player_off.assigned_position),
+                suitability(c_pos, player_off.player.position) * 0.95
+            )
+            return s * candidate.effective_overall
+
+        return max(candidates, key=score)
+
     def check_and_make_auto_substitution(self, current_second: int = 0) -> Optional[tuple[MatchPlayer, MatchPlayer]]:
         if self.substitution_limit <= 0 or not self.bench_players or not self.active_players:
             return None
@@ -788,14 +835,12 @@ class MatchTeam:
         if injured_on_field:
             player_off = injured_on_field[0]
         else:
-          
             if current_second < 2850:
                 return None
 
             if hasattr(self, 'last_substitution_second') and (current_second - self.last_substitution_second < 300):
                 return None
 
-           
             field_players_on_field = [
                 p for p in self.active_players 
                 if not isinstance(p.player, Goalkeeper) and p.assigned_position != Position.GOALKEEPER
@@ -816,13 +861,7 @@ class MatchTeam:
             if player_off.current_stamina > stamina_threshold:
                 return None
 
-        if isinstance(player_off.player, Goalkeeper) or player_off.assigned_position == Position.GOALKEEPER:
-            player_in = next((player for player in self.bench_players if isinstance(player.player, Goalkeeper) or player.player.position == Position.GOALKEEPER), None)
-        else:
-            player_in = next((player for player in self.bench_players if player.player.position == player_off.assigned_position and not isinstance(player.player, Goalkeeper)), None)
-            if player_in is None:
-                player_in = next((player for player in self.bench_players if not isinstance(player.player, Goalkeeper) and player.player.position != Position.GOALKEEPER), None)
-
+        player_in = self.get_best_substitute(player_off)
         if player_in and self.make_substitution(player_off, player_in, current_second):
             return (player_off, player_in)
         return None
@@ -834,14 +873,7 @@ class MatchTeam:
             injured_player.is_forced_off = True
 
         if severity == "severe" and self.substitution_limit > 0 and self.bench_players:
-            if isinstance(injured_player.player, Goalkeeper) or injured_player.assigned_position == Position.GOALKEEPER:
-                player_in = next((p for p in self.bench_players if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER), None)
-                if player_in is None:
-                    player_in = self.bench_players[0]
-            else:
-                player_in = next((p for p in self.bench_players if p.player.position == injured_player.assigned_position and not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER), None)
-                if player_in is None:
-                    player_in = next((p for p in self.bench_players if not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER), None)
+            player_in = self.get_best_substitute(injured_player)
             if player_in and self.make_substitution(injured_player, player_in, current_second):
                 return (injured_player, player_in)
         return None
