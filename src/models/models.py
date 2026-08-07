@@ -95,9 +95,9 @@ CAM_WEIGHTS: Final[dict[Position, int]] = {
 DEFAULT_CAM_WEIGHT = 1
 
 
-ATTACKING_POSITIONS = [Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING, Position.CENTRAL_FORWARD]
-MIDFIELD_POSITIONS = [Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER]
-DEFENCE_POSITIONS = [Position.LEFT_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK, Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK]
+ATTACKING_POSITIONS = set([Position.LEFT_WING, Position.STRIKER, Position.RIGHT_WING, Position.CENTRAL_FORWARD])
+MIDFIELD_POSITIONS = set([Position.LEFT_MIDFIELDER, Position.RIGHT_MIDFIELDER, Position.CENTRAL_ATTACKING_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_DEFENSIVE_MIDFIELDER])
+DEFENCE_POSITIONS = set([Position.LEFT_BACK, Position.CENTRE_BACK, Position.RIGHT_BACK, Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK])
 
 PREFERRED_FALLBACKS: dict[Position, list[Position]] = {
 
@@ -303,13 +303,6 @@ class MatchPlayer:
         self.is_starter: bool = False
         self.is_on_field: bool = False
 
-    @property
-    def is_injuried(self) -> bool:
-        return self.is_injured
-
-    @is_injuried.setter
-    def is_injuried(self, value: bool) -> None:
-        self.is_injured = value
 
 
     def receive_card(self, card_type: str) -> bool:
@@ -524,16 +517,14 @@ class MatchTeam:
             def is_field_player(p: MatchPlayer) -> bool:
                 return not is_gk(p)
 
-            # 1. Pick goalkeeper
             gks = [p for p in self.match_players if is_gk(p)]
             if gks:
-                best_gk = sorted(gks, key=lambda p: (p.effective_overall, p.player.overall), reverse=True)[0]
+                best_gk = max(gks, key=lambda p: (p.effective_overall, p.player.overall))
                 best_gk.assigned_position = Position.GOALKEEPER
                 best_gk.is_starter = True
                 best_gk.is_on_field = True
                 starting_players.append(best_gk)
 
-            # 2. Pick field players (STRICTLY non-Goalkeepers)
             for position in self.formation:
                 selected_player: MatchPlayer | None = None
                 players_on_position: list[MatchPlayer] = [
@@ -541,7 +532,7 @@ class MatchTeam:
                     if is_field_player(player) and player.player.position == position and player not in starting_players
                 ]
                 if players_on_position:
-                    selected_player = sorted(players_on_position, key=lambda player: (player.effective_overall, player.player.overall), reverse=True)[0]
+                    selected_player = max(players_on_position, key=lambda player: (player.effective_overall, player.player.overall))
                 else:
                     for fallback_position in PREFERRED_FALLBACKS.get(position, []):
                         players_on_position = [
@@ -549,14 +540,14 @@ class MatchTeam:
                             if is_field_player(player) and player.player.position == fallback_position and player not in starting_players
                         ]
                         if players_on_position:
-                            selected_player = sorted(players_on_position, key=lambda player: (player.effective_overall, player.player.overall), reverse=True)[0]
+                            selected_player = max(players_on_position, key=lambda player: (player.effective_overall, player.player.overall))
                             break
                 if selected_player is None:
                     candidates = [p for p in self.match_players if is_field_player(p) and isinstance(p.player, FieldPlayer) and p not in starting_players]
                     if not candidates:
                         candidates = [p for p in self.match_players if is_field_player(p) and p not in starting_players]
                     if candidates:
-                        selected_player = sorted(candidates, key=lambda player: (player.effective_overall, player.player.overall), reverse=True)[0]
+                        selected_player = max(candidates, key=lambda player: (player.effective_overall, player.player.overall))
 
                 if selected_player is not None:
                     selected_player.assigned_position = position
@@ -660,15 +651,14 @@ class MatchTeam:
         if injured_on_field:
             player_off = injured_on_field[0]
         else:
-            # Tactical/stamina substitutions ONLY allowed in the 2nd half (after minute 47 / 2850s)
+          
             if current_second < 2850:
                 return None
 
-            # Minimum 5-minute (300 seconds) cooldown between tactical substitutions per team
             if hasattr(self, 'last_substitution_second') and (current_second - self.last_substitution_second < 300):
                 return None
 
-            # Exclude goalkeepers from stamina/tactical substitutions (never sub GK during game unless injured)
+           
             field_players_on_field = [
                 p for p in self.active_players 
                 if not isinstance(p.player, Goalkeeper) and p.assigned_position != Position.GOALKEEPER

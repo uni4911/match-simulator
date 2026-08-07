@@ -27,6 +27,23 @@ class Foul(MatchEvent):
     fouling_player: str
     punishment: str
     foul_aftermath: str
+    team: str = ""
+
+@dataclass(frozen=True)
+class PossessionTimeEvent(MatchEvent):
+    team: str
+    duration: int
+
+@dataclass(frozen=True)
+class PassEvent(MatchEvent):
+    team: str
+    passer: str
+    receiver: str
+
+@dataclass(frozen=True)
+class ShotOffTargetEvent(MatchEvent):
+    shooter: str
+    team: str
 
 @dataclass(frozen=True)
 class PenaltyKickGoal(Goal):
@@ -67,7 +84,7 @@ class InjuryEvent(MatchEvent):
     forced_off: bool = False
 
     @property
-    def injuried_player(self) -> str:
+    def injured_player(self) -> str:
         return self.player
 
 @dataclass(frozen=True)

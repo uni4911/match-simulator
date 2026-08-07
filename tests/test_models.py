@@ -62,6 +62,15 @@ def test_severe_injury_forced_off(fresh_match_player: MatchPlayer):
     fresh_match_player.is_forced_off = True
     assert fresh_match_player.is_forced_off == True
 
+def test_is_injured_field(fresh_match_player: MatchPlayer):
+    assert fresh_match_player.is_injured is False
+
+    fresh_match_player.is_injured = True
+    assert fresh_match_player.is_injured is True
+
+    fresh_match_player.is_injured = False
+    assert fresh_match_player.is_injured is False
+
 def test_all_formations_initialization():
     from src.models import AVAILABLE_FORMATIONS, Team
     from src.db.loader import load_file

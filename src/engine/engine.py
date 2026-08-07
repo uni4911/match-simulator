@@ -8,8 +8,10 @@ from src.events.commentator import Commentator
 from src.events.events import (MatchEvent, Goal, KickoffEvent, ShotSave, Foul, PenaltyKickGoal, 
                         RedCardFoul, YellowCardFoul, GoalWithAssist, DoubleYellowCard, MatchEndEvent,
                         Substitution, HalfTimeEvent, InjuryEvent, LongShotGoal, LongShotEvent,
-                        WingPlayEvent, BuildUpEvent, InterceptionEvent)
+                        WingPlayEvent, BuildUpEvent, InterceptionEvent, PossessionTimeEvent,
+                        PassEvent, ShotOffTargetEvent, CornerKickEvent)
 from src.events.event_bus import EventBus
+from src.events.stats_tracker import MatchStatsTracker
 import math
 
 STANDARD_MATCH_LENGTH: Final[int] = 5400
@@ -203,9 +205,6 @@ class LongShot(State):
         if random.random() < 0.35:
             if winner:
                 shooter.goals += 1
-                if match.team_with_ball:
-                    match.team_with_ball.stats.shots_on_target += 1
-                    match.team_with_ball.stats.goals += 1
                 if match.potential_assistant:
                     match.add_event(LongShotGoal(match.current_second, shooter.player.name, match.team_with_ball.team.name, match.potential_assistant.player.name))
                     match.potential_assistant.assists += 1
@@ -220,16 +219,10 @@ class LongShot(State):
                     return KickOff(match.home_team)
             else:
                 match.potential_assistant = None
-                if match.team_with_ball:
-                    match.team_with_ball.stats.shots_on_target += 1
-                if match.defending_team:
-                    match.defending_team.stats.saves += 1
                 match.add_event(LongShotEvent(match.current_second, shooter.player.name, match.team_with_ball.team.name, "saved"))
                 return random.choices([CornerKick(), MidfieldPlay()], [20, 80], k=1)[0]
         else:
             match.potential_assistant = None
-            if match.team_with_ball:
-                match.team_with_ball.stats.shots_off_target += 1
             match.add_event(LongShotEvent(match.current_second, shooter.player.name, match.team_with_ball.team.name, "missed"))
             return MidfieldPlay()
 
@@ -293,9 +286,6 @@ class ShotOnGoal(State):
         if roll < 0.36:
             if winner:
                 match.player_with_ball.goals += 1
-                if match.team_with_ball:
-                    match.team_with_ball.stats.shots_on_target += 1
-                    match.team_with_ball.stats.goals += 1
                 if match.potential_assistant:
                     match.add_event(GoalWithAssist(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name, match.potential_assistant.player.name))
                     match.potential_assistant.assists += 1
@@ -309,16 +299,12 @@ class ShotOnGoal(State):
                     match.away_score += 1
                     return KickOff(match.home_team)
             else:
-                if match.team_with_ball:
-                    match.team_with_ball.stats.shots_on_target += 1
-                if match.defending_team:
-                    match.defending_team.stats.saves += 1
                 match.potential_assistant = None
                 match.add_event(ShotSave(match.current_second, goalkeeper.name, match.team_with_ball.team.name))
                 return random.choices([CornerKick(), MidfieldPlay()], [15, 85], k=1)[0]
         elif roll < 0.72:
             if match.team_with_ball:
-                match.team_with_ball.stats.shots_off_target += 1
+                match.add_event(ShotOffTargetEvent(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
             match.potential_assistant = None
             return MidfieldPlay()
         else:
@@ -329,9 +315,9 @@ class ShotOnGoal(State):
 class CornerKick(State):
 
     def execute(self, match: Match) -> 'State':
-        if match.team_with_ball:
-            match.team_with_ball.stats.corners += 1
         corner_kick_taker = match.team_with_ball.get_corner_taker()
+        if match.team_with_ball:
+            match.add_event(CornerKickEvent(match.current_second, match.team_with_ball.team.name, corner_kick_taker.player.name))
         attacker = match.team_with_ball.get_heading_player(excluded_player=corner_kick_taker)
         defender = match.defending_team.get_heading_player()
 
@@ -357,27 +343,19 @@ class AttackFoul(State):
         foul_aftermath = random.choices(FOUL_AFTERMATH_DURING_ATTACK, FOUL_AFTERMATH_DURING_ATTACK_WEIGHT, k=1)[0]
         
         fouling_team = match.home_team if match.home_team.has_player(self.fouling_player) else match.away_team
-        if fouling_team:
-            fouling_team.stats.fouls += 1
+        team_name = fouling_team.team.name if fouling_team else ""
 
         if foul_punishment == 'yellow_card':
             is_second_yellow = self.fouling_player.receive_card(foul_punishment)
             if is_second_yellow:
-                if fouling_team:
-                    fouling_team.stats.yellow_cards += 1
-                    fouling_team.stats.red_cards += 1
-                match.add_event(DoubleYellowCard(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+                match.add_event(DoubleYellowCard(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath, team=team_name))
             else:
-                if fouling_team:
-                    fouling_team.stats.yellow_cards += 1
-                match.add_event(YellowCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+                match.add_event(YellowCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath, team=team_name))
         elif foul_punishment == 'red_card':
             self.fouling_player.receive_card(foul_punishment)
-            if fouling_team:
-                fouling_team.stats.red_cards += 1
-            match.add_event(RedCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+            match.add_event(RedCardFoul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath, team=team_name))
         else:
-            match.add_event(Foul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath))
+            match.add_event(Foul(match.current_second, self.fouling_player.player.name, foul_punishment, foul_aftermath, team=team_name))
             
         target = self.fouled_player or match.player_with_ball
         if target is not None:
@@ -396,9 +374,6 @@ class PenaltyKick(State):
         def_boost = match.get_team_boost(match.defending_team)
         winner = self.winner_choose(penalty_taker.shooting * PENALTY_KICK_MODIFIER, goalkeeper.goalkeeping_score, attack_boost=atk_boost, defence_boost=def_boost)
         if winner:
-            if match.team_with_ball:
-                match.team_with_ball.stats.shots_on_target += 1
-                match.team_with_ball.stats.goals += 1
             match.add_event(PenaltyKickGoal(match.current_second, penalty_taker.player.name, match.team_with_ball.team.name))
             penalty_taker.goals += 1
             if match.team_with_ball == match.home_team:
@@ -408,10 +383,7 @@ class PenaltyKick(State):
                 match.away_score += 1
                 return KickOff(match.home_team)
         else:
-            if match.team_with_ball:
-                match.team_with_ball.stats.shots_on_target += 1
-            if match.defending_team:
-                match.defending_team.stats.saves += 1
+            match.add_event(ShotSave(match.current_second, goalkeeper.name, match.team_with_ball.team.name))
             return random.choices([MidfieldPlay(), Attack()], [80, 20], k=1)[0]
 
 
@@ -525,7 +497,8 @@ class Match:
     def __init__(self, home_team: MatchTeam, away_team: MatchTeam, event_bus: EventBus | None = None):
         self.home_team: MatchTeam = home_team
         self.away_team: MatchTeam = away_team
-        self.event_bus: EventBus | None = event_bus
+        self._event_bus: EventBus = event_bus if event_bus is not None else EventBus()
+        self.stats_tracker: MatchStatsTracker = MatchStatsTracker(self, event_bus=self._event_bus)
         self.home_score: int = 0
         self.away_score: int = 0
         self.current_state: 'State' = KickOff(random.choice([self.home_team, self.away_team]))
@@ -536,6 +509,18 @@ class Match:
         self.potential_assistant: MatchPlayer | None = None
         self.additional_time: int = 0
         self.half: int = 1
+
+    @property
+    def event_bus(self) -> EventBus | None:
+        return self._event_bus
+
+    @event_bus.setter
+    def event_bus(self, bus: EventBus | None) -> None:
+        if bus is None or bus is self._event_bus:
+            return
+        self._event_bus = bus
+        if hasattr(self, 'stats_tracker') and self.stats_tracker is not None:
+            self.stats_tracker.subscribe_to(self._event_bus)
 
     def get_home_boost(self, team: MatchTeam | None) -> float:
         return 1.05 if team is not None and team == self.home_team else 1.0
@@ -553,12 +538,12 @@ class Match:
         self.home_team.update_stamina(seconds, active_players)
         self.away_team.update_stamina(seconds, active_players)
         if self.team_with_ball:
-            self.team_with_ball.stats.possession_time += seconds
+            self.add_event(PossessionTimeEvent(self.current_second, self.team_with_ball.team.name, seconds))
 
     def add_event(self, event: MatchEvent) -> None:
         self.match_events.append(event)
-        if self.event_bus is not None:
-            self.event_bus.publish(event)
+        if self._event_bus is not None:
+            self._event_bus.publish(event)
 
     def process_injury_risk(self, player: MatchPlayer, foul_punishment: str | None = None, non_contact: bool = False) -> None:
         if player.is_injured or player.is_forced_off:
@@ -613,7 +598,7 @@ class Match:
         if self.player_with_ball and self.player_with_ball != receiver:
             self.player_with_ball.passes += 1
             if self.team_with_ball:
-                self.team_with_ball.stats.passes += 1
+                self.add_event(PassEvent(self.current_second, self.team_with_ball.team.name, self.player_with_ball.player.name, receiver.player.name))
         self.potential_assistant = self.player_with_ball
         self.player_with_ball = receiver
 
