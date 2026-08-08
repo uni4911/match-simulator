@@ -74,12 +74,18 @@ def test_league_endpoints():
 
     table_resp = league_table()
     assert table_resp["name"] == "Testowa Liga"
+    assert hasattr(table_resp["table"][0], "form")
+    assert hasattr(table_resp["table"][0], "recent_results")
 
     play_req = PlayLeagueMatch(match_index=0)
     match_resp = play_league_match(play_req)
     assert match_resp["fixtures"][0]["is_finished"] == True
     assert "player_stats" in match_resp
     assert len(match_resp["player_stats"]) > 0
+    # Check that teams involved in the played match have form updated
+    played_teams_forms = [getattr(t, "form", None) for t in match_resp["table"] if getattr(t, "matches_played", 0) > 0]
+    assert len(played_teams_forms) > 0
+    assert len(played_teams_forms[0]) > 0
 
     from main import get_league_player_stats, start_league_match_live
     player_stats_resp = get_league_player_stats("goals")

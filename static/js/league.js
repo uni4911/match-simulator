@@ -6,6 +6,7 @@ let currentLeagueData = null;
 let currentFilter = 'all'; // 'all', 'pending', 'finished'
 let currentSelectedRound = 1;
 let isSimulatingAll = false;
+let stopSeasonAfterRound = null;
 
 let allLeagueTeamsDetailed = [];
 let selectedTeamNames = new Set();
@@ -620,9 +621,32 @@ export function renderLeagueView(data) {
     // Render Fixtures for currentSelectedRound
     renderFixturesList(data.fixtures);
 
-
     // Render Player Season Stats
     renderLeaguePlayerStats(data.player_stats);
+    renderModalTable();
+}
+
+let currentLeagueSubTab = 'table';
+
+export function switchLeagueSubTab(tabName) {
+    currentLeagueSubTab = tabName;
+    const tableTabBtn = document.getElementById('league-subtab-table');
+    const statsTabBtn = document.getElementById('league-subtab-stats');
+    const tableView = document.getElementById('league-panel-table');
+    const statsView = document.getElementById('league-panel-stats');
+
+    if (tableTabBtn) tableTabBtn.classList.toggle('active', tabName === 'table');
+    if (statsTabBtn) statsTabBtn.classList.toggle('active', tabName === 'stats');
+
+    if (tableView) tableView.classList.toggle('hidden', tabName !== 'table');
+    if (statsView) statsView.classList.toggle('hidden', tabName !== 'stats');
+
+    if (tabName === 'stats') {
+        if (currentLeagueData && currentLeagueData.player_stats) {
+            renderLeaguePlayerStats(currentLeagueData.player_stats);
+        }
+        renderModalTable();
+    }
 }
 
 
@@ -672,6 +696,26 @@ export function selectRound(roundNum) {
     }
 }
 
+function renderFormBadges(recentResults) {
+    if (!recentResults || recentResults.length === 0) {
+        return '<div class="form-badges-container"><span class="form-badge-empty-text">—</span></div>';
+    }
+
+    const badgesHtml = recentResults.map(res => {
+        const r = String(res).toUpperCase();
+        if (r === 'W' || r === 'Z') {
+            return '<span class="form-badge form-badge-win" title="Wygrana (Win)">W</span>';
+        } else if (r === 'D' || r === 'R') {
+            return '<span class="form-badge form-badge-draw" title="Remis (Draw)">R</span>';
+        } else if (r === 'L' || r === 'P') {
+            return '<span class="form-badge form-badge-loss" title="Porażka (Loss)">P</span>';
+        }
+        return `<span class="form-badge form-badge-draw" title="${res}">${res}</span>`;
+    }).join('');
+
+    return `<div class="form-badges-container">${badgesHtml}</div>`;
+}
+
 function renderLeagueTable(tableData) {
     const tbody = document.getElementById('league-table-body');
     if (!tbody) return;
@@ -679,7 +723,7 @@ function renderLeagueTable(tableData) {
     tbody.innerHTML = '';
 
     if (!tableData || tableData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="empty-table-msg">Brak danych w tabeli</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-table-msg">Brak danych w tabeli</td></tr>';
         return;
     }
 
@@ -708,6 +752,8 @@ function renderLeagueTable(tableData) {
 
         tr.className = `table-row ${rankClass}`;
 
+        const formHtml = renderFormBadges(team.form || team.recent_results);
+
         tr.innerHTML = `
             <td class="text-center font-bold rank-cell">${rankBadge}</td>
             <td class="team-name-cell">
@@ -724,6 +770,7 @@ function renderLeagueTable(tableData) {
                 ${team.goal_difference > 0 ? '+' : ''}${team.goal_difference}
             </td>
             <td class="text-center highlight-col font-bold points-cell">${team.points}</td>
+            <td class="text-center form-cell">${formHtml}</td>
         `;
 
         tbody.appendChild(tr);
@@ -901,20 +948,31 @@ export async function playSingleLeagueMatch(matchIndex) {
 export async function playCurrentRoundMatches() {
     if (!currentLeagueData || !currentLeagueData.fixtures) return;
 
-    const targetRound = currentSelectedRound;
-    const unplayedCount = currentLeagueData.fixtures.filter(
+    let targetRound = currentSelectedRound;
+    let unplayedCount = currentLeagueData.fixtures.filter(
         f => (f.round_number || 1) === targetRound && !f.is_finished
     ).length;
 
+    // If current round is already finished, try moving to the next unplayed round
     if (unplayedCount === 0) {
-        alert(`Wszystkie mecze w Kolejce ${targetRound} zostały już rozegrane!`);
-        return;
+        const nextPending = currentLeagueData.fixtures.find(f => !f.is_finished);
+        if (nextPending) {
+            targetRound = nextPending.round_number || 1;
+            currentSelectedRound = targetRound;
+            renderLeagueView(currentLeagueData);
+            unplayedCount = currentLeagueData.fixtures.filter(
+                f => (f.round_number || 1) === targetRound && !f.is_finished
+            ).length;
+        } else {
+            alert(`Wszystkie mecze w Kolejce ${targetRound} (oraz w całej lidze) zostały już rozegrane!`);
+            return;
+        }
     }
 
     const simBtn = document.getElementById('sim-current-round-btn');
     if (simBtn) {
         simBtn.disabled = true;
-        simBtn.innerHTML = '⚡ SYMULOWANIE...';
+        simBtn.innerHTML = '<span class="btn-icon">⚡</span> SYMULOWANIE...';
     }
 
     while (currentLeagueData && currentLeagueData.fixtures) {
@@ -928,9 +986,35 @@ export async function playCurrentRoundMatches() {
         await new Promise(res => setTimeout(res, 80));
     }
 
+    // Automatically move to next round if available
+    if (currentLeagueData && currentLeagueData.fixtures && currentLeagueData.fixtures.length > 0) {
+        const maxRound = Math.max(...currentLeagueData.fixtures.map(f => f.round_number || 1));
+        if (targetRound < maxRound) {
+            currentSelectedRound = targetRound + 1;
+            renderLeagueView(currentLeagueData);
+        }
+    }
+
     if (simBtn) {
         simBtn.disabled = false;
-        simBtn.innerHTML = '⚡ Symuluj kolejkę';
+        simBtn.innerHTML = '<span class="btn-icon">⚡</span> SYMULUJ KOLEJKĘ';
+    }
+}
+
+export function requestStopLeagueSimulation() {
+    if (!isSimulatingAll) return;
+
+    stopSeasonAfterRound = currentSelectedRound;
+
+    const stopBtn = document.getElementById('stop-sim-all-btn');
+    if (stopBtn) {
+        stopBtn.disabled = true;
+        stopBtn.innerHTML = `<span class="btn-icon">⏳</span> DOKAŃCZANIE KOLEJKI ${stopSeasonAfterRound}...`;
+    }
+
+    const simAllBtn = document.getElementById('sim-all-matches-btn');
+    if (simAllBtn) {
+        simAllBtn.innerHTML = `<span class="btn-icon">⏳</span> ZATRZYMYWANIE...`;
     }
 }
 
@@ -943,27 +1027,88 @@ export async function playAllLeagueMatches() {
         return;
     }
 
-    const simBtn = document.getElementById('sim-all-matches-btn');
-    if (simBtn) {
-        simBtn.disabled = true;
-        simBtn.innerHTML = '⚡ SYMULOWANIE...';
+    const simAllBtn = document.getElementById('sim-all-matches-btn');
+    const simRoundBtn = document.getElementById('sim-current-round-btn');
+    const stopBtn = document.getElementById('stop-sim-all-btn');
+
+    if (simAllBtn) {
+        simAllBtn.disabled = true;
+        simAllBtn.innerHTML = '<span class="btn-icon">⚡</span> SYMULOWANIE...';
+    }
+
+    if (simRoundBtn) {
+        simRoundBtn.disabled = true;
+    }
+
+    if (stopBtn) {
+        stopBtn.classList.remove('hidden');
+        stopBtn.disabled = false;
+        stopBtn.innerHTML = '<span class="btn-icon">⏹</span> ZATRZYMAJ PO KOLEJCE';
     }
 
     isSimulatingAll = true;
+    stopSeasonAfterRound = null;
 
     while (isSimulatingAll && currentLeagueData) {
         const nextIndex = currentLeagueData.fixtures.findIndex(f => !f.is_finished);
         if (nextIndex === -1) break;
 
+        const nextRound = currentLeagueData.fixtures[nextIndex].round_number || 1;
+
+        // If stop was requested for a specific round and we reached a fixture in a future round, stop now!
+        if (stopSeasonAfterRound !== null && nextRound > stopSeasonAfterRound) {
+            break;
+        }
+
+        if (currentSelectedRound !== nextRound) {
+            currentSelectedRound = nextRound;
+        }
+
         await playSingleLeagueMatch(nextIndex);
         await new Promise(res => setTimeout(res, 80));
+
+        // If stop was requested and no unplayed matches remain in stopSeasonAfterRound, break!
+        if (stopSeasonAfterRound !== null) {
+            const remainingInRound = currentLeagueData.fixtures.filter(
+                f => (f.round_number || 1) === stopSeasonAfterRound && !f.is_finished
+            ).length;
+            if (remainingInRound === 0) {
+                break;
+            }
+        }
+    }
+
+    // Auto-advance to next round if available
+    if (currentLeagueData && currentLeagueData.fixtures && currentLeagueData.fixtures.length > 0) {
+        const maxRound = Math.max(...currentLeagueData.fixtures.map(f => f.round_number || 1));
+        if (currentSelectedRound < maxRound) {
+            const nextPending = currentLeagueData.fixtures.find(f => !f.is_finished);
+            if (nextPending && nextPending.round_number) {
+                currentSelectedRound = nextPending.round_number;
+            } else if (currentSelectedRound < maxRound) {
+                currentSelectedRound = currentSelectedRound + 1;
+            }
+            renderLeagueView(currentLeagueData);
+        }
     }
 
     isSimulatingAll = false;
+    stopSeasonAfterRound = null;
 
-    if (simBtn) {
-        simBtn.disabled = false;
-        simBtn.innerHTML = '<span class="btn-icon">⚡</span> SYMULUJ CAŁY SEZON';
+    if (stopBtn) {
+        stopBtn.classList.add('hidden');
+        stopBtn.disabled = false;
+        stopBtn.innerHTML = '<span class="btn-icon">⏹</span> ZATRZYMAJ PO KOLEJCE';
+    }
+
+    if (simAllBtn) {
+        simAllBtn.disabled = false;
+        simAllBtn.innerHTML = '<span class="btn-icon">⚡</span> SYMULUJ CAŁY SEZON';
+    }
+
+    if (simRoundBtn) {
+        simRoundBtn.disabled = false;
+        simRoundBtn.innerHTML = '<span class="btn-icon">⚡</span> SYMULUJ KOLEJKĘ';
     }
 }
 
@@ -1061,7 +1206,7 @@ function createCategoryCard(title, players, statFormatter, categoryKey) {
 }
 
 function updateModalTabButtons() {
-    document.querySelectorAll('#player-stats-modal .modal-tab-btn').forEach(btn => {
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
         const cat = btn.getAttribute('data-category');
         btn.classList.toggle('active', cat === currentModalCategory);
     });
@@ -1088,13 +1233,12 @@ export async function openPlayerStatsModal(category = 'goals') {
         modalSortDir = 'asc';
     }
 
-    const modal = document.getElementById('player-stats-modal');
+    switchLeagueSubTab('stats');
+
     const searchInput = document.getElementById('modal-player-search');
     if (searchInput) searchInput.value = '';
 
     updateModalTabButtons();
-
-    if (modal) modal.classList.remove('hidden');
 
     if (!currentLeaguePlayerStats || currentLeaguePlayerStats.length === 0) {
         try {
@@ -1108,6 +1252,11 @@ export async function openPlayerStatsModal(category = 'goals') {
     }
 
     renderModalTable();
+
+    const fullStatsSection = document.getElementById('league-player-full-stats-section');
+    if (fullStatsSection) {
+        fullStatsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 export function closePlayerStatsModal() {

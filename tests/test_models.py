@@ -187,6 +187,7 @@ def test_league_team_stats_form_modifier_ceiling_and_floor():
         stats.register_match_result(0, 2)
     assert stats.form_modifier == 0.975
     assert len(stats.recent_results) == 5
+    assert stats.form == stats.recent_results
 
 def test_match_team_starter_and_bench_status_tracking():
     from src.models import Team, FieldPlayer, Goalkeeper, Position, FORMATION_433

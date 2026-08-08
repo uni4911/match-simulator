@@ -7,10 +7,12 @@ import {
     showLeagueCreationView, 
     playAllLeagueMatches, 
     playCurrentRoundMatches,
+    requestStopLeagueSimulation,
     changeRound,
     selectRound,
     setFixturesFilter,
     selectAllTeams,
+    switchLeagueSubTab,
     openPlayerStatsModal,
     closePlayerStatsModal,
     setModalCategory,
@@ -49,6 +51,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         tabLeague.addEventListener('click', () => switchView('league'));
     }
 
+    // League sub-tab switches (Tabela i Terminarz vs Statystyki Zawodników)
+    const leagueSubTabTable = document.getElementById('league-subtab-table');
+    const leagueSubTabStats = document.getElementById('league-subtab-stats');
+
+    if (leagueSubTabTable) {
+        leagueSubTabTable.addEventListener('click', () => switchLeagueSubTab('table'));
+    }
+    if (leagueSubTabStats) {
+        leagueSubTabStats.addEventListener('click', () => switchLeagueSubTab('stats'));
+    }
+
     // League event listeners
     const createLeagueBtn = document.getElementById('create-league-btn');
     if (createLeagueBtn) {
@@ -83,6 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const simAllBtn = document.getElementById('sim-all-matches-btn');
     if (simAllBtn) {
         simAllBtn.addEventListener('click', playAllLeagueMatches);
+    }
+
+    const stopSimAllBtn = document.getElementById('stop-sim-all-btn');
+    if (stopSimAllBtn) {
+        stopSimAllBtn.addEventListener('click', requestStopLeagueSimulation);
     }
 
     const selectAllBtn = document.getElementById('select-all-teams-btn');
@@ -122,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    document.querySelectorAll('#player-stats-modal .modal-tab-btn').forEach(btn => {
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const cat = e.currentTarget.getAttribute('data-category');
             if (cat) setModalCategory(cat);

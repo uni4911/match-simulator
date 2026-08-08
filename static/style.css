@@ -836,6 +836,14 @@ body {
   box-shadow: 0 2px 8px rgba(0, 114, 206, 0.4);
 }
 
+.metro-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
 @media (max-width: 992px) {
   .metro-layout {
     flex-direction: column;
@@ -1816,17 +1824,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .league-title-block {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 }
 
 .league-badge-icon {
   font-size: 2.2rem;
+  flex-shrink: 0;
 }
 
 .league-main-title {
@@ -1836,6 +1847,7 @@ body {
   color: #ffffff;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  line-height: 1.2;
 }
 
 .league-sub-title {
@@ -1846,7 +1858,15 @@ body {
 
 .league-header-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.league-header-actions .metro-btn {
+  font-size: 0.92rem;
+  padding: 0.6rem 1.15rem;
+  white-space: nowrap;
 }
 
 .metro-btn.primary-alt {
@@ -1858,6 +1878,27 @@ body {
 .metro-btn.primary-alt:hover {
   background: linear-gradient(135deg, #48cae4, #00b4d8);
   box-shadow: 0 6px 16px rgba(0, 180, 216, 0.5);
+}
+
+.metro-btn.warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+  animation: pulse-warning-glow 1.8s infinite ease-in-out;
+}
+
+.metro-btn.warning:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.6);
+}
+
+@keyframes pulse-warning-glow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.65);
+  }
 }
 
 .metro-btn.danger {
@@ -1882,6 +1923,76 @@ body {
   height: 100%;
   background: linear-gradient(90deg, var(--metro-accent-teal), var(--metro-gold));
   transition: width 0.4s ease;
+}
+
+/* SUB-NAWIGACJA W MENU LIGI */
+.league-subnav-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1.25rem;
+  background: rgba(15, 25, 42, 0.75);
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.league-subtab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1.35rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--metro-text-sub);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.league-subtab-btn .subtab-icon {
+  font-size: 1.1rem;
+}
+
+.league-subtab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.league-subtab-btn.active {
+  background: linear-gradient(135deg, var(--metro-blue) 0%, rgba(0, 114, 206, 0.85) 100%);
+  color: #ffffff;
+  border-color: var(--metro-accent-teal);
+  box-shadow: 0 2px 10px rgba(0, 180, 216, 0.35);
+}
+
+.league-subpanel {
+  display: block;
+  width: 100%;
+  animation: fadeInSubpanel 0.25s ease forwards;
+}
+
+.league-subpanel.hidden {
+  display: none !important;
+}
+
+@keyframes fadeInSubpanel {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* TABELA LIGOWA */
@@ -1989,6 +2100,72 @@ body {
   padding: 2rem;
   color: var(--metro-text-sub);
   font-style: italic;
+}
+
+/* FORMA ZESPOŁU - KWADRATY WYNIKÓW */
+.form-cell {
+  padding: 0.5rem 0.6rem !important;
+  vertical-align: middle;
+}
+
+.form-badges-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 120px;
+}
+
+.form-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  color: #ffffff;
+  cursor: default;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.form-badge:hover {
+  transform: translateY(-2px) scale(1.12);
+  filter: brightness(1.18);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Zielony kwadrat dla wygranej / Zwycięstwa (W) */
+.form-badge-win {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid #34d399;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Szary kwadrat dla remisu (R) */
+.form-badge-draw {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  border: 1px solid #94a3b8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Czerwony kwadrat dla porażki (P) */
+.form-badge-loss {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: 1px solid #f87171;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.form-badge-empty-text {
+  font-size: 0.85rem;
+  color: var(--metro-text-sub);
+  opacity: 0.6;
 }
 
 /* FILTRY I TERMINARZ LIGOWY */

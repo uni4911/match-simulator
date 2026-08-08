@@ -974,6 +974,10 @@ class LeagueTeamStats:
     def team_name(self) -> str:
         return self.team.name
 
+    @property
+    def form(self) -> list[str]:
+        return self.recent_results
+
     def register_match_result(self, goals_scored: int, goals_conceded: int) -> None:
         diff = goals_scored - goals_conceded
         self.goals_scored += goals_scored

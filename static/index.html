@@ -390,115 +390,174 @@
 
                 <!-- Container 2: AKTYWNA LIGA (gdy liga została utworzona) -->
                 <div id="league-active-container" class="metro-league-active-wrapper hidden">
-                    <div class="metro-layout">
-                        <!-- LEWY PANEL: TABELA LIGOWA -->
-                        <main class="metro-main-content">
-                            <section class="tile-box tile-league-header">
-                                <div class="league-header-inner">
-                                    <div class="league-title-block">
-                                        <span class="league-badge-icon">🏆</span>
-                                        <div>
-                                            <h2 id="active-league-name" class="league-main-title">Moja Liga</h2>
-                                            <span id="league-progress-text" class="league-sub-title">0 z 0 meczów rozegranych</span>
-                                        </div>
-                                    </div>
-                                    <div class="league-header-actions">
-                                        <button id="sim-all-matches-btn" type="button" class="metro-btn primary-alt">
-                                            <span class="btn-icon">⚡</span> SYMULUJ CAŁY SEZON
-                                        </button>
-                                        <button id="reset-league-btn" type="button" class="metro-btn danger">
-                                            <span class="btn-icon">➕</span> NOWA LIGA
-                                        </button>
-                                    </div>
+                    <section class="tile-box tile-league-header">
+                        <div class="league-header-inner">
+                            <div class="league-title-block">
+                                <span class="league-badge-icon">🏆</span>
+                                <div>
+                                    <h2 id="active-league-name" class="league-main-title">Moja Liga</h2>
+                                    <span id="league-progress-text" class="league-sub-title">0 z 0 meczów rozegranych</span>
                                 </div>
-                                <div class="league-progress-bar-container">
-                                    <div id="league-progress-bar" class="league-progress-bar-fill" style="width: 0%;"></div>
-                                </div>
-                            </section>
-
-                            <section class="tile-box tile-events">
-                                <div class="tile-header">
-                                    <div class="tile-header-title">
-                                        <span class="header-icon">📊</span> TABELA LIGOWA
-                                    </div>
-                                    <div id="league-teams-count-badge" class="tile-badge-info">0 DRUŻYN</div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="metro-table">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center">#</th>
-                                                <th>DRUŻYNA</th>
-                                                <th class="text-center" title="Mecze rozegrane">M</th>
-                                                <th class="text-center" title="Zwycięstwa">Z</th>
-                                                <th class="text-center" title="Remisy">R</th>
-                                                <th class="text-center" title="Porażki">P</th>
-                                                <th class="text-center" title="Bramki zdobyte">BZ</th>
-                                                <th class="text-center" title="Bramki stracone">BS</th>
-                                                <th class="text-center" title="Różnica bramek">RB</th>
-                                                <th class="text-center highlight-col" title="Punkty">PKT</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="league-table-body">
-                                            <!-- Dynamicznie generowane wiersze -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </section>
-                        </main>
-
-                        <!-- PRAWY PANEL: TERMINARZ KOLEJEK -->
-                        <aside class="tile-box tile-stats" style="width: 450px;">
-                            <div class="tile-header">
-                                <div class="tile-header-title">
-                                    <span class="header-icon">📅</span> TERMINARZ MECZÓW
-                                </div>
-                                <button id="sim-current-round-btn" type="button" class="stats-refresh-btn" style="font-size:0.82rem; font-weight:700;" title="Symuluj całą wybraną kolejkę">
-                                    ⚡ Symuluj kolejkę
+                            </div>
+                            <div class="league-header-actions">
+                                <button id="sim-current-round-btn" type="button" class="metro-btn primary" title="Symuluj całą wybraną kolejkę">
+                                    <span class="btn-icon">⚡</span> SYMULUJ KOLEJKĘ
+                                </button>
+                                <button id="sim-all-matches-btn" type="button" class="metro-btn primary-alt" title="Symuluj cały sezon ligowy">
+                                    <span class="btn-icon">⚡</span> SYMULUJ CAŁY SEZON
+                                </button>
+                                <button id="stop-sim-all-btn" type="button" class="metro-btn warning hidden" title="Zatrzymaj symulację po zakończeniu bieżącej kolejki">
+                                    <span class="btn-icon">⏹</span> ZATRZYMAJ PO KOLEJCE
+                                </button>
+                                <button id="reset-league-btn" type="button" class="metro-btn danger" title="Utwórz nową ligę">
+                                    <span class="btn-icon">➕</span> NOWA LIGA
                                 </button>
                             </div>
-
-                            <!-- NAWIGACJA PO KOLEJKACH -->
-                            <div class="round-navigator-box">
-                                <button type="button" id="prev-round-btn" class="round-nav-arrow" title="Poprzednia kolejka">◀</button>
-                                
-                                <div class="round-select-wrapper">
-                                    <select id="round-select-dropdown" class="round-select-element"></select>
-                                </div>
-
-                                <button type="button" id="next-round-btn" class="round-nav-arrow" title="Następna kolejka">▶</button>
-                            </div>
-
-                            <div class="fixtures-filter-bar">
-                                <button type="button" id="filter-fixtures-all" class="fixture-filter-btn active">Wszystkie w kolejce</button>
-                                <button type="button" id="filter-fixtures-pending" class="fixture-filter-btn">Do rozegrania</button>
-                                <button type="button" id="filter-fixtures-finished" class="fixture-filter-btn">Zakończone</button>
-                            </div>
-
-                            <div id="league-fixtures-list" class="metro-fixtures-list">
-                                <!-- Dynamicznie generowana lista spotkań dla wybranej kolejki -->
-                            </div>
-                        </aside>
-                    </div>
-
-                    <!-- DOLNY PANEL: STATYSTYKI INDYWIDUALNE ZAWODNIKÓW (SEZON) -->
-                    <section class="tile-box tile-player-season-stats">
-                        <div class="tile-header">
-                            <div class="tile-header-title">
-                                <span class="header-icon">🌟</span> LIDERZY STATYSTYK INDYWIDUALNYCH
-                            </div>
-                            <button id="show-all-player-stats-btn" type="button" class="metro-btn-sm" style="background: var(--metro-accent-blue); font-weight: 700;">
-                                🔍 POKAŻ PEŁNĄ LISTĘ GRACZY
-                            </button>
                         </div>
-
-                        <div id="league-player-stats-grid" class="league-stats-grid">
-                            <!-- Dynamicznie generowane karty Top 5 -->
+                        <div class="league-progress-bar-container">
+                            <div id="league-progress-bar" class="league-progress-bar-fill" style="width: 0%;"></div>
                         </div>
                     </section>
+
+                    <!-- PASEK PRZEŁĄCZANIA ZAKŁADEK W MENU LIGI -->
+                    <div class="league-subnav-bar">
+                        <button type="button" id="league-subtab-table" class="league-subtab-btn active">
+                            <span class="subtab-icon">📊</span>
+                            <span>TABELA I TERMINARZ</span>
+                        </button>
+                        <button type="button" id="league-subtab-stats" class="league-subtab-btn">
+                            <span class="subtab-icon">📈</span>
+                            <span>STATYSTYKI ZAWODNIKÓW</span>
+                        </button>
+                    </div>
+
+                    <!-- ZAKŁADKA 1: TABELA I TERMINARZ -->
+                    <div id="league-panel-table" class="league-subpanel">
+                        <div class="metro-layout">
+                            <!-- LEWY PANEL: TABELA LIGOWA -->
+                            <main class="metro-main-content">
+                                <section class="tile-box tile-events">
+                                    <div class="tile-header">
+                                        <div class="tile-header-title">
+                                            <span class="header-icon">📊</span> TABELA LIGOWA
+                                        </div>
+                                        <div id="league-teams-count-badge" class="tile-badge-info">0 DRUŻYN</div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="metro-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">#</th>
+                                                    <th>DRUŻYNA</th>
+                                                    <th class="text-center" title="Mecze rozegrane">M</th>
+                                                    <th class="text-center" title="Zwycięstwa">Z</th>
+                                                    <th class="text-center" title="Remisy">R</th>
+                                                    <th class="text-center" title="Porażki">P</th>
+                                                    <th class="text-center" title="Bramki zdobyte">BZ</th>
+                                                    <th class="text-center" title="Bramki stracone">BS</th>
+                                                    <th class="text-center" title="Różnica bramek">RB</th>
+                                                    <th class="text-center highlight-col" title="Punkty">PKT</th>
+                                                    <th class="text-center" title="Forma (ostatnie 5 meczów)">FORMA</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="league-table-body">
+                                                <!-- Dynamicznie generowane wiersze -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </main>
+
+                            <!-- PRAWY PANEL: TERMINARZ KOLEJEK -->
+                            <aside class="tile-box tile-stats" style="width: 450px;">
+                                <div class="tile-header">
+                                    <div class="tile-header-title">
+                                        <span class="header-icon">📅</span> TERMINARZ MECZÓW
+                                    </div>
+                                </div>
+
+                                <!-- NAWIGACJA PO KOLEJKACH -->
+                                <div class="round-navigator-box">
+                                    <button type="button" id="prev-round-btn" class="round-nav-arrow" title="Poprzednia kolejka">◀</button>
+                                    
+                                    <div class="round-select-wrapper">
+                                        <select id="round-select-dropdown" class="round-select-element"></select>
+                                    </div>
+
+                                    <button type="button" id="next-round-btn" class="round-nav-arrow" title="Następna kolejka">▶</button>
+                                </div>
+
+                                <div class="fixtures-filter-bar">
+                                    <button type="button" id="filter-fixtures-all" class="fixture-filter-btn active">Wszystkie w kolejce</button>
+                                    <button type="button" id="filter-fixtures-pending" class="fixture-filter-btn">Do rozegrania</button>
+                                    <button type="button" id="filter-fixtures-finished" class="fixture-filter-btn">Zakończone</button>
+                                </div>
+
+                                <div id="league-fixtures-list" class="metro-fixtures-list">
+                                    <!-- Dynamicznie generowana lista spotkań dla wybranej kolejki -->
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+
+                    <!-- ZAKŁADKA 2: STATYSTYKI ZAWODNIKÓW (OKNO STATYSTYK) -->
+                    <div id="league-panel-stats" class="league-subpanel hidden">
+                        <!-- GÓRNY PANEL: LIDERZY STATYSTYK INDYWIDUALNYCH (Karty Top 5) -->
+                        <section class="tile-box tile-player-season-stats">
+                            <div class="tile-header">
+                                <div class="tile-header-title">
+                                    <span class="header-icon">🌟</span> LIDERZY STATYSTYK INDYWIDUALNYCH
+                                </div>
+                            </div>
+
+                            <div id="league-player-stats-grid" class="league-stats-grid">
+                                <!-- Dynamicznie generowane karty Top 5 -->
+                            </div>
+                        </section>
+
+                        <!-- DOLNY PANEL: PEŁNA TABELA STATYSTYK SEZONU (Wyszukiwarka, filtry, sortowanie) -->
+                        <section class="tile-box tile-events" id="league-player-full-stats-section" style="margin-top: 1.25rem;">
+                            <div class="tile-header">
+                                <div class="tile-header-title">
+                                    <span class="header-icon">📊</span> PEŁNA LISTA STATYSTYK GRACZY SEZONU
+                                </div>
+                            </div>
+
+                            <div class="modal-filter-row" style="padding: 0.8rem 1rem; background: rgba(0,0,0,0.25); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                                <input type="text" id="modal-player-search" class="metro-select" placeholder="🔍 Szukaj zawodnika..." style="max-width: 280px; padding: 0.4rem 0.8rem;">
+                                <div class="modal-tab-buttons">
+                                    <button type="button" class="modal-tab-btn active" data-category="goals">⚽ Strzelcy</button>
+                                    <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asysty</button>
+                                    <button type="button" class="modal-tab-btn" data-category="cards">🟨 Kartki</button>
+                                    <button type="button" class="modal-tab-btn" data-category="cleansheets">🧤 Czyste Konta</button>
+                                    <button type="button" class="modal-tab-btn" data-category="all">📋 Wszyscy</button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive" style="max-height: 560px; overflow-y: auto;">
+                                <table class="metro-table">
+                                    <thead>
+                                        <tr id="modal-player-stats-thead-row">
+                                            <th class="text-center sortable-header" data-sort="rank">#</th>
+                                            <th class="sortable-header" data-sort="name">ZAWODNIK</th>
+                                            <th class="text-center sortable-header" data-sort="position">POZYCJA</th>
+                                            <th class="text-center sortable-header" data-sort="matches" title="Mecze rozegrane">MECZE</th>
+                                            <th class="text-center sortable-header highlight-col" data-sort="goals">BRAMKI</th>
+                                            <th class="text-center sortable-header" data-sort="assists">ASYSTY</th>
+                                            <th class="text-center sortable-header" data-sort="cards">KARTKI (🟨/🟥)</th>
+                                            <th class="text-center sortable-header" data-sort="cleansheets">CZYSTE KONTA</th>
+                                            <th class="text-center sortable-header" data-sort="passes">PODANIA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modal-player-stats-tbody">
+                                        <!-- Dynamicznie generowane wiersze zawodników -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <!-- MODAL: PEŁNE STATYSTYKI GRACZY W LIDZE -->
         <div id="player-stats-modal" class="metro-modal-overlay hidden">

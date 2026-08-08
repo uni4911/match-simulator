@@ -81,6 +81,7 @@ class LeagueTeamStatsSchema(BaseModel):
     wins: int 
     draws: int 
     loses: int
+    recent_results: list[str] = Field(default_factory=list)
 
     @computed_field
     def points(self) -> int:
@@ -89,6 +90,10 @@ class LeagueTeamStatsSchema(BaseModel):
     @computed_field
     def goal_difference(self) -> int:
         return self.goals_scored - self.goals_conceded
+
+    @computed_field
+    def form(self) -> list[str]:
+        return self.recent_results
 
 class LeagueMatchSchema(BaseModel):
     home_team_name: str
