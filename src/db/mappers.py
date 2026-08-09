@@ -21,7 +21,8 @@ class PlayerMapper:
                 positioning=model.positioning or 50,
                 age=model.age,
                 nationality=model.nationality,
-                height=model.height
+                height=model.height,
+                overall=model.overall
             )
         else:
             player = FieldPlayer(
@@ -37,7 +38,8 @@ class PlayerMapper:
                 heading=model.heading or 50,
                 height=model.height,
                 age=model.age,
-                nationality=model.nationality
+                nationality=model.nationality,
+                overall=model.overall
             )
         player.fitness = model.fitness
         player.form = model.form
@@ -55,6 +57,7 @@ class PlayerMapper:
                 fitness=player.fitness,
                 form=player.form,
                 height=player.height,
+                overall=getattr(player, '_overall', player.overall),
                 diving=player.diving,
                 handling=player.handling,
                 kicking=player.kicking,
@@ -72,6 +75,7 @@ class PlayerMapper:
                 fitness=player.fitness,
                 form=player.form,
                 height=player.height,
+                overall=getattr(player, '_overall', player.overall),
                 pace=player.base_pace,
                 shooting=player.base_shooting,
                 passing=player.base_passing,
@@ -90,6 +94,7 @@ class PlayerMapper:
                 fitness=player.fitness,
                 form=player.form,
                 height=player.height,
+                overall=getattr(player, '_overall', player.overall),
             )
 
     @staticmethod
@@ -102,6 +107,7 @@ class PlayerMapper:
         model.fitness = player.fitness
         model.form = player.form
         model.height = player.height
+        model.overall = getattr(player, '_overall', player.overall)
         if isinstance(player, Goalkeeper):
             model.diving = player.diving
             model.handling = player.handling

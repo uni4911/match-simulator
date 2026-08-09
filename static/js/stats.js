@@ -1,4 +1,5 @@
 import { getTeamInitials, getShortPosition, getPositionClass } from './helpers.js';
+import { openPlayerProfile } from './player-profile.js';
 
 let currentStatsData = null;
 let activeStatsTab = 'home';
@@ -69,7 +70,25 @@ export function createPlayerStatCard(player, index, forceBench = false) {
         statusBadgeClass = 'bench';
     }
 
-    card.className = `player-stat-card ${cardStatusClass}`;
+    const isLeagueContext = Boolean(document.getElementById('league-view') && !document.getElementById('league-view').classList.contains('hidden')) || Boolean(document.getElementById('match-details-modal') && !document.getElementById('match-details-modal').classList.contains('hidden'));
+
+    if (isLeagueContext) {
+        card.className = `player-stat-card ${cardStatusClass} clickable-player-card`;
+        card.setAttribute('title', 'Kliknij, aby zobaczyć profil gracza w lidze');
+        card.addEventListener('click', () => {
+            const pName = player.short_name || player.name || player.player_name || player.full_name;
+            const tName = player.team_name || (currentStatsData ? (activeStatsTab === 'home' ? currentStatsData.home_team_name : currentStatsData.away_team_name) : '');
+            const mdModal = document.getElementById('match-details-modal');
+            if (mdModal) mdModal.classList.add('hidden');
+            const statsModal = document.getElementById('player-stats-modal');
+            if (statsModal) statsModal.classList.add('hidden');
+            if (window.openPlayerProfile) {
+                window.openPlayerProfile(pName, tName);
+            }
+        });
+    } else {
+        card.className = `player-stat-card ${cardStatusClass}`;
+    }
 
     const mainRow = document.createElement('div');
     mainRow.className = 'player-card-main';
@@ -261,6 +280,17 @@ export function renderPlayerStats() {
             else if (rNum < 6.0) rClass = 'low';
             motmRatingEl.className = `stat-pill rating ${rClass}`;
             motmRatingEl.textContent = `⭐ ${rVal}`;
+        }
+        if (motmEl) {
+            motmEl.classList.add('clickable-player-card');
+            motmEl.setAttribute('title', 'Kliknij, aby zobaczyć profil gracza meczu');
+            motmEl.onclick = () => {
+                const pName = motm.short_name || motm.name || motm.player_name || motm.full_name;
+                const tName = motm.team_name || '';
+                if (window.openPlayerProfile) {
+                    window.openPlayerProfile(pName, tName);
+                }
+            };
         }
     }
 

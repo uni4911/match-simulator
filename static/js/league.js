@@ -1,6 +1,7 @@
 import { getTeamInitials, getShortPosition, getPositionClass, getEventIcon } from './helpers.js';
 import { renderMatchData, switchView, startLiveStream } from './match.js';
 import { fetchPlayerStats, createPlayerStatCard } from './stats.js';
+import { openPlayerProfile } from './player-profile.js';
 
 let currentLeagueData = null;
 let currentFilter = 'all'; // 'all', 'pending', 'finished'
@@ -19,6 +20,7 @@ let isTeamEventsBound = false;
 
 export async function initLeagueView() {
     await loadLeagueTeamOptions();
+    bindLeagueStatsTableEvents();
     await fetchLeagueTable();
 }
 
@@ -494,13 +496,15 @@ export async function fetchLeagueTable() {
         }
 
         const data = await response.json();
+        if (!data || !data.teams || data.teams.length === 0) {
+            showLeagueCreationView();
+            return;
+        }
+
         currentLeagueData = data;
-        
-        // Auto select first round with unplayed matches if not set
         autoSelectActiveRound(data);
         renderLeagueView(data);
     } catch (err) {
-        console.error('Błąd podczas pobierania stanu ligi:', err);
         showLeagueCreationView();
     }
 }
@@ -627,19 +631,42 @@ export function renderLeagueView(data) {
 }
 
 let currentLeagueSubTab = 'table';
+let previousLeagueSubTab = 'table';
+
+export function getCurrentLeagueData() {
+    return currentLeagueData;
+}
+
+export function getPreviousLeagueSubTab() {
+    return previousLeagueSubTab || 'table';
+}
 
 export function switchLeagueSubTab(tabName) {
+    if (tabName !== 'player') {
+        previousLeagueSubTab = tabName;
+    }
     currentLeagueSubTab = tabName;
+
     const tableTabBtn = document.getElementById('league-subtab-table');
     const statsTabBtn = document.getElementById('league-subtab-stats');
+    const playerTabBtn = document.getElementById('league-subtab-player');
+
     const tableView = document.getElementById('league-panel-table');
     const statsView = document.getElementById('league-panel-stats');
+    const playerView = document.getElementById('league-panel-player');
 
     if (tableTabBtn) tableTabBtn.classList.toggle('active', tabName === 'table');
     if (statsTabBtn) statsTabBtn.classList.toggle('active', tabName === 'stats');
+    if (playerTabBtn) {
+        playerTabBtn.classList.toggle('active', tabName === 'player');
+        if (tabName === 'player') {
+            playerTabBtn.classList.remove('hidden');
+        }
+    }
 
     if (tableView) tableView.classList.toggle('hidden', tabName !== 'table');
     if (statsView) statsView.classList.toggle('hidden', tabName !== 'stats');
+    if (playerView) playerView.classList.toggle('hidden', tabName !== 'player');
 
     if (tabName === 'stats') {
         if (currentLeagueData && currentLeagueData.player_stats) {
@@ -788,13 +815,18 @@ export function setFixturesFilter(filter) {
     if (pendingBtn) pendingBtn.classList.toggle('active', filter === 'pending');
     if (finishedBtn) finishedBtn.classList.toggle('active', filter === 'finished');
 
+    document.querySelectorAll('.fixtures-filter-btn, .fixture-filter-btn').forEach(btn => {
+        const f = btn.getAttribute('data-filter');
+        if (f) btn.classList.toggle('active', f === filter);
+    });
+
     if (currentLeagueData && currentLeagueData.fixtures) {
         renderFixturesList(currentLeagueData.fixtures);
     }
 }
 
 function renderFixturesList(fixtures) {
-    const listContainer = document.getElementById('league-fixtures-list');
+    const listContainer = document.getElementById('fixtures-container') || document.getElementById('league-fixtures-list');
     if (!listContainer) return;
 
     listContainer.innerHTML = '';
@@ -1146,7 +1178,7 @@ const COLUMN_CONFIGS = {
         { key: 'team', title: 'DRUŻYNA', align: '' },
         { key: 'position', title: 'POZYCJA', align: 'text-center' },
         { key: 'matches', title: 'MECZE', align: 'text-center' },
-        { key: 'rating', title: '⭐ ŚR. OCENA', align: 'text-center highlight-col' }
+        { key: 'rating', title: '⭐ ŚR. OCENA MECZOWA', align: 'text-center highlight-col' }
     ],
     motm: [
         { key: 'rank', title: '#', align: 'text-center' },
@@ -1192,7 +1224,7 @@ const COLUMN_CONFIGS = {
 
 export function renderLeaguePlayerStats(playerStats) {
     currentLeaguePlayerStats = playerStats || [];
-    const container = document.getElementById('league-player-stats-grid');
+    const container = document.getElementById('league-player-stats-grid') || document.getElementById('league-leaders-grid');
     if (!container) return;
 
     if (!playerStats || playerStats.length === 0) {
@@ -1237,14 +1269,14 @@ export function renderLeaguePlayerStats(playerStats) {
         .sort((a, b) => b.clean_sheets - a.clean_sheets || (a.short_name || a.player_name || '').localeCompare(b.short_name || b.player_name || ''))
         .slice(0, 5);
 
-    const ratingCardTitle = hasMin5 ? '⭐ ŚREDNIA OCEN (>5 meczów)' : '⭐ ŚREDNIA OCEN';
+    const ratingCardTitle = hasMin5 ? '⭐ ŚR. OCEN MECZOWYCH (>5 m.)' : '⭐ ŚR. OCEN MECZOWYCH';
 
     container.innerHTML = `
         ${createCategoryCard('⚽ NAJLEPSI STRZELCY', topScorers, p => `${p.goals} gol(i)`, 'goals')}
         ${createCategoryCard('🅰️ NAJLEPSI ASYSTENCI', topAssists, p => `${p.assists} asyst`, 'assists')}
         ${createCategoryCard(ratingCardTitle, topRatings, p => `⭐ ${(p.average_rating || 0).toFixed(2)}`, 'rating')}
         ${createCategoryCard('👑 ZAWODNIK MECZU', topMotm, p => `${p.motm_awards || 0}x 👑`, 'motm')}
-        ${createCategoryCard('🟨 NAJWIĘCEJ KARTEK', mostCards, p => `${p.yellow_cards}🟨 ${p.red_cards}🟥`, 'cards')}
+        ${createCategoryCard('🟨 NAJWIĘCEJ KARTEK', mostCards, p => `${p.yellow_cards} 🟨 / ${p.red_cards} 🟥`, 'cards')}
         ${createCategoryCard('🧤 CZYSTE KONTA', cleanSheets, p => `${p.clean_sheets} mecz(e)`, 'cleansheets')}
     `;
 
@@ -1252,6 +1284,20 @@ export function renderLeaguePlayerStats(playerStats) {
         btn.addEventListener('click', () => {
             const cat = btn.getAttribute('data-category');
             openPlayerStatsModal(cat || 'goals');
+        });
+    });
+
+    container.querySelectorAll('.clickable-player-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const pName = item.getAttribute('data-player-name');
+            const tName = item.getAttribute('data-team-name') || '';
+            const statsModal = document.getElementById('player-stats-modal');
+            if (statsModal) statsModal.classList.add('hidden');
+            const mdModal = document.getElementById('match-details-modal');
+            if (mdModal) mdModal.classList.add('hidden');
+            if (pName && window.openPlayerProfile) {
+                window.openPlayerProfile(pName, tName);
+            }
         });
     });
 }
@@ -1266,7 +1312,7 @@ function createCategoryCard(title, players, statFormatter, categoryKey) {
         const teamBadge = teamName ? getTeamInitials(teamName) : '';
 
         return `
-            <div class="stat-player-item ${isTop ? 'rank-top' : ''}">
+            <div class="stat-player-item clickable-player-item ${isTop ? 'rank-top' : ''}" data-player-name="${playerName}" data-team-name="${teamName}" title="Kliknij, aby zobaczyć profil zawodnika: ${playerName}">
                 <div class="stat-player-left">
                     <span class="stat-player-rank">${rankBadge}</span>
                     <div class="stat-player-info">
@@ -1305,7 +1351,7 @@ function createCategoryCard(title, players, statFormatter, categoryKey) {
 }
 
 function updateModalTabButtons() {
-    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+    document.querySelectorAll('#modal-category-tabs .modal-tab-btn').forEach(btn => {
         const cat = btn.getAttribute('data-category');
         btn.classList.toggle('active', cat === currentModalCategory);
     });
@@ -1519,29 +1565,26 @@ export function renderModalTable() {
 
     let players = [...currentLeaguePlayerStats];
 
-    if (currentModalSearch.trim() !== '') {
-        const query = currentModalSearch.toLowerCase().trim();
+    // Filter by search
+    if (currentModalSearch) {
+        const q = currentModalSearch.toLowerCase();
         players = players.filter(p => {
-            const nameVal = (p.short_name || p.player_name || p.name || p.full_name || '').toLowerCase();
-            const teamVal = (p.team_name || '').toLowerCase();
-            const posVal = (p.position || '').toLowerCase();
-            const shortPosVal = getShortPosition(p.position).toLowerCase();
-            return nameVal.includes(query) || teamVal.includes(query) || posVal.includes(query) || shortPosVal.includes(query);
+            const name = (p.short_name || p.player_name || p.name || p.full_name || '').toLowerCase();
+            const team = (p.team_name || '').toLowerCase();
+            return name.includes(q) || team.includes(q);
         });
     }
 
+    // Filter by category specifics
     if (currentModalCategory === 'cleansheets') {
         players = players.filter(p => p.position === 'GOALKEEPER');
-    } else if (currentModalCategory === 'rating') {
-        if (players.some(p => p.matches_played > 5)) {
-            players = players.filter(p => p.matches_played > 5);
-        }
     }
 
+    // Sort players
     players.sort((a, b) => {
         let cmp = 0;
-        const getPName = (x) => x.short_name || x.player_name || x.name || x.full_name || '';
-        const getPTeam = (x) => x.team_name || '';
+        const getPName = p => p.short_name || p.player_name || p.name || p.full_name || '';
+        const getPTeam = p => p.team_name || '';
 
         if (modalSortKey === 'goals') {
             cmp = (b.goals - a.goals) || (b.assists - a.assists) || getPName(a).localeCompare(getPName(b));
@@ -1589,8 +1632,45 @@ export function renderModalTable() {
 
     tbody.innerHTML = players.map((p, idx) => {
         const cellsHtml = cols.map(col => renderCellContent(col.key, p, idx)).join('');
-        return `<tr class="table-row">${cellsHtml}</tr>`;
+        const pName = p.short_name || p.player_name || p.name || p.full_name || '';
+        const tName = p.team_name || '';
+        return `<tr class="table-row clickable-player-row" data-player-name="${pName}" data-team-name="${tName}" title="Kliknij, aby otworzyć profil gracza: ${pName}">${cellsHtml}</tr>`;
     }).join('');
+
+    tbody.querySelectorAll('.clickable-player-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const pName = row.getAttribute('data-player-name');
+            const tName = row.getAttribute('data-team-name') || '';
+            const statsModal = document.getElementById('player-stats-modal');
+            if (statsModal) statsModal.classList.add('hidden');
+            const mdModal = document.getElementById('match-details-modal');
+            if (mdModal) mdModal.classList.add('hidden');
+            if (pName && window.openPlayerProfile) {
+                window.openPlayerProfile(pName, tName);
+            }
+        });
+    });
+}
+
+export function bindLeagueStatsTableEvents() {
+    const categoryTabs = document.querySelectorAll('#modal-category-tabs .modal-tab-btn');
+    categoryTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.getAttribute('data-category');
+            if (cat) setModalCategory(cat);
+        });
+    });
+
+    const searchInput = document.getElementById('modal-player-search');
+    if (searchInput) {
+        let timer = null;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                setModalSearch(searchInput.value.trim());
+            }, 250);
+        });
+    }
 }
 
 export function openMatchDetailsModal(fixture) {
@@ -1776,7 +1856,15 @@ export function switchMatchDetailsTab(tabName) {
     });
 }
 
+export function openMatchByIndex(fixIdx) {
+    if (currentLeagueData && currentLeagueData.fixtures && currentLeagueData.fixtures[fixIdx]) {
+        openMatchDetailsModal(currentLeagueData.fixtures[fixIdx]);
+    }
+}
+
 window.openPlayerStatsModal = openPlayerStatsModal;
 window.openMatchDetailsModal = openMatchDetailsModal;
+window.openMatchByIndex = openMatchByIndex;
+
 
 

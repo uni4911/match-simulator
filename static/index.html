@@ -559,6 +559,10 @@
                             <span class="subtab-icon">📈</span>
                             <span>STATYSTYKI ZAWODNIKÓW</span>
                         </button>
+                        <button type="button" id="league-subtab-player" class="league-subtab-btn hidden">
+                            <span class="subtab-icon">👤</span>
+                            <span id="league-subtab-player-label">PROFIL ZAWODNIKA</span>
+                        </button>
                     </div>
 
                     <!-- ZAKŁADKA 1: TABELA I TERMINARZ -->
@@ -617,49 +621,55 @@
                                     <button type="button" id="next-round-btn" class="round-nav-arrow" title="Następna kolejka">▶</button>
                                 </div>
 
+                                <!-- FILTR SPOTKAŃ W TERMINARZU -->
                                 <div class="fixtures-filter-bar">
-                                    <button type="button" id="filter-fixtures-all" class="fixture-filter-btn active">Wszystkie w kolejce</button>
-                                    <button type="button" id="filter-fixtures-pending" class="fixture-filter-btn">Do rozegrania</button>
-                                    <button type="button" id="filter-fixtures-finished" class="fixture-filter-btn">Zakończone</button>
+                                    <button type="button" id="filter-fixtures-all" class="fixtures-filter-btn active" data-filter="all">Wszystkie</button>
+                                    <button type="button" id="filter-fixtures-finished" class="fixtures-filter-btn" data-filter="finished">Rozegrane</button>
+                                    <button type="button" id="filter-fixtures-pending" class="fixtures-filter-btn" data-filter="pending">Do rozegrania</button>
                                 </div>
 
-                                <div id="league-fixtures-list" class="metro-fixtures-list">
-                                    <!-- Dynamicznie generowana lista spotkań dla wybranej kolejki -->
+                                <div id="fixtures-container" class="metro-fixtures-list">
+                                    <!-- Dynamicznie generowane kafelki meczów -->
                                 </div>
                             </aside>
                         </div>
                     </div>
 
-                    <!-- ZAKŁADKA 2: STATYSTYKI ZAWODNIKÓW (OKNO STATYSTYK) -->
+                    <!-- ZAKŁADKA 2: STATYSTYKI ZAWODNIKÓW W RAMACH LIGI -->
                     <div id="league-panel-stats" class="league-subpanel hidden">
-                        <!-- GÓRNY PANEL: LIDERZY STATYSTYK INDYWIDUALNYCH (Karty Top 5) -->
+                        <!-- Sekcja 1: Kafelki Liderów Kategorii (Top 5) -->
                         <section class="tile-box tile-player-season-stats">
                             <div class="tile-header">
                                 <div class="tile-header-title">
-                                    <span class="header-icon">🌟</span> LIDERZY STATYSTYK INDYWIDUALNYCH
+                                    <span class="header-icon">🌟</span> LIDERZY STATYSTYK INDYWIDUALNYCH (TOP 5)
                                 </div>
                             </div>
-
                             <div id="league-player-stats-grid" class="league-stats-grid">
                                 <!-- Dynamicznie generowane karty Top 5 -->
                             </div>
                         </section>
 
-                        <!-- DOLNY PANEL: PEŁNA TABELA STATYSTYK SEZONU (Wyszukiwarka, filtry, sortowanie) -->
-                        <section class="tile-box tile-events" id="league-player-full-stats-section" style="margin-top: 1.25rem;">
-                            <div class="tile-header">
+                        <!-- Sekcja 2: Pełna Tabela Zawodników z Filtrami -->
+                        <section class="tile-box tile-league-stats-table" style="margin-top: 1.5rem;">
+                            <div class="tile-header" style="flex-wrap: wrap; gap: 0.75rem;">
                                 <div class="tile-header-title">
-                                    <span class="header-icon">📊</span> PEŁNA LISTA STATYSTYK GRACZY SEZONU
+                                    <span class="header-icon">📋</span> PEŁNA LISTA I STATYSTYKI ZAWODNIKÓW LIGI
+                                </div>
+                                <div class="table-actions-group">
+                                    <div class="search-box-wrapper">
+                                        <span class="search-icon">🔍</span>
+                                        <input type="text" id="modal-player-search" class="metro-search-input" placeholder="Szukaj zawodnika lub klubu..." autocomplete="off">
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="modal-filter-row" style="padding: 0.8rem 1rem; background: rgba(0,0,0,0.25); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-                                <input type="text" id="modal-player-search" class="metro-select" placeholder="🔍 Szukaj zawodnika lub klubu..." style="max-width: 280px; padding: 0.4rem 0.8rem;">
-                                <div class="modal-tab-buttons">
+                            <!-- Pasek zakładek kategorii w pełnej tabeli -->
+                            <div class="modal-category-tabs-wrapper">
+                                <div class="modal-tab-buttons" id="modal-category-tabs">
                                     <button type="button" class="modal-tab-btn active" data-category="goals">⚽ Strzelcy</button>
-                                    <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asysty</button>
-                                    <button type="button" class="modal-tab-btn" data-category="rating">⭐ Śr. ocen (>5)</button>
-                                    <button type="button" class="modal-tab-btn" data-category="motm">👑 MOTM</button>
+                                    <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asystenci</button>
+                                    <button type="button" class="modal-tab-btn" data-category="rating">⭐ Śr. Ocena Meczowa</button>
+                                    <button type="button" class="modal-tab-btn" data-category="motm">👑 Zawodnicy Meczu</button>
                                     <button type="button" class="modal-tab-btn" data-category="cards">🟨 Kartki</button>
                                     <button type="button" class="modal-tab-btn" data-category="cleansheets">🧤 Czyste Konta</button>
                                     <button type="button" class="modal-tab-btn" data-category="all">📋 Wszyscy</button>
@@ -680,8 +690,111 @@
                             </div>
                         </section>
                     </div>
-                </div>
-            </div>
+
+                    <!-- ZAKŁADKA 3: PROFIL I STATYSTYKI WYBRANEGO ZAWODNIKA -->
+                    <div id="league-panel-player" class="league-subpanel hidden">
+                        <div class="tile-box tile-player-profile-view">
+                            <!-- Top Navigation Toolbar -->
+                            <div class="tile-header player-view-header">
+                                <div class="player-view-header-left">
+                                    <button type="button" id="player-back-btn" class="metro-btn-sm primary-sm player-back-btn" title="Wróć do poprzedniego widoku ligi">
+                                        <span id="player-back-icon">←</span>
+                                        <span id="player-back-text">Wróć do ligi</span>
+                                    </button>
+                                    <div class="tile-header-title">
+                                        <span class="header-icon">👤</span> PROFIL I STATYSTYKI ZAWODNIKA
+                                    </div>
+                                </div>
+
+                                <div class="player-view-header-right">
+                                    <div class="player-switcher-group">
+                                        <div class="search-box-wrapper" style="max-width: 220px;">
+                                            <span class="search-icon">🔍</span>
+                                            <input type="text" id="pv-player-search" class="metro-search-input" placeholder="Szukaj gracza w lidze..." autocomplete="off">
+                                        </div>
+                                        <select id="pv-team-select" class="metro-select-sm" style="max-width: 180px;">
+                                            <option value="">Wszystkie drużyny ligi</option>
+                                        </select>
+                                        <select id="pv-player-select" class="metro-select-sm" style="max-width: 200px;">
+                                            <option value="">Wybierz gracza...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pp-workspace-body">
+                                <!-- Dynamic Header Banner -->
+                                <div id="pp-header-banner" class="pp-header-banner">
+                                    <!-- Populated by JS -->
+                                </div>
+
+                                <!-- Subtabs Navigation -->
+                                <div class="modal-tab-buttons pp-tab-buttons">
+                                    <button type="button" class="modal-tab-btn active" id="pp-tab-overview-btn">
+                                        <span>📊 Przegląd i Atrybuty</span>
+                                    </button>
+                                    <button type="button" class="modal-tab-btn" id="pp-tab-matches-btn">
+                                        <span>📜 Historia Meczów</span>
+                                        <span id="pp-matches-count-badge" class="tab-count-badge">0</span>
+                                    </button>
+                                    <button type="button" class="modal-tab-btn" id="pp-tab-stats-btn">
+                                        <span>📈 Statystyki Sezonu</span>
+                                    </button>
+                                    <button type="button" class="modal-tab-btn" id="pp-tab-all-btn">
+                                        <span>📋 Wszystkie Statystyki</span>
+                                    </button>
+                                </div>
+
+                                <!-- Main Content Body -->
+                                <div id="pp-content-body" class="pp-content-body">
+                                    <!-- Panel 1: Overview & Attributes -->
+                                    <div id="pp-panel-overview" class="pp-tab-panel">
+                                        <!-- Quick KPIs Grid -->
+                                        <div id="pp-overview-kpi-grid" class="pp-kpi-grid">
+                                            <!-- Populated dynamically -->
+                                        </div>
+
+                                        <!-- Attributes Section -->
+                                        <div class="pp-section-card">
+                                            <div class="pp-section-title">
+                                                <span class="sec-icon">⚡</span> ATRYBUTY I UMIEJĘTNOŚCI ZAWODNIKA
+                                            </div>
+                                            <div id="pp-attributes-grid" class="pp-attributes-grid">
+                                                <!-- Populated dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Panel 2: Match History / Game by Game Performance -->
+                                    <div id="pp-panel-matches" class="pp-tab-panel hidden">
+                                        <div id="pp-matches-summary" class="pp-matches-summary">
+                                            <!-- Populated dynamically -->
+                                        </div>
+                                        <div id="pp-matches-list" class="pp-matches-list">
+                                            <!-- Populated dynamically -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Panel 3: Detailed Season Stats Breakdown -->
+                                    <div id="pp-panel-stats" class="pp-tab-panel hidden">
+                                        <div id="pp-stats-detail-grid" class="pp-stats-detail-grid">
+                                            <!-- Populated dynamically -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Panel 4: All Stats Comprehensive Matrix -->
+                                    <div id="pp-panel-all" class="pp-tab-panel hidden">
+                                        <div id="pp-all-stats-table-container" class="pp-all-stats-container">
+                                            <!-- Populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div> <!-- /.pp-content-body -->
+                            </div> <!-- /.pp-workspace-body -->
+                        </div> <!-- /.tile-box -->
+                    </div> <!-- /#league-panel-player -->
+                </div> <!-- /#league-active-container -->
+            </div> <!-- /#league-view -->
+
                 </div> <!-- /.workspace-inner -->
             </main> <!-- /.app-workspace -->
         </div> <!-- /.app-root -->
@@ -744,10 +857,10 @@
                             <!-- Populated dynamically via JS -->
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </div> <!-- /.metro-modal-body -->
+            </div> <!-- /.match-details-modal-content -->
+        </div> <!-- /#match-details-modal -->
 
-        <script type="module" src="/static/app.js?v=3"></script>
+        <script type="module" src="/static/app.js?v=11"></script>
     </body>
 </html>

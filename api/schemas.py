@@ -52,6 +52,12 @@ class MatchPlayerStatsSchema(BaseModel):
     is_on_field: bool = False
     is_injured: bool = False
     rating: float = Field(default=6.0, ge=1.0, le=10.0)
+    minutes_played: int = Field(default=0, ge=0)
+    age: int = Field(default=20, ge=15, le=50)
+    nationality: str = "Unknown"
+    height: int = Field(default=180, ge=140, le=220)
+    overall: int = Field(default=50, ge=1, le=99)
+    team_name: Optional[str] = None
 
 class MatchFullStatsSchema(BaseModel):
     home_team_name: str
@@ -70,6 +76,7 @@ class PlayerSeasonStatsSchema(BaseModel):
     team_name: Optional[str] = None
     position: str
     matches_played: int = Field(default=0, ge=0)
+    minutes_played: int = Field(default=0, ge=0)
     goals: int = Field(default=0, ge=0)
     assists: int = Field(default=0, ge=0)
     yellow_cards: int = Field(default=0, ge=0)
@@ -78,6 +85,56 @@ class PlayerSeasonStatsSchema(BaseModel):
     clean_sheets: int = Field(default=0, ge=0)
     average_rating: float = Field(default=0.0, ge=0.0, le=10.0)
     motm_awards: int = Field(default=0, ge=0)
+    age: int = Field(default=20, ge=15, le=50)
+    nationality: str = "Unknown"
+    height: int = Field(default=180, ge=140, le=220)
+    overall: int = Field(default=50, ge=1, le=99)
+    fitness: float = Field(default=1.0, ge=0.0, le=1.0)
+    form: float = Field(default=1.0, ge=0.0, le=2.0)
+    attributes: dict[str, int] = Field(default_factory=dict)
+
+class PlayerMatchLogSchema(BaseModel):
+    round_number: int = 1
+    home_team_name: str
+    away_team_name: str
+    home_score: int = 0
+    away_score: int = 0
+    is_home: bool = True
+    opponent_name: str
+    result: str = "-"
+    is_finished: bool = False
+    played_in_match: bool = False
+    is_starter: bool = False
+    is_on_field: bool = False
+    was_subbed_in: bool = False
+    was_subbed_off: bool = False
+    minutes_played: int = 0
+    rating: float = 6.0
+    goals: int = 0
+    assists: int = 0
+    passes: int = 0
+    yellow_cards: int = 0
+    has_red_card: bool = False
+    is_injured: bool = False
+    is_motm: bool = False
+    fixture_index: Optional[int] = None
+
+class PlayerProfileResponse(BaseModel):
+    player_name: str
+    full_name: str
+    short_name: str
+    team_name: str
+    position: str
+    age: int
+    nationality: str
+    height: int
+    overall: int
+    fitness: float
+    form: float
+    is_goalkeeper: bool
+    attributes: dict[str, int] = Field(default_factory=dict)
+    season_stats: PlayerSeasonStatsSchema
+    match_history: list[PlayerMatchLogSchema] = []
 
 class LeagueTeamStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

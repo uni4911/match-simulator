@@ -232,6 +232,13 @@ COUNTRIES_DATA = [
     {"name": "Tahiti", "code": "TAH", "confederation": "OFC"},
     {"name": "Tonga", "code": "TGA", "confederation": "OFC"},
     {"name": "Vanuatu", "code": "VAN", "confederation": "OFC"},
+
+    {"name": "Martinique", "code": "MTQ", "confederation": "CONCACAF"},
+    {"name": "Guadeloupe", "code": "GLP", "confederation": "CONCACAF"},
+    {"name": "French Guiana", "code": "GUF", "confederation": "CONCACAF"},
+    {"name": "Jersey", "code": "JEY", "confederation": "UEFA"},
+    {"name": "Guernsey", "code": "GGY", "confederation": "UEFA"},
+    {"name": "Curaçao", "code": "CUW", "confederation": "CONCACAF"},
 ]
 
 def seed_confederations_and_countries(db: Session) -> dict[str, CountryModel]:
@@ -289,6 +296,23 @@ def seed_leagues(db: Session, country_map: dict[str, CountryModel]) -> LeagueMod
         db.commit()
         db.refresh(league)
     return league
+
+
+NATIONALITY_CLEAN_MAP = {
+    'Bośnia i Herc.': 'Bosnia and Herzegovina',
+    'Bo\u015bnia i Herc.': 'Bosnia and Herzegovina',
+    'Demokr. Rep. Konga': 'Congo DR',
+    'Rep. Środkowoafryk.': 'Central African Republic',
+    'Rep. \u015arodkowoafryk.': 'Central African Republic',
+    'St Vincent i Grenad.': 'Saint Vincent and the Grenadines',
+    'W-y Ziel. Przylądka': 'Cabo Verde',
+    'W-y Ziel. Przyl\u0105dka': 'Cabo Verde',
+    'Curacao': 'Curaçao',
+    'Cura\u00e7ao': 'Curaçao',
+    'Côte d\'Ivoire': 'Côte d\'Ivoire',
+    'C\u00f4te d\'Ivoire': 'Côte d\'Ivoire',
+    'Ivory Coast': 'Côte d\'Ivoire',
+}
 
 
 def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[int, int]:
@@ -354,7 +378,6 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 team_model.country_id = team_country_id
                 team_model.formation = team_formation
 
-  
         for p_data in players_data:
             team_name = p_data.get("team_name")
             team_model = existing_teams.get(team_name)
@@ -365,8 +388,19 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             full_name = p_data.get("full_name") or p_data.get("short_name", "Unknown")
             short_name = p_data.get("short_name") or full_name
 
+            raw_nationality = p_data.get("nationality", "Unknown")
+            clean_nationality = NATIONALITY_CLEAN_MAP.get(raw_nationality, raw_nationality)
+            player_country = country_map.get(clean_nationality, team_model.country)
+            player_country_id = player_country.id if player_country else team_model.country_id
+            overall_val = p_data.get("overall")
+
             if full_name in existing_players_map:
                 existing_p = existing_players_map[full_name]
+                existing_p.nationality = clean_nationality
+                existing_p.country_id = player_country_id
+                existing_p.overall = overall_val
+                existing_p.age = p_data.get("age", 24)
+                existing_p.height = p_data.get("height", 180)
                 existing_p.pace = p_data.get("pace")
                 existing_p.shooting = p_data.get("shooting")
                 existing_p.passing = p_data.get("passing")
@@ -382,8 +416,6 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 existing_p.positioning = p_data.get("positioning")
                 continue
 
-            player_country = country_map.get(p_data.get("nationality"), team_model.country)
-            player_country_id = player_country.id if player_country else team_model.country_id
             position_str = p_data.get("position", "CENTRAL_MIDFIELDER")
 
             player_model = PlayerModel(
@@ -393,7 +425,8 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 short_name=short_name,
                 position=position_str,
                 age=p_data.get("age", 24),
-                nationality=p_data.get("nationality", "Unknown"),
+                nationality=clean_nationality,
+                overall=overall_val,
                 fitness=1.0,
                 form=1.0,
                 height=p_data.get("height", 180),

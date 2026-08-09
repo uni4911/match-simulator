@@ -11,7 +11,8 @@
       "positioning": 50,
       "age": 22,
       "nationality": "Poland",
-      "height": 192
+      "height": 192,
+      "overall": 51
     },
     {
       "name": "O. Lewy Obronica",
@@ -25,7 +26,8 @@
       "heading": 48,
       "height": 175,
       "age": 22,
-      "nationality": "Switzerland"
+      "nationality": "Switzerland",
+      "overall": 51
     },
     {
       "name": "O. Srodkowy 1",
@@ -39,7 +41,8 @@
       "heading": 62,
       "height": 186,
       "age": 32,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 53
     },
     {
       "name": "O. Srodkowy 2",
@@ -53,7 +56,8 @@
       "heading": 60,
       "height": 184,
       "age": 34,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 51
     },
     {
       "name": "O. Prawy Obronica",
@@ -67,7 +71,8 @@
       "heading": 46,
       "height": 174,
       "age": 33,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 50
     },
     {
       "name": "P. Defensywny",
@@ -81,7 +86,8 @@
       "heading": 52,
       "height": 180,
       "age": 21,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 49
     },
     {
       "name": "P. Srodkowy",
@@ -95,7 +101,8 @@
       "heading": 44,
       "height": 176,
       "age": 22,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 50
     },
     {
       "name": "P. Ofensywny",
@@ -109,7 +116,8 @@
       "heading": 40,
       "height": 172,
       "age": 34,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 52
     },
     {
       "name": "N. Lewy Skrzydlowy",
@@ -123,7 +131,8 @@
       "heading": 38,
       "height": 170,
       "age": 31,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 53
     },
     {
       "name": "N. Prawy Skrzydlowy",
@@ -137,7 +146,8 @@
       "heading": 36,
       "height": 171,
       "age": 30,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 52
     },
     {
       "name": "N. Napastnik Glowny",
@@ -151,7 +161,8 @@
       "heading": 58,
       "height": 183,
       "age": 21,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 54
     },
     {
       "name": "G. Bramkarz Rezerwowy",
@@ -164,7 +175,8 @@
       "positioning": 44,
       "age": 28,
       "nationality": "Poland",
-      "height": 186
+      "height": 186,
+      "overall": 45
     },
     {
       "name": "R. Srodkowy Obronica",
@@ -178,7 +190,8 @@
       "heading": 54,
       "height": 185,
       "age": 28,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 47
     },
     {
       "name": "R. Wahadlowy Lewy",
@@ -192,7 +205,8 @@
       "heading": 42,
       "height": 173,
       "age": 30,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 47
     },
     {
       "name": "R. Wahadlowy Prawy",
@@ -206,7 +220,8 @@
       "heading": 41,
       "height": 174,
       "age": 32,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 46
     },
     {
       "name": "R. Pomocnik Srodkowy",
@@ -220,7 +235,8 @@
       "heading": 42,
       "height": 175,
       "age": 34,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 46
     },
     {
       "name": "R. Pomocnik Lewy",
@@ -234,7 +250,8 @@
       "heading": 35,
       "height": 172,
       "age": 35,
-      "nationality": "Switzerland"
+      "nationality": "Switzerland",
+      "overall": 46
     },
     {
       "name": "R. Pomocnik Prawy",
@@ -248,7 +265,8 @@
       "heading": 36,
       "height": 171,
       "age": 34,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 46
     },
     {
       "name": "R. Cofniety Napastnik",
@@ -262,7 +280,8 @@
       "heading": 48,
       "height": 178,
       "age": 35,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 50
     },
     {
       "name": "R. Rezerwowy Napastnik",
@@ -276,7 +295,8 @@
       "heading": 55,
       "height": 182,
       "age": 32,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 51
     }
   ],
   "CF Java": [
@@ -291,7 +311,8 @@
       "positioning": 76,
       "age": 34,
       "nationality": "Spain",
-      "height": 196
+      "height": 196,
+      "overall": 76
     },
     {
       "name": "J. Lewy Obronica",
@@ -305,7 +326,8 @@
       "heading": 66,
       "height": 178,
       "age": 19,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 73
     },
     {
       "name": "J. Srodkowy Obronica 1",
@@ -319,7 +341,8 @@
       "heading": 80,
       "height": 189,
       "age": 23,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 73
     },
     {
       "name": "J. Srodkowy Obronica 2",
@@ -333,7 +356,8 @@
       "heading": 82,
       "height": 188,
       "age": 22,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 73
     },
     {
       "name": "J. Prawy Obronica",
@@ -347,7 +371,8 @@
       "heading": 65,
       "height": 177,
       "age": 34,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 72
     },
     {
       "name": "J. Defensywny Pomocnik",
@@ -361,7 +386,8 @@
       "heading": 72,
       "height": 184,
       "age": 26,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 70
     },
     {
       "name": "J. Srodkowy Pomocnik",
@@ -375,7 +401,8 @@
       "heading": 60,
       "height": 180,
       "age": 33,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 72
     },
     {
       "name": "J. Ofensywny Pomocnik",
@@ -389,7 +416,8 @@
       "heading": 55,
       "height": 175,
       "age": 27,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 73
     },
     {
       "name": "J. Lewy Skrzydlowy",
@@ -403,7 +431,8 @@
       "heading": 50,
       "height": 173,
       "age": 28,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 75
     },
     {
       "name": "J. Prawy Skrzydlowy",
@@ -417,7 +446,8 @@
       "heading": 48,
       "height": 174,
       "age": 35,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 74
     },
     {
       "name": "J. Napastnik",
@@ -431,7 +461,8 @@
       "heading": 78,
       "height": 186,
       "age": 32,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 77
     },
     {
       "name": "J. Rezerwowy Bramkarz",
@@ -444,7 +475,8 @@
       "positioning": 70,
       "age": 27,
       "nationality": "Spain",
-      "height": 186
+      "height": 186,
+      "overall": 69
     },
     {
       "name": "J. Rezerwowy Stoper",
@@ -458,7 +490,8 @@
       "heading": 74,
       "height": 187,
       "age": 33,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 68
     },
     {
       "name": "J. Lewy Wahadlowy",
@@ -472,7 +505,8 @@
       "heading": 60,
       "height": 176,
       "age": 30,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 68
     },
     {
       "name": "J. Prawy Wahadlowy",
@@ -486,7 +520,8 @@
       "heading": 58,
       "height": 176,
       "age": 34,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 67
     },
     {
       "name": "J. Rezerwowy Pomocnik 1",
@@ -500,7 +535,8 @@
       "heading": 58,
       "height": 179,
       "age": 34,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 68
     },
     {
       "name": "J. Boczny Pomocnik Lewy",
@@ -514,7 +550,8 @@
       "heading": 52,
       "height": 174,
       "age": 20,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 67
     },
     {
       "name": "J. Boczny Pomocnik Prawy",
@@ -528,7 +565,8 @@
       "heading": 50,
       "height": 175,
       "age": 33,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 66
     },
     {
       "name": "J. Drugi Napastnik",
@@ -542,7 +580,8 @@
       "heading": 68,
       "height": 181,
       "age": 33,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 72
     },
     {
       "name": "J. Rezerwowy Snajper",
@@ -556,7 +595,8 @@
       "heading": 75,
       "height": 185,
       "age": 27,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 72
     }
   ],
   "Python FC": [
@@ -571,7 +611,8 @@
       "positioning": 78,
       "age": 24,
       "nationality": "Denmark",
-      "height": 185
+      "height": 185,
+      "overall": 78
     },
     {
       "name": "P. Lewy Obronica",
@@ -585,7 +626,8 @@
       "heading": 67,
       "height": 179,
       "age": 27,
-      "nationality": "Belgium"
+      "nationality": "Belgium",
+      "overall": 73
     },
     {
       "name": "P. Srodkowy Obronica 1",
@@ -599,7 +641,8 @@
       "heading": 82,
       "height": 190,
       "age": 22,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 74
     },
     {
       "name": "P. Srodkowy Obronica 2",
@@ -613,7 +656,8 @@
       "heading": 80,
       "height": 188,
       "age": 32,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 73
     },
     {
       "name": "P. Prawy Obronica",
@@ -627,7 +671,8 @@
       "heading": 65,
       "height": 178,
       "age": 19,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 73
     },
     {
       "name": "P. Defensywny Pomocnik",
@@ -641,7 +686,8 @@
       "heading": 74,
       "height": 185,
       "age": 33,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 71
     },
     {
       "name": "P. Srodkowy Pomocnik",
@@ -655,7 +701,8 @@
       "heading": 62,
       "height": 181,
       "age": 21,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 74
     },
     {
       "name": "P. Ofensywny Pomocnik",
@@ -669,7 +716,8 @@
       "heading": 54,
       "height": 176,
       "age": 25,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 73
     },
     {
       "name": "P. Lewy Skrzydlowy",
@@ -683,7 +731,8 @@
       "heading": 52,
       "height": 175,
       "age": 20,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 77
     },
     {
       "name": "P. Prawy Skrzydlowy",
@@ -697,7 +746,8 @@
       "heading": 50,
       "height": 173,
       "age": 30,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 75
     },
     {
       "name": "P. Napastnik",
@@ -711,7 +761,8 @@
       "heading": 80,
       "height": 187,
       "age": 29,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 77
     },
     {
       "name": "P. Rezerwowy Bramkarz",
@@ -724,7 +775,8 @@
       "positioning": 68,
       "age": 34,
       "nationality": "France",
-      "height": 192
+      "height": 192,
+      "overall": 68
     },
     {
       "name": "P. Rezerwowy Stoper",
@@ -738,7 +790,8 @@
       "heading": 76,
       "height": 186,
       "age": 26,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 68
     },
     {
       "name": "P. Lewy Wahadlowy",
@@ -752,7 +805,8 @@
       "heading": 59,
       "height": 177,
       "age": 23,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 67
     },
     {
       "name": "P. Prawy Wahadlowy",
@@ -766,7 +820,8 @@
       "heading": 58,
       "height": 177,
       "age": 28,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 67
     },
     {
       "name": "P. Rezerwowy Pomocnik",
@@ -780,7 +835,8 @@
       "heading": 56,
       "height": 180,
       "age": 24,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 68
     },
     {
       "name": "P. Boczny Pomocnik Lewy",
@@ -794,7 +850,8 @@
       "heading": 50,
       "height": 174,
       "age": 28,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 67
     },
     {
       "name": "P. Boczny Pomocnik Prawy",
@@ -808,7 +865,8 @@
       "heading": 51,
       "height": 175,
       "age": 31,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 66
     },
     {
       "name": "P. Cofniety Napastnik",
@@ -822,7 +880,8 @@
       "heading": 66,
       "height": 182,
       "age": 25,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 71
     },
     {
       "name": "P. Rezerwowy Snajper",
@@ -836,7 +895,8 @@
       "heading": 77,
       "height": 184,
       "age": 22,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 73
     }
   ],
   "Galacticos Rust": [
@@ -851,7 +911,8 @@
       "positioning": 93,
       "age": 21,
       "nationality": "Spain",
-      "height": 189
+      "height": 189,
+      "overall": 93
     },
     {
       "name": "R. Lewy Obronica Elite",
@@ -865,7 +926,8 @@
       "heading": 80,
       "height": 181,
       "age": 30,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 89
     },
     {
       "name": "R. Srodkowy Obronica Elite 1",
@@ -879,7 +941,8 @@
       "heading": 94,
       "height": 193,
       "age": 19,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 91
     },
     {
       "name": "R. Srodkowy Obronica Elite 2",
@@ -893,7 +956,8 @@
       "heading": 93,
       "height": 191,
       "age": 29,
-      "nationality": "Uruguay"
+      "nationality": "Uruguay",
+      "overall": 89
     },
     {
       "name": "R. Prawy Obronica Elite",
@@ -907,7 +971,8 @@
       "heading": 79,
       "height": 180,
       "age": 29,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 88
     },
     {
       "name": "R. Defensywny Pomocnik Elite",
@@ -921,7 +986,8 @@
       "heading": 88,
       "height": 187,
       "age": 33,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 86
     },
     {
       "name": "R. Srodkowy Pomocnik Elite",
@@ -935,7 +1001,8 @@
       "heading": 78,
       "height": 183,
       "age": 24,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 89
     },
     {
       "name": "R. Ofensywny Pomocnik Elite",
@@ -949,7 +1016,8 @@
       "heading": 72,
       "height": 178,
       "age": 35,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 89
     },
     {
       "name": "R. Lewy Skrzydlowy Elite",
@@ -963,7 +1031,8 @@
       "heading": 70,
       "height": 176,
       "age": 29,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 92
     },
     {
       "name": "R. Prawy Skrzydlowy Elite",
@@ -977,7 +1046,8 @@
       "heading": 68,
       "height": 175,
       "age": 26,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 90
     },
     {
       "name": "R. Napastnik Legend",
@@ -991,7 +1061,8 @@
       "heading": 92,
       "height": 189,
       "age": 31,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 93
     },
     {
       "name": "R. Rezerwowy Bramkarz Elite",
@@ -1004,7 +1075,8 @@
       "positioning": 85,
       "age": 24,
       "nationality": "Spain",
-      "height": 192
+      "height": 192,
+      "overall": 85
     },
     {
       "name": "R. Rezerwowy Stoper Elite",
@@ -1018,7 +1090,8 @@
       "heading": 86,
       "height": 190,
       "age": 20,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 83
     },
     {
       "name": "R. Wahadlowy Lewy Elite",
@@ -1032,7 +1105,8 @@
       "heading": 74,
       "height": 179,
       "age": 25,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 82
     },
     {
       "name": "R. Wahadlowy Prawy Elite",
@@ -1046,7 +1120,8 @@
       "heading": 73,
       "height": 179,
       "age": 19,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 81
     },
     {
       "name": "R. Rezerwowy Pomocnik Elite",
@@ -1060,7 +1135,8 @@
       "heading": 74,
       "height": 182,
       "age": 35,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 83
     },
     {
       "name": "R. Boczny Pomocnik Lewy Elite",
@@ -1074,7 +1150,8 @@
       "heading": 66,
       "height": 177,
       "age": 35,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 81
     },
     {
       "name": "R. Boczny Pomocnik Prawy Elite",
@@ -1088,7 +1165,8 @@
       "heading": 67,
       "height": 178,
       "age": 24,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 80
     },
     {
       "name": "R. Cofniety Napastnik Elite",
@@ -1102,7 +1180,8 @@
       "heading": 80,
       "height": 184,
       "age": 31,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 86
     },
     {
       "name": "R. Rezerwowy Snajper Elite",
@@ -1116,7 +1195,8 @@
       "heading": 88,
       "height": 188,
       "age": 32,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 88
     }
   ],
   "AC C++": [
@@ -1131,7 +1211,8 @@
       "positioning": 86,
       "age": 28,
       "nationality": "Italy",
-      "height": 186
+      "height": 186,
+      "overall": 85
     },
     {
       "name": "C. Vector",
@@ -1145,7 +1226,8 @@
       "heading": 72,
       "height": 180,
       "age": 27,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 81
     },
     {
       "name": "C. Memory",
@@ -1159,7 +1241,8 @@
       "heading": 88,
       "height": 192,
       "age": 32,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 83
     },
     {
       "name": "C. Template",
@@ -1173,7 +1256,8 @@
       "heading": 86,
       "height": 190,
       "age": 24,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 82
     },
     {
       "name": "C. Reference",
@@ -1187,7 +1271,8 @@
       "heading": 71,
       "height": 179,
       "age": 34,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 80
     },
     {
       "name": "C. Destructor",
@@ -1201,7 +1286,8 @@
       "heading": 80,
       "height": 186,
       "age": 35,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 79
     },
     {
       "name": "C. Class",
@@ -1215,7 +1301,8 @@
       "heading": 70,
       "height": 182,
       "age": 22,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 82
     },
     {
       "name": "C. Virtual",
@@ -1229,7 +1316,8 @@
       "heading": 65,
       "height": 177,
       "age": 19,
-      "nationality": "Uruguay"
+      "nationality": "Uruguay",
+      "overall": 82
     },
     {
       "name": "C. Operator",
@@ -1243,7 +1331,8 @@
       "heading": 64,
       "height": 175,
       "age": 29,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 84
     },
     {
       "name": "C. Inline",
@@ -1257,7 +1346,8 @@
       "heading": 62,
       "height": 176,
       "age": 24,
-      "nationality": "Belgium"
+      "nationality": "Belgium",
+      "overall": 83
     },
     {
       "name": "C. Compiler",
@@ -1271,7 +1361,8 @@
       "heading": 88,
       "height": 187,
       "age": 24,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 86
     },
     {
       "name": "C. Rezerwowy",
@@ -1284,7 +1375,8 @@
       "positioning": 77,
       "age": 25,
       "nationality": "Italy",
-      "height": 195
+      "height": 195,
+      "overall": 76
     },
     {
       "name": "C. Stack",
@@ -1298,7 +1390,8 @@
       "heading": 82,
       "height": 188,
       "age": 27,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 76
     },
     {
       "name": "C. Heap",
@@ -1312,7 +1405,8 @@
       "heading": 68,
       "height": 177,
       "age": 25,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 75
     },
     {
       "name": "C. Buffer",
@@ -1326,7 +1420,8 @@
       "heading": 67,
       "height": 178,
       "age": 27,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 74
     },
     {
       "name": "C. Namespace",
@@ -1340,7 +1435,8 @@
       "heading": 66,
       "height": 180,
       "age": 22,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 75
     },
     {
       "name": "C. Macro",
@@ -1354,7 +1450,8 @@
       "heading": 58,
       "height": 174,
       "age": 32,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 73
     },
     {
       "name": "C. Enum",
@@ -1368,7 +1465,8 @@
       "heading": 59,
       "height": 175,
       "age": 20,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 73
     },
     {
       "name": "C. Struct",
@@ -1382,7 +1480,8 @@
       "heading": 72,
       "height": 181,
       "age": 22,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 79
     },
     {
       "name": "C. Lambda",
@@ -1396,7 +1495,8 @@
       "heading": 80,
       "height": 184,
       "age": 27,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 80
     }
   ],
   "TypeScript United": [
@@ -1411,7 +1511,8 @@
       "positioning": 78,
       "age": 21,
       "nationality": "England",
-      "height": 189
+      "height": 189,
+      "overall": 78
     },
     {
       "name": "T. Interface",
@@ -1425,7 +1526,8 @@
       "heading": 66,
       "height": 178,
       "age": 24,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 75
     },
     {
       "name": "T. Strict",
@@ -1439,7 +1541,8 @@
       "heading": 82,
       "height": 189,
       "age": 21,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 77
     },
     {
       "name": "T. Type",
@@ -1453,7 +1556,8 @@
       "heading": 81,
       "height": 188,
       "age": 27,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 76
     },
     {
       "name": "T. Generic",
@@ -1467,7 +1571,8 @@
       "heading": 65,
       "height": 177,
       "age": 19,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 74
     },
     {
       "name": "T. Guard",
@@ -1481,7 +1586,8 @@
       "heading": 74,
       "height": 183,
       "age": 26,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 73
     },
     {
       "name": "T. Promise",
@@ -1495,7 +1601,8 @@
       "heading": 62,
       "height": 180,
       "age": 22,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 76
     },
     {
       "name": "T. Decorator",
@@ -1509,7 +1616,8 @@
       "heading": 56,
       "height": 176,
       "age": 30,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 75
     },
     {
       "name": "T. Async",
@@ -1523,7 +1631,8 @@
       "heading": 51,
       "height": 174,
       "age": 33,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 77
     },
     {
       "name": "T. Await",
@@ -1537,7 +1646,8 @@
       "heading": 50,
       "height": 175,
       "age": 20,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 76
     },
     {
       "name": "T. Infer",
@@ -1551,7 +1661,8 @@
       "heading": 79,
       "height": 185,
       "age": 25,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 78
     },
     {
       "name": "T. Unknown",
@@ -1564,7 +1675,8 @@
       "positioning": 70,
       "age": 32,
       "nationality": "Germany",
-      "height": 194
+      "height": 194,
+      "overall": 70
     },
     {
       "name": "T. Readonly",
@@ -1578,7 +1690,8 @@
       "heading": 76,
       "height": 187,
       "age": 30,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 70
     },
     {
       "name": "T. Partial",
@@ -1592,7 +1705,8 @@
       "heading": 61,
       "height": 176,
       "age": 31,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 69
     },
     {
       "name": "T. Required",
@@ -1606,7 +1720,8 @@
       "heading": 60,
       "height": 177,
       "age": 30,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 68
     },
     {
       "name": "T. Utility",
@@ -1620,7 +1735,8 @@
       "heading": 59,
       "height": 179,
       "age": 32,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 70
     },
     {
       "name": "T. Union",
@@ -1634,7 +1750,8 @@
       "heading": 52,
       "height": 173,
       "age": 29,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 68
     },
     {
       "name": "T. Tuple",
@@ -1648,7 +1765,8 @@
       "heading": 53,
       "height": 174,
       "age": 22,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 68
     },
     {
       "name": "T. Omit",
@@ -1662,7 +1780,8 @@
       "heading": 67,
       "height": 180,
       "age": 32,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 73
     },
     {
       "name": "T. Pick",
@@ -1676,7 +1795,8 @@
       "heading": 76,
       "height": 183,
       "age": 19,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 74
     }
   ],
   "Golang FC": [
@@ -1691,7 +1811,8 @@
       "positioning": 80,
       "age": 29,
       "nationality": "Germany",
-      "height": 184
+      "height": 184,
+      "overall": 81
     },
     {
       "name": "G. Channel",
@@ -1705,7 +1826,8 @@
       "heading": 68,
       "height": 179,
       "age": 22,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 77
     },
     {
       "name": "G. Mutex",
@@ -1719,7 +1841,8 @@
       "heading": 84,
       "height": 191,
       "age": 22,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 79
     },
     {
       "name": "G. Context",
@@ -1733,7 +1856,8 @@
       "heading": 83,
       "height": 189,
       "age": 23,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 78
     },
     {
       "name": "G. Select",
@@ -1747,7 +1871,8 @@
       "heading": 67,
       "height": 178,
       "age": 28,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 76
     },
     {
       "name": "G. WaitGroup",
@@ -1761,7 +1886,8 @@
       "heading": 76,
       "height": 185,
       "age": 23,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 76
     },
     {
       "name": "G. Slice",
@@ -1775,7 +1901,8 @@
       "heading": 64,
       "height": 181,
       "age": 31,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 78
     },
     {
       "name": "G. Struct",
@@ -1789,7 +1916,8 @@
       "heading": 58,
       "height": 177,
       "age": 32,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 78
     },
     {
       "name": "G. Defer",
@@ -1803,7 +1931,8 @@
       "heading": 54,
       "height": 175,
       "age": 24,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 80
     },
     {
       "name": "G. Panic",
@@ -1817,7 +1946,8 @@
       "heading": 52,
       "height": 174,
       "age": 31,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 80
     },
     {
       "name": "G. Nil",
@@ -1831,7 +1961,8 @@
       "heading": 82,
       "height": 186,
       "age": 26,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 82
     },
     {
       "name": "G. Recover",
@@ -1844,7 +1975,8 @@
       "positioning": 73,
       "age": 27,
       "nationality": "Germany",
-      "height": 190
+      "height": 190,
+      "overall": 73
     },
     {
       "name": "G. Pointer",
@@ -1858,7 +1990,8 @@
       "heading": 78,
       "height": 187,
       "age": 27,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 72
     },
     {
       "name": "G. Make",
@@ -1872,7 +2005,8 @@
       "heading": 62,
       "height": 177,
       "age": 21,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 72
     },
     {
       "name": "G. Append",
@@ -1886,7 +2020,8 @@
       "heading": 61,
       "height": 178,
       "age": 20,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 71
     },
     {
       "name": "G. Map",
@@ -1900,7 +2035,8 @@
       "heading": 60,
       "height": 180,
       "age": 27,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 73
     },
     {
       "name": "G. Interface",
@@ -1914,7 +2050,8 @@
       "heading": 54,
       "height": 174,
       "age": 35,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 70
     },
     {
       "name": "G. Package",
@@ -1928,7 +2065,8 @@
       "heading": 55,
       "height": 175,
       "age": 20,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 70
     },
     {
       "name": "G. Runtime",
@@ -1942,7 +2080,8 @@
       "heading": 70,
       "height": 182,
       "age": 26,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 75
     },
     {
       "name": "G. Build",
@@ -1956,7 +2095,8 @@
       "heading": 78,
       "height": 184,
       "age": 26,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 77
     }
   ],
   "Real SQL": [
@@ -1971,7 +2111,8 @@
       "positioning": 80,
       "age": 31,
       "nationality": "Belgium",
-      "height": 196
+      "height": 196,
+      "overall": 76
     },
     {
       "name": "S. ForeignKey",
@@ -1985,7 +2126,8 @@
       "heading": 70,
       "height": 180,
       "age": 26,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 73
     },
     {
       "name": "S. PrimaryKey",
@@ -1999,7 +2141,8 @@
       "heading": 86,
       "height": 192,
       "age": 27,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 77
     },
     {
       "name": "S. Index",
@@ -2013,7 +2156,8 @@
       "heading": 85,
       "height": 190,
       "age": 25,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 76
     },
     {
       "name": "S. Unique",
@@ -2027,7 +2171,8 @@
       "heading": 69,
       "height": 179,
       "age": 33,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 72
     },
     {
       "name": "S. Transaction",
@@ -2041,7 +2186,8 @@
       "heading": 76,
       "height": 186,
       "age": 34,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 68
     },
     {
       "name": "S. Join",
@@ -2055,7 +2201,8 @@
       "heading": 64,
       "height": 181,
       "age": 28,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 70
     },
     {
       "name": "S. Select",
@@ -2069,7 +2216,8 @@
       "heading": 56,
       "height": 176,
       "age": 32,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 70
     },
     {
       "name": "S. Trigger",
@@ -2083,7 +2231,8 @@
       "heading": 50,
       "height": 174,
       "age": 19,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 71
     },
     {
       "name": "S. View",
@@ -2097,7 +2246,8 @@
       "heading": 48,
       "height": 175,
       "age": 32,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 70
     },
     {
       "name": "S. Insert",
@@ -2111,7 +2261,8 @@
       "heading": 80,
       "height": 187,
       "age": 21,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 74
     },
     {
       "name": "S. Backup",
@@ -2124,7 +2275,8 @@
       "positioning": 72,
       "age": 27,
       "nationality": "Spain",
-      "height": 195
+      "height": 195,
+      "overall": 68
     },
     {
       "name": "S. Commit",
@@ -2138,7 +2290,8 @@
       "heading": 78,
       "height": 188,
       "age": 22,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 70
     },
     {
       "name": "S. Where",
@@ -2152,7 +2305,8 @@
       "heading": 62,
       "height": 177,
       "age": 25,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 67
     },
     {
       "name": "S. Having",
@@ -2166,7 +2320,8 @@
       "heading": 61,
       "height": 178,
       "age": 28,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 66
     },
     {
       "name": "S. GroupBy",
@@ -2180,7 +2335,8 @@
       "heading": 60,
       "height": 180,
       "age": 31,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 65
     },
     {
       "name": "S. UnionAll",
@@ -2194,7 +2350,8 @@
       "heading": 48,
       "height": 173,
       "age": 35,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 62
     },
     {
       "name": "S. OrderBy",
@@ -2208,7 +2365,8 @@
       "heading": 49,
       "height": 174,
       "age": 35,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 62
     },
     {
       "name": "S. Update",
@@ -2222,7 +2380,8 @@
       "heading": 68,
       "height": 182,
       "age": 23,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 68
     },
     {
       "name": "S. Delete",
@@ -2236,7 +2395,8 @@
       "heading": 76,
       "height": 184,
       "age": 27,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 70
     }
   ],
   "FC Docker": [
@@ -2251,7 +2411,8 @@
       "positioning": 78,
       "age": 25,
       "nationality": "Netherlands",
-      "height": 188
+      "height": 188,
+      "overall": 78
     },
     {
       "name": "D. Image",
@@ -2265,7 +2426,8 @@
       "heading": 90,
       "height": 171,
       "age": 28,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 93
     },
     {
       "name": "D. Volume",
@@ -2279,7 +2441,8 @@
       "heading": 96,
       "height": 194,
       "age": 30,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 83
     },
     {
       "name": "D. Network",
@@ -2293,7 +2456,8 @@
       "heading": 92,
       "height": 194,
       "age": 31,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 84
     },
     {
       "name": "D. Port",
@@ -2307,7 +2471,8 @@
       "heading": 82,
       "height": 173,
       "age": 19,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 86
     },
     {
       "name": "D. Compose",
@@ -2321,7 +2486,8 @@
       "heading": 85,
       "height": 175,
       "age": 32,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 87
     },
     {
       "name": "D. Kubernetes",
@@ -2335,7 +2501,8 @@
       "heading": 85,
       "height": 175,
       "age": 24,
-      "nationality": "Poland"
+      "nationality": "Poland",
+      "overall": 91
     },
     {
       "name": "D. Swarm",
@@ -2349,7 +2516,8 @@
       "heading": 82,
       "height": 186,
       "age": 24,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 87
     },
     {
       "name": "D. Pod",
@@ -2363,7 +2531,8 @@
       "heading": 85,
       "height": 174,
       "age": 23,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 96
     },
     {
       "name": "D. Daemon",
@@ -2377,7 +2546,8 @@
       "heading": 80,
       "height": 170,
       "age": 22,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 85
     },
     {
       "name": "D. Registry",
@@ -2391,7 +2561,8 @@
       "heading": 99,
       "height": 188,
       "age": 19,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 92
     },
     {
       "name": "D. Backup",
@@ -2404,7 +2575,8 @@
       "positioning": 75,
       "age": 30,
       "nationality": "Netherlands",
-      "height": 192
+      "height": 192,
+      "overall": 74
     },
     {
       "name": "D. Overlay",
@@ -2418,7 +2590,8 @@
       "heading": 85,
       "height": 195,
       "age": 23,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 81
     },
     {
       "name": "D. Ingress",
@@ -2432,7 +2605,8 @@
       "heading": 76,
       "height": 171,
       "age": 26,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 82
     },
     {
       "name": "D. Egress",
@@ -2446,7 +2620,8 @@
       "heading": 80,
       "height": 176,
       "age": 29,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 85
     },
     {
       "name": "D. Helm",
@@ -2460,7 +2635,8 @@
       "heading": 73,
       "height": 172,
       "age": 21,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 77
     },
     {
       "name": "D. ConfigMap",
@@ -2474,7 +2650,8 @@
       "heading": 74,
       "height": 173,
       "age": 28,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 80
     },
     {
       "name": "D. Secret",
@@ -2488,7 +2665,8 @@
       "heading": 78,
       "height": 175,
       "age": 30,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 84
     },
     {
       "name": "D. VolumeMount",
@@ -2502,7 +2680,8 @@
       "heading": 74,
       "height": 171,
       "age": 34,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 82
     },
     {
       "name": "D. Entrypoint",
@@ -2516,7 +2695,8 @@
       "heading": 88,
       "height": 179,
       "age": 35,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 87
     }
   ],
   "Inter Kotlin": [
@@ -2531,7 +2711,8 @@
       "positioning": 79,
       "age": 30,
       "nationality": "Uruguay",
-      "height": 198
+      "height": 198,
+      "overall": 80
     },
     {
       "name": "K. Extension",
@@ -2545,7 +2726,8 @@
       "heading": 78,
       "height": 176,
       "age": 30,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 89
     },
     {
       "name": "K. DataClass",
@@ -2559,7 +2741,8 @@
       "heading": 94,
       "height": 183,
       "age": 21,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 85
     },
     {
       "name": "K. SealedClass",
@@ -2573,7 +2756,8 @@
       "heading": 92,
       "height": 184,
       "age": 27,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 89
     },
     {
       "name": "K. Delegate",
@@ -2587,7 +2771,8 @@
       "heading": 78,
       "height": 180,
       "age": 24,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 85
     },
     {
       "name": "K. Flow",
@@ -2601,7 +2786,8 @@
       "heading": 88,
       "height": 175,
       "age": 35,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 87
     },
     {
       "name": "K. Coroutine",
@@ -2615,7 +2801,8 @@
       "heading": 80,
       "height": 181,
       "age": 29,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 86
     },
     {
       "name": "K. Suspend",
@@ -2629,7 +2816,8 @@
       "heading": 81,
       "height": 186,
       "age": 31,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 80
     },
     {
       "name": "K. Lambda",
@@ -2643,7 +2831,8 @@
       "heading": 81,
       "height": 174,
       "age": 25,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 86
     },
     {
       "name": "K. Val",
@@ -2657,7 +2846,8 @@
       "heading": 85,
       "height": 169,
       "age": 30,
-      "nationality": "Belgium"
+      "nationality": "Belgium",
+      "overall": 91
     },
     {
       "name": "K. Var",
@@ -2671,7 +2861,8 @@
       "heading": 83,
       "height": 192,
       "age": 32,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 82
     },
     {
       "name": "K. Elvis",
@@ -2684,7 +2875,8 @@
       "positioning": 77,
       "age": 31,
       "nationality": "Italy",
-      "height": 191
+      "height": 191,
+      "overall": 74
     },
     {
       "name": "K. SmartCast",
@@ -2698,7 +2890,8 @@
       "heading": 78,
       "height": 196,
       "age": 23,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 78
     },
     {
       "name": "K. Companion",
@@ -2712,7 +2905,8 @@
       "heading": 72,
       "height": 175,
       "age": 29,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 75
     },
     {
       "name": "K. Infix",
@@ -2726,7 +2920,8 @@
       "heading": 71,
       "height": 181,
       "age": 27,
-      "nationality": "Uruguay"
+      "nationality": "Uruguay",
+      "overall": 75
     },
     {
       "name": "K. Scope",
@@ -2740,7 +2935,8 @@
       "heading": 71,
       "height": 172,
       "age": 27,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 76
     },
     {
       "name": "K. Let",
@@ -2754,7 +2950,8 @@
       "heading": 71,
       "height": 180,
       "age": 27,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 77
     },
     {
       "name": "K. Also",
@@ -2768,7 +2965,8 @@
       "heading": 75,
       "height": 182,
       "age": 23,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 80
     },
     {
       "name": "K. Run",
@@ -2782,7 +2980,8 @@
       "heading": 79,
       "height": 175,
       "age": 22,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 83
     },
     {
       "name": "K. Apply",
@@ -2796,7 +2995,8 @@
       "heading": 88,
       "height": 181,
       "age": 33,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 83
     }
   ],
   "Athletic Swift": [
@@ -2811,7 +3011,8 @@
       "positioning": 82,
       "age": 31,
       "nationality": "United States",
-      "height": 195
+      "height": 195,
+      "overall": 84
     },
     {
       "name": "S. Protocol",
@@ -2825,7 +3026,8 @@
       "heading": 81,
       "height": 173,
       "age": 29,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 83
     },
     {
       "name": "S. Struct",
@@ -2839,7 +3041,8 @@
       "heading": 91,
       "height": 192,
       "age": 22,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 83
     },
     {
       "name": "S. Class",
@@ -2853,7 +3056,8 @@
       "heading": 93,
       "height": 184,
       "age": 35,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 87
     },
     {
       "name": "S. Enum",
@@ -2867,7 +3071,8 @@
       "heading": 83,
       "height": 176,
       "age": 30,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 85
     },
     {
       "name": "S. Optionals",
@@ -2881,7 +3086,8 @@
       "heading": 86,
       "height": 186,
       "age": 20,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 87
     },
     {
       "name": "S. Closure",
@@ -2895,7 +3101,8 @@
       "heading": 82,
       "height": 183,
       "age": 19,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 91
     },
     {
       "name": "S. SwiftUI",
@@ -2909,7 +3116,8 @@
       "heading": 80,
       "height": 177,
       "age": 27,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 88
     },
     {
       "name": "S. Combine",
@@ -2923,7 +3131,8 @@
       "heading": 80,
       "height": 170,
       "age": 32,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 86
     },
     {
       "name": "S. Async",
@@ -2937,7 +3146,8 @@
       "heading": 80,
       "height": 175,
       "age": 34,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 90
     },
     {
       "name": "S. Await",
@@ -2951,7 +3161,8 @@
       "heading": 83,
       "height": 181,
       "age": 20,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 85
     },
     {
       "name": "S. ARC",
@@ -2964,7 +3175,8 @@
       "positioning": 76,
       "age": 27,
       "nationality": "United States",
-      "height": 196
+      "height": 196,
+      "overall": 77
     },
     {
       "name": "S. PropertyWrapper",
@@ -2978,7 +3190,8 @@
       "heading": 84,
       "height": 192,
       "age": 25,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 80
     },
     {
       "name": "S. Equatable",
@@ -2992,7 +3205,8 @@
       "heading": 72,
       "height": 171,
       "age": 27,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 76
     },
     {
       "name": "S. Hashable",
@@ -3006,7 +3220,8 @@
       "heading": 82,
       "height": 174,
       "age": 30,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 85
     },
     {
       "name": "S. Actor",
@@ -3020,7 +3235,8 @@
       "heading": 80,
       "height": 179,
       "age": 25,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 84
     },
     {
       "name": "S. Result",
@@ -3034,7 +3250,8 @@
       "heading": 81,
       "height": 180,
       "age": 19,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 86
     },
     {
       "name": "S. Task",
@@ -3048,7 +3265,8 @@
       "heading": 80,
       "height": 179,
       "age": 29,
-      "nationality": "Uruguay"
+      "nationality": "Uruguay",
+      "overall": 82
     },
     {
       "name": "S. Deinit",
@@ -3062,7 +3280,8 @@
       "heading": 77,
       "height": 173,
       "age": 25,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 85
     },
     {
       "name": "S. NilCoalescing",
@@ -3076,7 +3295,8 @@
       "heading": 85,
       "height": 181,
       "age": 24,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 89
     }
   ],
   "Dynamo JavaScript": [
@@ -3091,7 +3311,8 @@
       "positioning": 69,
       "age": 32,
       "nationality": "Austria",
-      "height": 192
+      "height": 192,
+      "overall": 68
     },
     {
       "name": "J. Hoisting",
@@ -3105,7 +3326,8 @@
       "heading": 75,
       "height": 180,
       "age": 23,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 78
     },
     {
       "name": "J. Closure",
@@ -3119,7 +3341,8 @@
       "heading": 76,
       "height": 196,
       "age": 27,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 73
     },
     {
       "name": "J. Prototype",
@@ -3133,7 +3356,8 @@
       "heading": 75,
       "height": 192,
       "age": 24,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 75
     },
     {
       "name": "J. Callback",
@@ -3147,7 +3371,8 @@
       "heading": 75,
       "height": 173,
       "age": 35,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 81
     },
     {
       "name": "J. EventLoop",
@@ -3161,7 +3386,8 @@
       "heading": 65,
       "height": 178,
       "age": 29,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 71
     },
     {
       "name": "J. Promise",
@@ -3175,7 +3401,8 @@
       "heading": 78,
       "height": 175,
       "age": 29,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 82
     },
     {
       "name": "J. Undefined",
@@ -3189,7 +3416,8 @@
       "heading": 70,
       "height": 173,
       "age": 27,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 72
     },
     {
       "name": "J. StrictMode",
@@ -3203,7 +3431,8 @@
       "heading": 72,
       "height": 177,
       "age": 29,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 83
     },
     {
       "name": "J. ArrowFunction",
@@ -3217,7 +3446,8 @@
       "heading": 80,
       "height": 180,
       "age": 34,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 86
     },
     {
       "name": "J. Evaluation",
@@ -3231,7 +3461,8 @@
       "heading": 89,
       "height": 183,
       "age": 34,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 84
     },
     {
       "name": "J. Null",
@@ -3244,7 +3475,8 @@
       "positioning": 66,
       "age": 33,
       "nationality": "Ukraine",
-      "height": 188
+      "height": 188,
+      "overall": 65
     },
     {
       "name": "J. ObjectKeys",
@@ -3258,7 +3490,8 @@
       "heading": 78,
       "height": 196,
       "age": 35,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 75
     },
     {
       "name": "J. Bind",
@@ -3272,7 +3505,8 @@
       "heading": 68,
       "height": 171,
       "age": 28,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 69
     },
     {
       "name": "J. Apply",
@@ -3286,7 +3520,8 @@
       "heading": 64,
       "height": 172,
       "age": 20,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 70
     },
     {
       "name": "J. Coercion",
@@ -3300,7 +3535,8 @@
       "heading": 72,
       "height": 174,
       "age": 35,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 71
     },
     {
       "name": "J. SetTimeout",
@@ -3314,7 +3550,8 @@
       "heading": 70,
       "height": 176,
       "age": 34,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 76
     },
     {
       "name": "J. SetInterval",
@@ -3328,7 +3565,8 @@
       "heading": 70,
       "height": 178,
       "age": 35,
-      "nationality": "Switzerland"
+      "nationality": "Switzerland",
+      "overall": 72
     },
     {
       "name": "J. SpreadOperator",
@@ -3342,7 +3580,8 @@
       "heading": 65,
       "height": 170,
       "age": 29,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 74
     },
     {
       "name": "J. RestParameter",
@@ -3356,7 +3595,8 @@
       "heading": 71,
       "height": 190,
       "age": 29,
-      "nationality": "Ukraine"
+      "nationality": "Ukraine",
+      "overall": 69
     }
   ],
   "Sporting PHP": [
@@ -3371,7 +3611,8 @@
       "positioning": 80,
       "age": 21,
       "nationality": "Brazil",
-      "height": 196
+      "height": 196,
+      "overall": 79
     },
     {
       "name": "P. Autoload",
@@ -3385,7 +3626,8 @@
       "heading": 74,
       "height": 181,
       "age": 27,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 73
     },
     {
       "name": "P. Namespace",
@@ -3399,7 +3641,8 @@
       "heading": 84,
       "height": 186,
       "age": 35,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 71
     },
     {
       "name": "P. Trait",
@@ -3413,7 +3656,8 @@
       "heading": 84,
       "height": 187,
       "age": 25,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 81
     },
     {
       "name": "P. Composer",
@@ -3427,7 +3671,8 @@
       "heading": 80,
       "height": 173,
       "age": 26,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 86
     },
     {
       "name": "P. Middleware",
@@ -3441,7 +3686,8 @@
       "heading": 69,
       "height": 185,
       "age": 35,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 73
     },
     {
       "name": "P. Eloquent",
@@ -3455,7 +3701,8 @@
       "heading": 80,
       "height": 176,
       "age": 35,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 82
     },
     {
       "name": "P. Artisan",
@@ -3469,7 +3716,8 @@
       "heading": 76,
       "height": 173,
       "age": 27,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 75
     },
     {
       "name": "P. Blade",
@@ -3483,7 +3731,8 @@
       "heading": 76,
       "height": 180,
       "age": 23,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 78
     },
     {
       "name": "P. PDO",
@@ -3497,7 +3746,8 @@
       "heading": 79,
       "height": 168,
       "age": 29,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 84
     },
     {
       "name": "P. Request",
@@ -3511,7 +3761,8 @@
       "heading": 78,
       "height": 187,
       "age": 31,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 76
     },
     {
       "name": "P. Cookie",
@@ -3524,7 +3775,8 @@
       "positioning": 68,
       "age": 25,
       "nationality": "Portugal",
-      "height": 192
+      "height": 192,
+      "overall": 66
     },
     {
       "name": "P. Exception",
@@ -3538,7 +3790,8 @@
       "heading": 80,
       "height": 194,
       "age": 23,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 74
     },
     {
       "name": "P. Fiber",
@@ -3552,7 +3805,8 @@
       "heading": 74,
       "height": 175,
       "age": 20,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 75
     },
     {
       "name": "P. Attribute",
@@ -3566,7 +3820,8 @@
       "heading": 66,
       "height": 182,
       "age": 27,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 74
     },
     {
       "name": "P. MatchExpr",
@@ -3580,7 +3835,8 @@
       "heading": 66,
       "height": 184,
       "age": 23,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 71
     },
     {
       "name": "P. Constructor",
@@ -3594,7 +3850,8 @@
       "heading": 66,
       "height": 174,
       "age": 30,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 68
     },
     {
       "name": "P. Destructor",
@@ -3608,7 +3865,8 @@
       "heading": 73,
       "height": 173,
       "age": 24,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 74
     },
     {
       "name": "P. GlobalVar",
@@ -3622,7 +3880,8 @@
       "heading": 69,
       "height": 178,
       "age": 20,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 74
     },
     {
       "name": "P. SuperGlobal",
@@ -3636,7 +3895,8 @@
       "heading": 80,
       "height": 182,
       "age": 32,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 73
     }
   ],
   "C# Dynamo": [
@@ -3651,7 +3911,8 @@
       "positioning": 79,
       "age": 34,
       "nationality": "Poland",
-      "height": 188
+      "height": 188,
+      "overall": 80
     },
     {
       "name": "C. Namespace",
@@ -3665,7 +3926,8 @@
       "heading": 88,
       "height": 181,
       "age": 26,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 90
     },
     {
       "name": "C. Struct",
@@ -3679,7 +3941,8 @@
       "heading": 92,
       "height": 184,
       "age": 21,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 84
     },
     {
       "name": "C. Interface",
@@ -3693,7 +3956,8 @@
       "heading": 90,
       "height": 187,
       "age": 32,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 89
     },
     {
       "name": "C. Delegate",
@@ -3707,7 +3971,8 @@
       "heading": 82,
       "height": 179,
       "age": 29,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 88
     },
     {
       "name": "C. LINQ",
@@ -3721,7 +3986,8 @@
       "heading": 79,
       "height": 183,
       "age": 35,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 85
     },
     {
       "name": "C. Async",
@@ -3735,7 +4001,8 @@
       "heading": 80,
       "height": 183,
       "age": 19,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 85
     },
     {
       "name": "C. Await",
@@ -3749,7 +4016,8 @@
       "heading": 86,
       "height": 184,
       "age": 30,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 85
     },
     {
       "name": "C. Entity",
@@ -3763,7 +4031,8 @@
       "heading": 89,
       "height": 171,
       "age": 27,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 94
     },
     {
       "name": "C. Reflection",
@@ -3777,7 +4046,8 @@
       "heading": 87,
       "height": 174,
       "age": 19,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 90
     },
     {
       "name": "C. Nuget",
@@ -3791,7 +4061,8 @@
       "heading": 95,
       "height": 189,
       "age": 25,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 86
     },
     {
       "name": "C. GarbageCollector",
@@ -3804,7 +4075,8 @@
       "positioning": 78,
       "age": 32,
       "nationality": "Argentina",
-      "height": 197
+      "height": 197,
+      "overall": 78
     },
     {
       "name": "C. Record",
@@ -3818,7 +4090,8 @@
       "heading": 85,
       "height": 184,
       "age": 24,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 80
     },
     {
       "name": "C. ValueTuple",
@@ -3832,7 +4105,8 @@
       "heading": 73,
       "height": 174,
       "age": 34,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 81
     },
     {
       "name": "C. Extension",
@@ -3846,7 +4120,8 @@
       "heading": 77,
       "height": 172,
       "age": 24,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 83
     },
     {
       "name": "C. PatternMatch",
@@ -3860,7 +4135,8 @@
       "heading": 78,
       "height": 179,
       "age": 32,
-      "nationality": "Uruguay"
+      "nationality": "Uruguay",
+      "overall": 80
     },
     {
       "name": "C. Expression",
@@ -3874,7 +4150,8 @@
       "heading": 84,
       "height": 184,
       "age": 30,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 85
     },
     {
       "name": "C. Property",
@@ -3888,7 +4165,8 @@
       "heading": 72,
       "height": 177,
       "age": 33,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 82
     },
     {
       "name": "C. YieldReturn",
@@ -3902,7 +4180,8 @@
       "heading": 83,
       "height": 175,
       "age": 34,
-      "nationality": "Czechia"
+      "nationality": "Czechia",
+      "overall": 82
     },
     {
       "name": "C. Lock",
@@ -3916,7 +4195,8 @@
       "heading": 78,
       "height": 186,
       "age": 25,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 86
     }
   ],
   "Vim SV": [
@@ -3931,7 +4211,8 @@
       "positioning": 86,
       "age": 21,
       "nationality": "Sweden",
-      "height": 194
+      "height": 194,
+      "overall": 83
     },
     {
       "name": "V. Motion",
@@ -3945,7 +4226,8 @@
       "heading": 78,
       "height": 171,
       "age": 24,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 82
     },
     {
       "name": "V. Buffer",
@@ -3959,7 +4241,8 @@
       "heading": 86,
       "height": 193,
       "age": 25,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 86
     },
     {
       "name": "V. Register",
@@ -3973,7 +4256,8 @@
       "heading": 85,
       "height": 185,
       "age": 25,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 82
     },
     {
       "name": "V. Macro",
@@ -3987,7 +4271,8 @@
       "heading": 86,
       "height": 172,
       "age": 19,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 88
     },
     {
       "name": "V. NormalMode",
@@ -4001,7 +4286,8 @@
       "heading": 86,
       "height": 176,
       "age": 23,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 89
     },
     {
       "name": "V. VisualMode",
@@ -4015,7 +4301,8 @@
       "heading": 79,
       "height": 184,
       "age": 27,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 87
     },
     {
       "name": "V. InsertMode",
@@ -4029,7 +4316,8 @@
       "heading": 76,
       "height": 172,
       "age": 30,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 82
     },
     {
       "name": "V. CommandMode",
@@ -4043,7 +4331,8 @@
       "heading": 82,
       "height": 169,
       "age": 34,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 87
     },
     {
       "name": "V. Neovim",
@@ -4057,7 +4346,8 @@
       "heading": 79,
       "height": 171,
       "age": 27,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 83
     },
     {
       "name": "V. Regex",
@@ -4071,7 +4361,8 @@
       "heading": 87,
       "height": 185,
       "age": 23,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 84
     },
     {
       "name": "V. Quit",
@@ -4084,7 +4375,8 @@
       "positioning": 76,
       "age": 23,
       "nationality": "Sweden",
-      "height": 189
+      "height": 189,
+      "overall": 75
     },
     {
       "name": "V. Write",
@@ -4098,7 +4390,8 @@
       "heading": 79,
       "height": 191,
       "age": 33,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 72
     },
     {
       "name": "V. Undo",
@@ -4112,7 +4405,8 @@
       "heading": 72,
       "height": 175,
       "age": 20,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 75
     },
     {
       "name": "V. Redo",
@@ -4126,7 +4420,8 @@
       "heading": 74,
       "height": 175,
       "age": 29,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 82
     },
     {
       "name": "V. Yank",
@@ -4140,7 +4435,8 @@
       "heading": 75,
       "height": 177,
       "age": 33,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 77
     },
     {
       "name": "V. Paste",
@@ -4154,7 +4450,8 @@
       "heading": 73,
       "height": 175,
       "age": 35,
-      "nationality": "Germany"
+      "nationality": "Germany",
+      "overall": 73
     },
     {
       "name": "V. Search",
@@ -4168,7 +4465,8 @@
       "heading": 73,
       "height": 172,
       "age": 27,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 80
     },
     {
       "name": "V. Replace",
@@ -4182,7 +4480,8 @@
       "heading": 70,
       "height": 174,
       "age": 21,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 81
     },
     {
       "name": "V. Plug",
@@ -4196,7 +4495,8 @@
       "heading": 78,
       "height": 183,
       "age": 21,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 82
     }
   ],
   "Git Atletico": [
@@ -4211,7 +4511,8 @@
       "positioning": 87,
       "age": 33,
       "nationality": "Argentina",
-      "height": 190
+      "height": 190,
+      "overall": 86
     },
     {
       "name": "G. Checkout",
@@ -4225,7 +4526,8 @@
       "heading": 78,
       "height": 180,
       "age": 33,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 86
     },
     {
       "name": "G. Commit",
@@ -4239,7 +4541,8 @@
       "heading": 83,
       "height": 189,
       "age": 19,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 82
     },
     {
       "name": "G. Branch",
@@ -4253,7 +4556,8 @@
       "heading": 91,
       "height": 184,
       "age": 29,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 88
     },
     {
       "name": "G. Stash",
@@ -4267,7 +4571,8 @@
       "heading": 86,
       "height": 171,
       "age": 22,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 88
     },
     {
       "name": "G. Merge",
@@ -4281,7 +4586,8 @@
       "heading": 77,
       "height": 180,
       "age": 24,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 82
     },
     {
       "name": "G. Rebase",
@@ -4295,7 +4601,8 @@
       "heading": 78,
       "height": 184,
       "age": 27,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 86
     },
     {
       "name": "G. CherryPick",
@@ -4309,7 +4616,8 @@
       "heading": 76,
       "height": 176,
       "age": 20,
-      "nationality": "England"
+      "nationality": "England",
+      "overall": 82
     },
     {
       "name": "G. Push",
@@ -4323,7 +4631,8 @@
       "heading": 89,
       "height": 180,
       "age": 35,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 92
     },
     {
       "name": "G. Pull",
@@ -4337,7 +4646,8 @@
       "heading": 84,
       "height": 179,
       "age": 29,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 86
     },
     {
       "name": "G. Fetch",
@@ -4351,7 +4661,8 @@
       "heading": 89,
       "height": 179,
       "age": 34,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 86
     },
     {
       "name": "G. Reflog",
@@ -4364,7 +4675,8 @@
       "positioning": 67,
       "age": 33,
       "nationality": "Japan",
-      "height": 187
+      "height": 187,
+      "overall": 70
     },
     {
       "name": "G. Reset",
@@ -4378,7 +4690,8 @@
       "heading": 92,
       "height": 195,
       "age": 35,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 83
     },
     {
       "name": "G. Hook",
@@ -4392,7 +4705,8 @@
       "heading": 78,
       "height": 181,
       "age": 32,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 89
     },
     {
       "name": "G. Submodule",
@@ -4406,7 +4720,8 @@
       "heading": 80,
       "height": 172,
       "age": 26,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 80
     },
     {
       "name": "G. Tag",
@@ -4420,7 +4735,8 @@
       "heading": 78,
       "height": 175,
       "age": 33,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 89
     },
     {
       "name": "G. Diff",
@@ -4434,7 +4750,8 @@
       "heading": 76,
       "height": 180,
       "age": 22,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 74
     },
     {
       "name": "G. Patch",
@@ -4448,7 +4765,8 @@
       "heading": 71,
       "height": 172,
       "age": 31,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 79
     },
     {
       "name": "G. Blame",
@@ -4462,7 +4780,8 @@
       "heading": 78,
       "height": 176,
       "age": 19,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 89
     },
     {
       "name": "G. ForcePush",
@@ -4476,7 +4795,8 @@
       "heading": 80,
       "height": 186,
       "age": 25,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 83
     }
   ],
   "Boca Assembly": [
@@ -4491,7 +4811,8 @@
       "positioning": 80,
       "age": 20,
       "nationality": "Argentina",
-      "height": 196
+      "height": 196,
+      "overall": 82
     },
     {
       "name": "A. BasePointer",
@@ -4505,7 +4826,8 @@
       "heading": 90,
       "height": 176,
       "age": 23,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 97
     },
     {
       "name": "A. Register",
@@ -4519,7 +4841,8 @@
       "heading": 99,
       "height": 184,
       "age": 35,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 88
     },
     {
       "name": "A. Instruction",
@@ -4533,7 +4856,8 @@
       "heading": 90,
       "height": 196,
       "age": 32,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 89
     },
     {
       "name": "A. Interrupt",
@@ -4547,7 +4871,8 @@
       "heading": 90,
       "height": 181,
       "age": 19,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 95
     },
     {
       "name": "A. MOV",
@@ -4561,7 +4886,8 @@
       "heading": 91,
       "height": 174,
       "age": 35,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 90
     },
     {
       "name": "A. ADD",
@@ -4575,7 +4901,8 @@
       "heading": 90,
       "height": 175,
       "age": 35,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 92
     },
     {
       "name": "A. XOR",
@@ -4589,7 +4916,8 @@
       "heading": 86,
       "height": 176,
       "age": 30,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 88
     },
     {
       "name": "A. JMP",
@@ -4603,7 +4931,8 @@
       "heading": 81,
       "height": 179,
       "age": 21,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 91
     },
     {
       "name": "A. CALL",
@@ -4617,7 +4946,8 @@
       "heading": 86,
       "height": 178,
       "age": 33,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 87
     },
     {
       "name": "A. RET",
@@ -4631,7 +4961,8 @@
       "heading": 87,
       "height": 192,
       "age": 22,
-      "nationality": "United States"
+      "nationality": "United States",
+      "overall": 88
     },
     {
       "name": "A. NullPtr",
@@ -4644,7 +4975,8 @@
       "positioning": 77,
       "age": 31,
       "nationality": "Italy",
-      "height": 187
+      "height": 187,
+      "overall": 77
     },
     {
       "name": "A. Heap",
@@ -4658,7 +4990,8 @@
       "heading": 88,
       "height": 183,
       "age": 20,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 80
     },
     {
       "name": "A. Bitwise",
@@ -4672,7 +5005,8 @@
       "heading": 76,
       "height": 172,
       "age": 24,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 81
     },
     {
       "name": "A. Shift",
@@ -4686,7 +5020,8 @@
       "heading": 76,
       "height": 175,
       "age": 30,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 83
     },
     {
       "name": "A. Flag",
@@ -4700,7 +5035,8 @@
       "heading": 76,
       "height": 178,
       "age": 24,
-      "nationality": "Spain"
+      "nationality": "Spain",
+      "overall": 79
     },
     {
       "name": "A. NOP",
@@ -4714,7 +5050,8 @@
       "heading": 78,
       "height": 179,
       "age": 25,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 82
     },
     {
       "name": "A. PUSH",
@@ -4728,7 +5065,8 @@
       "heading": 80,
       "height": 179,
       "age": 22,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 87
     },
     {
       "name": "A. POP",
@@ -4742,7 +5080,8 @@
       "heading": 74,
       "height": 169,
       "age": 20,
-      "nationality": "Argentina"
+      "nationality": "Argentina",
+      "overall": 83
     },
     {
       "name": "A. Overflow",
@@ -4756,7 +5095,8 @@
       "heading": 82,
       "height": 188,
       "age": 33,
-      "nationality": "Norway"
+      "nationality": "Norway",
+      "overall": 87
     }
   ],
   "Linux Rovers": [
@@ -4771,7 +5111,8 @@
       "positioning": 90,
       "age": 20,
       "nationality": "Argentina",
-      "height": 194
+      "height": 194,
+      "overall": 91
     },
     {
       "name": "L. Kernel",
@@ -4785,7 +5126,8 @@
       "heading": 81,
       "height": 179,
       "age": 34,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 88
     },
     {
       "name": "L. Systemd",
@@ -4799,7 +5141,8 @@
       "heading": 99,
       "height": 195,
       "age": 21,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 93
     },
     {
       "name": "L. Root",
@@ -4813,7 +5156,8 @@
       "heading": 99,
       "height": 185,
       "age": 21,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 93
     },
     {
       "name": "L. Cron",
@@ -4827,7 +5171,8 @@
       "heading": 84,
       "height": 173,
       "age": 19,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 90
     },
     {
       "name": "L. Bash",
@@ -4841,7 +5186,8 @@
       "heading": 89,
       "height": 181,
       "age": 20,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 86
     },
     {
       "name": "L. Zsh",
@@ -4855,7 +5201,8 @@
       "heading": 88,
       "height": 184,
       "age": 27,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 92
     },
     {
       "name": "L. Grep",
@@ -4869,7 +5216,8 @@
       "heading": 89,
       "height": 176,
       "age": 24,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 89
     },
     {
       "name": "L. Sed",
@@ -4883,7 +5231,8 @@
       "heading": 93,
       "height": 174,
       "age": 35,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 98
     },
     {
       "name": "L. Awk",
@@ -4897,7 +5246,8 @@
       "heading": 90,
       "height": 171,
       "age": 26,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 94
     },
     {
       "name": "L. Chmod",
@@ -4911,7 +5261,8 @@
       "heading": 89,
       "height": 183,
       "age": 20,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 92
     },
     {
       "name": "L. Chown",
@@ -4924,7 +5275,8 @@
       "positioning": 86,
       "age": 26,
       "nationality": "Scotland",
-      "height": 191
+      "height": 191,
+      "overall": 83
     },
     {
       "name": "L. Process",
@@ -4938,7 +5290,8 @@
       "heading": 96,
       "height": 194,
       "age": 21,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 83
     },
     {
       "name": "L. Pipe",
@@ -4952,7 +5305,8 @@
       "heading": 85,
       "height": 178,
       "age": 19,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 89
     },
     {
       "name": "L. Daemon",
@@ -4966,7 +5320,8 @@
       "heading": 89,
       "height": 174,
       "age": 21,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 93
     },
     {
       "name": "L. Signal",
@@ -4980,7 +5335,8 @@
       "heading": 82,
       "height": 180,
       "age": 24,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 88
     },
     {
       "name": "L. Terminal",
@@ -4994,7 +5350,8 @@
       "heading": 78,
       "height": 183,
       "age": 24,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 85
     },
     {
       "name": "L. Shell",
@@ -5008,7 +5365,8 @@
       "heading": 81,
       "height": 174,
       "age": 35,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 81
     },
     {
       "name": "L. Swap",
@@ -5022,7 +5380,8 @@
       "heading": 86,
       "height": 168,
       "age": 27,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 96
     },
     {
       "name": "L. KernelPanik",
@@ -5036,7 +5395,8 @@
       "heading": 89,
       "height": 179,
       "age": 33,
-      "nationality": "Scotland"
+      "nationality": "Scotland",
+      "overall": 92
     }
   ],
   "AI Neural FC": [
@@ -5051,7 +5411,8 @@
       "positioning": 88,
       "age": 30,
       "nationality": "Japan",
-      "height": 196
+      "height": 196,
+      "overall": 89
     },
     {
       "name": "N. Attention",
@@ -5065,7 +5426,8 @@
       "heading": 91,
       "height": 180,
       "age": 23,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 96
     },
     {
       "name": "N. LayerNorm",
@@ -5079,7 +5441,8 @@
       "heading": 99,
       "height": 190,
       "age": 35,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 86
     },
     {
       "name": "N. Residual",
@@ -5093,7 +5456,8 @@
       "heading": 94,
       "height": 192,
       "age": 23,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 91
     },
     {
       "name": "N. Embedding",
@@ -5107,7 +5471,8 @@
       "heading": 84,
       "height": 178,
       "age": 24,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 90
     },
     {
       "name": "N. Backprop",
@@ -5121,7 +5486,8 @@
       "heading": 90,
       "height": 175,
       "age": 22,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 93
     },
     {
       "name": "N. Optimizer",
@@ -5135,7 +5501,8 @@
       "heading": 87,
       "height": 180,
       "age": 31,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 92
     },
     {
       "name": "N. LossFunction",
@@ -5149,7 +5516,8 @@
       "heading": 85,
       "height": 174,
       "age": 34,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 92
     },
     {
       "name": "N. Gradient",
@@ -5163,7 +5531,8 @@
       "heading": 93,
       "height": 169,
       "age": 29,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 96
     },
     {
       "name": "N. Tokenizer",
@@ -5177,7 +5546,8 @@
       "heading": 88,
       "height": 176,
       "age": 30,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 95
     },
     {
       "name": "N. Hyperparameter",
@@ -5191,7 +5561,8 @@
       "heading": 99,
       "height": 180,
       "age": 19,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 97
     },
     {
       "name": "N. Dropout",
@@ -5204,7 +5575,8 @@
       "positioning": 79,
       "age": 22,
       "nationality": "Japan",
-      "height": 187
+      "height": 187,
+      "overall": 81
     },
     {
       "name": "N. Weight",
@@ -5218,7 +5590,8 @@
       "heading": 95,
       "height": 192,
       "age": 28,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 89
     },
     {
       "name": "N. Bias",
@@ -5232,7 +5605,8 @@
       "heading": 84,
       "height": 175,
       "age": 24,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 91
     },
     {
       "name": "N. Latent",
@@ -5246,7 +5620,8 @@
       "heading": 81,
       "height": 182,
       "age": 19,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 89
     },
     {
       "name": "N. Epoch",
@@ -5260,7 +5635,8 @@
       "heading": 88,
       "height": 179,
       "age": 24,
-      "nationality": "Austria"
+      "nationality": "Austria",
+      "overall": 92
     },
     {
       "name": "N. Batch",
@@ -5274,7 +5650,8 @@
       "heading": 85,
       "height": 184,
       "age": 22,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 87
     },
     {
       "name": "N. Tensor",
@@ -5288,7 +5665,8 @@
       "heading": 82,
       "height": 183,
       "age": 34,
-      "nationality": "Brazil"
+      "nationality": "Brazil",
+      "overall": 84
     },
     {
       "name": "N. Inference",
@@ -5302,7 +5680,8 @@
       "heading": 87,
       "height": 171,
       "age": 35,
-      "nationality": "Denmark"
+      "nationality": "Denmark",
+      "overall": 91
     },
     {
       "name": "N. Overfitting",
@@ -5316,7 +5695,8 @@
       "heading": 94,
       "height": 179,
       "age": 22,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 91
     }
   ],
   "CSS Selectors": [
@@ -5331,7 +5711,8 @@
       "positioning": 74,
       "age": 19,
       "nationality": "France",
-      "height": 188
+      "height": 188,
+      "overall": 76
     },
     {
       "name": "C. Flexbox",
@@ -5345,7 +5726,8 @@
       "heading": 81,
       "height": 174,
       "age": 23,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 80
     },
     {
       "name": "C. Grid",
@@ -5359,7 +5741,8 @@
       "heading": 86,
       "height": 186,
       "age": 27,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 70
     },
     {
       "name": "C. Container",
@@ -5373,7 +5756,8 @@
       "heading": 88,
       "height": 187,
       "age": 28,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 79
     },
     {
       "name": "C. MediaQueries",
@@ -5387,7 +5771,8 @@
       "heading": 69,
       "height": 180,
       "age": 19,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 78
     },
     {
       "name": "C. ZIndex",
@@ -5401,7 +5786,8 @@
       "heading": 77,
       "height": 183,
       "age": 22,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 82
     },
     {
       "name": "C. Transition",
@@ -5415,7 +5801,8 @@
       "heading": 70,
       "height": 177,
       "age": 29,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 77
     },
     {
       "name": "C. Keyframes",
@@ -5429,7 +5816,8 @@
       "heading": 78,
       "height": 182,
       "age": 21,
-      "nationality": "Netherlands"
+      "nationality": "Netherlands",
+      "overall": 82
     },
     {
       "name": "C. Specificity",
@@ -5443,7 +5831,8 @@
       "heading": 79,
       "height": 168,
       "age": 33,
-      "nationality": "Portugal"
+      "nationality": "Portugal",
+      "overall": 83
     },
     {
       "name": "C. PseudoClass",
@@ -5457,7 +5846,8 @@
       "heading": 79,
       "height": 175,
       "age": 27,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 85
     },
     {
       "name": "C. Important",
@@ -5471,7 +5861,8 @@
       "heading": 88,
       "height": 187,
       "age": 32,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 86
     },
     {
       "name": "C. Margin",
@@ -5484,7 +5875,8 @@
       "positioning": 74,
       "age": 29,
       "nationality": "Germany",
-      "height": 193
+      "height": 193,
+      "overall": 75
     },
     {
       "name": "C. Padding",
@@ -5498,7 +5890,8 @@
       "heading": 76,
       "height": 196,
       "age": 19,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 72
     },
     {
       "name": "C. BorderBox",
@@ -5512,7 +5905,8 @@
       "heading": 59,
       "height": 181,
       "age": 28,
-      "nationality": "Japan"
+      "nationality": "Japan",
+      "overall": 68
     },
     {
       "name": "C. OverflowHidden",
@@ -5526,7 +5920,8 @@
       "heading": 72,
       "height": 181,
       "age": 26,
-      "nationality": "Croatia"
+      "nationality": "Croatia",
+      "overall": 76
     },
     {
       "name": "C. DisplayBlock",
@@ -5540,7 +5935,8 @@
       "heading": 77,
       "height": 182,
       "age": 24,
-      "nationality": "Italy"
+      "nationality": "Italy",
+      "overall": 81
     },
     {
       "name": "C. FloatLeft",
@@ -5554,7 +5950,8 @@
       "heading": 67,
       "height": 172,
       "age": 31,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 73
     },
     {
       "name": "C. Absolute",
@@ -5568,7 +5965,8 @@
       "heading": 68,
       "height": 179,
       "age": 29,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 76
     },
     {
       "name": "C. Relative",
@@ -5582,7 +5980,8 @@
       "heading": 65,
       "height": 170,
       "age": 31,
-      "nationality": "France"
+      "nationality": "France",
+      "overall": 73
     },
     {
       "name": "C. Transform",
@@ -5596,7 +5995,8 @@
       "heading": 72,
       "height": 183,
       "age": 28,
-      "nationality": "Sweden"
+      "nationality": "Sweden",
+      "overall": 76
     }
   ]
 }

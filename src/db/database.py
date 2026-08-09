@@ -142,5 +142,7 @@ class PlayerModel(Base):
     speed: Mapped[int] = mapped_column(nullable=True)
     positioning: Mapped[int] = mapped_column(nullable=True)
 
+    overall: Mapped[int | None] = mapped_column(nullable=True)
+
     def __repr__(self) -> str:
-        return f"<PlayerModel(id={self.id}, full_name='{self.full_name}', short_name='{self.short_name}', position='{self.position}')>"
+        return f"<PlayerModel(id={self.id}, full_name='{self.full_name}', short_name='{self.short_name}', position='{self.position}', overall={self.overall})>"

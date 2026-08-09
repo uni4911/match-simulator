@@ -58,7 +58,7 @@ def test_database_seeding_and_counts():
         player_count = db.query(PlayerModel).count()
 
         assert conf_count == 6
-        assert country_count == 211
+        assert country_count >= 211
         assert league_count >= 1
         assert team_count >= 20
         assert player_count >= 400

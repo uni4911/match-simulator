@@ -424,7 +424,7 @@ def get_formation_positions(formation_name: str) -> list[Position]:
 
 BASE_DRAIN_RATE = 0.0001
 class Player:
-    def __init__(self, full_name: Optional[str] = None, position: Position = Position.CENTRAL_MIDFIELDER, age: int = 20, nationality: str = "Unknown", height: int = 180, short_name: Optional[str] = None, name: Optional[str] = None):
+    def __init__(self, full_name: Optional[str] = None, position: Position = Position.CENTRAL_MIDFIELDER, age: int = 20, nationality: str = "Unknown", height: int = 180, short_name: Optional[str] = None, name: Optional[str] = None, overall: Optional[int] = None):
         resolved_full_name = full_name if full_name is not None else (name if name is not None else "Unknown Player")
         self.full_name: str = resolved_full_name
         self.short_name: str = short_name if short_name is not None else resolved_full_name
@@ -434,10 +434,19 @@ class Player:
         self.height: int = height
         self.fitness: float = 1.0
         self.form: float = 1.0
+        self._overall: Optional[int] = overall
 
     @property
     def name(self) -> str:
         return self.short_name or self.full_name
+
+    @property
+    def overall(self) -> int:
+        return self._overall if self._overall is not None and self._overall > 0 else 50
+
+    @overall.setter
+    def overall(self, value: Optional[int]) -> None:
+        self._overall = value
 
     
 class Team:
@@ -451,9 +460,9 @@ class Team:
         
 
 class FieldPlayer(Player):
-    def __init__(self, full_name: Optional[str] = None, position: Position = Position.CENTRAL_MIDFIELDER, pace: int = 50, shooting: int = 50, passing: int = 50, dribbling: int = 50, defending: int = 50, physical: int = 50, heading: int = 50, height: int = 180, age: int = 20, nationality: str = "Unknown", short_name: Optional[str] = None, name: Optional[str] = None):
+    def __init__(self, full_name: Optional[str] = None, position: Position = Position.CENTRAL_MIDFIELDER, pace: int = 50, shooting: int = 50, passing: int = 50, dribbling: int = 50, defending: int = 50, physical: int = 50, heading: int = 50, height: int = 180, age: int = 20, nationality: str = "Unknown", short_name: Optional[str] = None, name: Optional[str] = None, overall: Optional[int] = None):
         resolved_full_name = full_name if full_name is not None else (name if name is not None else "Unknown Player")
-        super().__init__(full_name=resolved_full_name, position=position, age=age, nationality=nationality, height=height, short_name=short_name)
+        super().__init__(full_name=resolved_full_name, position=position, age=age, nationality=nationality, height=height, short_name=short_name, overall=overall)
         self.base_pace : int = pace
         self.base_shooting : int = shooting
         self.base_passing : int = passing
@@ -463,24 +472,14 @@ class FieldPlayer(Player):
         self.heading: int = heading
 
 
-    @property
-    def overall(self) -> int:
-        if self.position in ATTACKING_POSITIONS:
-            return round((self.base_pace * 0.3) + (self.base_shooting * 0.4) + (self.base_passing * 0.05) + (self.base_dribbling * 0.15) + (self.base_defending * 0.0) + (self.base_physical * 0.1))
-        elif self.position in MIDFIELD_POSITIONS:
-            return round((self.base_pace * 0.1) + (self.base_shooting * 0.1) + (self.base_passing * 0.3) + (self.base_dribbling * 0.3) + (self.base_defending * 0.1) + (self.base_physical * 0.1))
-        elif self.position in DEFENCE_POSITIONS:
-            return round((self.base_pace * 0.15) + (self.base_shooting * 0.0) + (self.base_passing * 0.1) + (self.base_dribbling * 0.05) + (self.base_defending * 0.4) + (self.base_physical * 0.3))
-        else:
-            raise ValueError("Position doesnt exist")
 class Goalkeeper(Player):
 
     REFLEX_MODIFIER: Final[float] = 0.6
     POSITION_MODIFIER: Final[float] = 0.4
 
-    def __init__(self, full_name: Optional[str] = None, diving: int = 50, handling: int = 50, kicking: int = 50, reflexes: int = 50, speed: int = 50, positioning: int = 50, age: int = 20, nationality: str = "Unknown", height: int = 188, short_name: Optional[str] = None, name: Optional[str] = None):
+    def __init__(self, full_name: Optional[str] = None, diving: int = 50, handling: int = 50, kicking: int = 50, reflexes: int = 50, speed: int = 50, positioning: int = 50, age: int = 20, nationality: str = "Unknown", height: int = 188, short_name: Optional[str] = None, name: Optional[str] = None, overall: Optional[int] = None):
         resolved_full_name = full_name if full_name is not None else (name if name is not None else "Unknown Player")
-        super().__init__(full_name=resolved_full_name, position=Position.GOALKEEPER, age=age, nationality=nationality, height=height, short_name=short_name)
+        super().__init__(full_name=resolved_full_name, position=Position.GOALKEEPER, age=age, nationality=nationality, height=height, short_name=short_name, overall=overall)
         self.diving : int = diving
         self.handling : int = handling
         self.kicking : int = kicking
@@ -488,10 +487,6 @@ class Goalkeeper(Player):
         self.speed : int = speed
         self.positioning : int = positioning
 
-    @property
-    def overall(self) -> int:
-        return round((self.diving * 0.2) + (self.handling * 0.1) + (self.kicking *0.05) + (self.reflexes *0.35) + (self.speed *0.05) + (self.positioning * 0.25))
-    
     @property
     def goalkeeping_score(self) -> int:
         return round(((self.reflexes * Goalkeeper.REFLEX_MODIFIER) + (self.positioning * Goalkeeper.POSITION_MODIFIER)))
@@ -512,6 +507,7 @@ class MatchPlayer:
         self.is_starter: bool = False
         self.is_on_field: bool = False
         self.rating: float = 6.0
+        self.seconds_played: int = 0
 
 
 
@@ -559,6 +555,24 @@ class MatchPlayer:
     @property
     def yellow_cards(self) -> int:
         return self.yellow_card
+    @property
+    def minutes_played(self) -> int:
+        return min(90, max(0, round(getattr(self, "seconds_played", 0) / 60)))
+    @property
+    def age(self) -> int:
+        return getattr(self.player, "age", 20)
+    @property
+    def nationality(self) -> str:
+        return getattr(self.player, "nationality", "Unknown")
+    @property
+    def overall(self) -> int:
+        return getattr(self.player, "overall", 50)
+    @property
+    def fitness(self) -> float:
+        return getattr(self.player, "fitness", 1.0)
+    @property
+    def form(self) -> float:
+        return getattr(self.player, "form", 1.0)
     @property
     def pace(self) -> int:
         b = getattr(self.player, "base_pace", getattr(self.player, "speed", 50))
@@ -996,6 +1010,7 @@ class PlayerSeasonStats:
         self.player: Player = player
         self.team_name: Optional[str] = team_name
         self.matches_played: int = 0
+        self.minutes_played: int = 0
         self.goals: int = 0
         self.assists: int = 0
         self.yellow_cards: int = 0
@@ -1022,6 +1037,57 @@ class PlayerSeasonStats:
         return self.player.position.name
 
     @property
+    def age(self) -> int:
+        return getattr(self.player, "age", 20)
+
+    @property
+    def nationality(self) -> str:
+        return getattr(self.player, "nationality", "Unknown")
+
+    @property
+    def height(self) -> int:
+        return getattr(self.player, "height", 180)
+
+    @property
+    def overall(self) -> int:
+        return getattr(self.player, "overall", 50)
+
+    @property
+    def fitness(self) -> float:
+        return getattr(self.player, "fitness", 1.0)
+
+    @property
+    def form(self) -> float:
+        return getattr(self.player, "form", 1.0)
+
+    @property
+    def is_goalkeeper(self) -> bool:
+        return isinstance(self.player, Goalkeeper) or self.player.position == Position.GOALKEEPER
+
+    @property
+    def attributes(self) -> dict[str, int]:
+        if isinstance(self.player, Goalkeeper):
+            return {
+                "diving": getattr(self.player, "diving", 50),
+                "handling": getattr(self.player, "handling", 50),
+                "kicking": getattr(self.player, "kicking", 50),
+                "reflexes": getattr(self.player, "reflexes", 50),
+                "speed": getattr(self.player, "speed", 50),
+                "positioning": getattr(self.player, "positioning", 50),
+                "goalkeeping_score": getattr(self.player, "goalkeeping_score", 50)
+            }
+        else:
+            return {
+                "pace": getattr(self.player, "base_pace", 50),
+                "shooting": getattr(self.player, "base_shooting", 50),
+                "passing": getattr(self.player, "base_passing", 50),
+                "dribbling": getattr(self.player, "base_dribbling", 50),
+                "defending": getattr(self.player, "base_defending", 50),
+                "physical": getattr(self.player, "base_physical", 50),
+                "heading": getattr(self.player, "heading", 50)
+            }
+
+    @property
     def average_rating(self) -> float:
         if self.matches_played <= 0:
             return 0.0
@@ -1029,6 +1095,7 @@ class PlayerSeasonStats:
 
     def register_match_player(self, match_player: MatchPlayer, team_conceded_zero: bool = False, is_motm: bool = False) -> None:
         self.matches_played += 1
+        self.minutes_played += getattr(match_player, "minutes_played", 0)
         self.goals += match_player.goals
         self.assists += match_player.assists
         self.yellow_cards += match_player.yellow_card

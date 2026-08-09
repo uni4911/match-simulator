@@ -19,8 +19,14 @@ import {
     toggleModalSort,
     setModalSearch,
     closeMatchDetailsModal,
-    switchMatchDetailsTab
+    switchMatchDetailsTab,
+    openMatchByIndex
 } from './js/league.js';
+import { 
+    openPlayerProfile, 
+    initPlayerProfileView,
+    switchPlayerProfileTab 
+} from './js/player-profile.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadMatchOptions();
@@ -91,12 +97,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // League sub-tab switches (Tabela i Terminarz vs Statystyki Zawodników)
     const leagueSubTabTable = document.getElementById('league-subtab-table');
     const leagueSubTabStats = document.getElementById('league-subtab-stats');
+    const leagueSubTabPlayer = document.getElementById('league-subtab-player');
 
     if (leagueSubTabTable) {
         leagueSubTabTable.addEventListener('click', () => switchLeagueSubTab('table'));
     }
     if (leagueSubTabStats) {
         leagueSubTabStats.addEventListener('click', () => switchLeagueSubTab('stats'));
+    }
+    if (leagueSubTabPlayer) {
+        leagueSubTabPlayer.addEventListener('click', () => switchLeagueSubTab('player'));
     }
 
     // League event listeners
@@ -177,23 +187,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const cat = e.currentTarget.getAttribute('data-category');
-            if (cat) setModalCategory(cat);
+    const modalCategoryTabs = document.getElementById('modal-category-tabs');
+    if (modalCategoryTabs) {
+        modalCategoryTabs.addEventListener('click', (e) => {
+            const btn = e.target.closest('.modal-tab-btn');
+            if (btn) {
+                const cat = btn.getAttribute('data-category');
+                if (cat) setModalCategory(cat);
+            }
         });
-    });
-
-    document.querySelectorAll('#modal-player-stats-thead-row .sortable-header').forEach(th => {
-        th.addEventListener('click', (e) => {
-            const sortKey = e.currentTarget.getAttribute('data-sort');
-            if (sortKey) toggleModalSort(sortKey);
-        });
-    });
+    }
 
     const searchInput = document.getElementById('modal-player-search');
     if (searchInput) {
-        searchInput.addEventListener('input', (e) => setModalSearch(e.target.value));
+        let searchTimeout = null;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                setModalSearch(e.target.value.trim());
+            }, 200);
+        });
     }
 
     const closeMdModalBtn = document.getElementById('close-match-details-modal-btn');
@@ -217,6 +230,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnMdEvents) btnMdEvents.addEventListener('click', () => switchMatchDetailsTab('events'));
     if (btnMdPlayers) btnMdPlayers.addEventListener('click', () => switchMatchDetailsTab('players'));
     if (btnMdAwayPlayers) btnMdAwayPlayers.addEventListener('click', () => switchMatchDetailsTab('away-players'));
+
+    // Initialize Player Profile dedicated view
+    initPlayerProfileView();
 
 
     const homeTab = document.getElementById('tab-home-stats');

@@ -567,6 +567,12 @@ class Match:
         active_players = [self.player_with_ball] if self.player_with_ball else []
         self.home_team.update_stamina(seconds, active_players)
         self.away_team.update_stamina(seconds, active_players)
+        for p in self.home_team.players_on_field:
+            if not p.has_red_card and not p.is_forced_off:
+                p.seconds_played += seconds
+        for p in self.away_team.players_on_field:
+            if not p.has_red_card and not p.is_forced_off:
+                p.seconds_played += seconds
         if self.team_with_ball:
             self.add_event(PossessionTimeEvent(self.current_second, self.team_with_ball.team.name, seconds))
 

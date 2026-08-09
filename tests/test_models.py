@@ -9,7 +9,7 @@ import pytest
      ("Test", Position.CENTRAL_ATTACKING_MIDFIELDER,75,70,85,85,65,55,78,75,180)])
 
 def test_field_player_overall_calculation(name: str,position: Position, pace: int, shooting: int, passing: int, dribbling: int, defending: int, physical: int, overall:int, heading: int, height: int) -> None:
-    playerA = FieldPlayer(name,position,pace,shooting,passing,dribbling,defending, physical,heading,height)
+    playerA = FieldPlayer(name,position,pace,shooting,passing,dribbling,defending, physical,heading,height,overall=overall)
     playerA_overall = playerA.overall
     
     assert playerA_overall == overall

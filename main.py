@@ -2,20 +2,21 @@ import os
 import json
 import asyncio
 import random
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from src.db.loader import load_all_teams
 from src.db.migrate import run_migration
-from src.models import AVAILABLE_FORMATIONS, FORMATION_433, League, PlayerSeasonStats, get_formation_positions
+from src.models import AVAILABLE_FORMATIONS, FORMATION_433, League, PlayerSeasonStats, get_formation_positions, Goalkeeper, Player
 from src.engine.league_engine import LeagueEngine
 from src.events.event_bus import EventBus
 from src.engine.engine import MatchTeam, Match, MatchEngine, EVENT_OR_STATE_DURATIONS
 from src.events.commentator import Commentator
 from api.schemas import (MatchStatusSchema, StartMatchRequest, MatchOptionsResponse, MatchFullStatsSchema, 
                          MatchPlayerStatsSchema, LeagueTableResponse, CreateLeagueRequest, LeagueTeamStats,
-                         PlayLeagueMatch, PlayerSeasonStatsSchema)
+                         PlayLeagueMatch, PlayerSeasonStatsSchema, PlayerProfileResponse, PlayerMatchLogSchema)
 
 try:
     run_migration()
@@ -180,6 +181,28 @@ def match_options():
         "formations": list(AVAILABLE_FORMATIONS.keys())
     }
 
+
+@app.get("/teams")
+def get_teams():
+    result = {}
+    for team_name, team_obj in loaded_teams.items():
+        players_list = []
+        for p in team_obj.players:
+            actual = getattr(p, "player", p)
+            players_list.append({
+                "full_name": actual.full_name,
+                "short_name": actual.short_name,
+                "name": actual.name,
+                "position": actual.position.name if hasattr(actual.position, "name") else str(actual.position),
+                "nationality": actual.nationality,
+                "overall": actual.overall,
+                "age": actual.age,
+                "height": actual.height
+            })
+        result[team_name] = players_list
+    return result
+
+
 @app.post("/match/start", response_model=MatchStatusSchema)
 def start_match(req: StartMatchRequest):
     global match, event_bus, commentator, engine
@@ -333,12 +356,17 @@ def league_start(req: CreateLeagueRequest):
     return _get_league_response(league)
 
 
-@app.get("/league/table", response_model=LeagueTableResponse)
+@app.get("/league/table", response_model=Optional[LeagueTableResponse])
 def league_table():
     if league is None:
-        raise HTTPException(400, "Liga nie została jeszcze utworzona")
-    
+        return None
     return _get_league_response(league)
+
+@app.get("/league/player-stats", response_model=list[PlayerSeasonStatsSchema])
+def league_player_stats():
+    if league is None:
+        return []
+    return sorted(list(league.player_stats.values()), key=lambda p: (p.goals, p.assists, p.average_rating), reverse=True)
 
 @app.post("/league/match/status", response_model=LeagueTableResponse)
 def play_league_match(req: PlayLeagueMatch):
@@ -383,5 +411,259 @@ def start_league_match_live(req: PlayLeagueMatch):
     engine = MatchEngine(commentator=commentator, speed_factor=0.1, event_bus=event_bus)
 
     return get_match_status_report()
+
+def _find_player_in_all_teams(name: str, team_name: str | None = None) -> tuple[Player | None, str | None]:
+    clean_name = name.strip()
+    # Strip rank prefix like "1. ", "12. " if present
+    if "." in clean_name:
+        parts = clean_name.split(".", 1)
+        if parts[0].strip().isdigit():
+            clean_name = parts[1].strip()
+
+    import unicodedata
+
+    def strip_accents(text: str) -> str:
+        return "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn").lower()
+
+    clean_norm = strip_accents(clean_name).replace("jr", "junior").replace(".", "").replace("-", " ")
+    clean_name_lower = clean_name.lower()
+    team_name_lower = team_name.strip().lower() if team_name else None
+
+    # Collect candidates: (priority, player, team_name)
+    def check_match(p_obj, t_name: str):
+        actual = getattr(p_obj, "player", p_obj)
+        fn = actual.full_name or ""
+        sn = actual.short_name or ""
+        nm = actual.name or ""
+        
+        # 1. Exact matches
+        if fn.lower() == clean_name_lower or sn.lower() == clean_name_lower or nm.lower() == clean_name_lower:
+            return 1, actual, t_name
+        
+        # 2. Normalized exact matches
+        fn_norm = strip_accents(fn).replace("jr", "junior").replace(".", "").replace("-", " ")
+        sn_norm = strip_accents(sn).replace("jr", "junior").replace(".", "").replace("-", " ")
+        if fn_norm == clean_norm or sn_norm == clean_norm:
+            return 2, actual, t_name
+
+        # 3. Substring in normalized
+        if (clean_norm and clean_norm in fn_norm) or (clean_norm and clean_norm in sn_norm):
+            return 3, actual, t_name
+
+        # 4. Partial word matching
+        words = [w for w in clean_norm.split() if len(w) > 2]
+        if words and all(w in fn_norm or w in sn_norm for w in words):
+            return 4, actual, t_name
+
+        return 999, None, None
+
+    # Search in order: match, league, loaded_teams
+    best_candidate = None
+    best_prio = 999
+
+    sources = []
+    if match:
+        for mt in [match.home_team, match.away_team]:
+            if not team_name_lower or mt.team.name.lower() == team_name_lower:
+                sources.append((mt.team.name, [mp.player for mp in mt.match_players]))
+    if league:
+        for t in league.teams:
+            if not team_name_lower or t.name.lower() == team_name_lower:
+                sources.append((t.name, t.players))
+    for t_name, t_obj in loaded_teams.items():
+        if not team_name_lower or t_name.lower() == team_name_lower:
+            sources.append((t_name, t_obj.players))
+
+    for t_name, player_list in sources:
+        for p in player_list:
+            prio, act, team_ret = check_match(p, t_name)
+            if prio == 1:
+                return act, team_ret
+            if prio < best_prio:
+                best_prio = prio
+                best_candidate = (act, team_ret)
+
+    if best_candidate and best_prio < 999:
+        return best_candidate
+
+    return None, None
+
+
+@app.get("/player/profile", response_model=PlayerProfileResponse)
+def get_player_profile(name: str, team: str | None = None):
+    player_obj, found_team_name = _find_player_in_all_teams(name, team)
+    if not player_obj:
+        raise HTTPException(status_code=404, detail=f"Nie znaleziono zawodnika: {name}")
+
+    # Season stats
+    season_stats_obj = None
+    if league and player_obj in league.player_stats:
+        season_stats_obj = league.player_stats[player_obj]
+    elif league:
+        for p, stats in league.player_stats.items():
+            if p.full_name == player_obj.full_name or p.short_name == player_obj.short_name:
+                season_stats_obj = stats
+                break
+
+    if not season_stats_obj:
+        season_stats_obj = PlayerSeasonStats(player_obj, team_name=found_team_name)
+        # If single match is active or finished, populate single match stats
+        if match:
+            for mt in [match.home_team, match.away_team]:
+                for mp in mt.match_players:
+                    if mp.player == player_obj or mp.name == player_obj.name:
+                        if mp.is_starter or mp.minutes_played > 0 or mp in mt.played_players:
+                            is_motm = (match.man_of_the_match is not None and (match.man_of_the_match == mp or match.man_of_the_match.player == player_obj))
+                            conceded = match.away_score if mt == match.home_team else match.home_score
+                            season_stats_obj.register_match_player(mp, team_conceded_zero=(conceded == 0), is_motm=bool(is_motm))
+
+    match_history: list[PlayerMatchLogSchema] = []
+    if league and league.fixtures:
+        num_teams = len(league.teams)
+        matches_per_round = max(1, num_teams // 2)
+
+        for fix_idx, fixture in enumerate(league.fixtures):
+            h_name = getattr(fixture.home_team, "team", fixture.home_team).name
+            a_name = getattr(fixture.away_team, "team", fixture.away_team).name
+
+            if h_name != found_team_name and a_name != found_team_name:
+                continue
+
+            is_home = (h_name == found_team_name)
+            opp_name = a_name if is_home else h_name
+            r_num = (fix_idx // matches_per_round) + 1
+            is_fin = getattr(fixture, "is_finished", False)
+
+            my_score = fixture.home_score if is_home else fixture.away_score
+            opp_score = fixture.away_score if is_home else fixture.home_score
+            res = "W" if my_score > opp_score else ("D" if my_score == opp_score else "L") if is_fin else "-"
+
+            played = False
+            is_starter = False
+            is_on_field = False
+            was_sub_in = False
+            was_sub_off = False
+            m_played = 0
+            rating = 6.0
+            goals = 0
+            assists = 0
+            passes = 0
+            yellow_cards = 0
+            has_red = False
+            is_injured = False
+            is_motm = False
+
+            if is_fin:
+                match_team = fixture.home_team if is_home else fixture.away_team
+                if hasattr(match_team, "match_players"):
+                    for mp in match_team.match_players:
+                        if mp.player == player_obj or mp.name == player_obj.name or mp.full_name == player_obj.full_name:
+                            is_starter = mp.is_starter
+                            is_on_field = mp.is_on_field
+                            m_played = getattr(mp, "minutes_played", 0)
+                            rating = getattr(mp, "rating", 6.0)
+                            goals = mp.goals
+                            assists = mp.assists
+                            passes = mp.passes
+                            yellow_cards = mp.yellow_cards
+                            has_red = mp.has_red_card
+                            is_injured = mp.is_injured
+                            played = (is_starter or m_played > 0 or mp in getattr(match_team, "played_players", set()))
+                            was_sub_in = (not is_starter and played)
+                            was_sub_off = (is_starter and not is_on_field and not has_red and not getattr(mp, "is_forced_off", False))
+                            motm = getattr(fixture, "man_of_the_match", None)
+                            if motm and (motm == mp or motm.player == player_obj):
+                                is_motm = True
+                            break
+
+            match_history.append(PlayerMatchLogSchema(
+                round_number=r_num,
+                home_team_name=h_name,
+                away_team_name=a_name,
+                home_score=fixture.home_score,
+                away_score=fixture.away_score,
+                is_home=is_home,
+                opponent_name=opp_name,
+                result=res,
+                is_finished=is_fin,
+                played_in_match=played,
+                is_starter=is_starter,
+                is_on_field=is_on_field,
+                was_subbed_in=was_sub_in,
+                was_subbed_off=was_sub_off,
+                minutes_played=m_played,
+                rating=rating,
+                goals=goals,
+                assists=assists,
+                passes=passes,
+                yellow_cards=yellow_cards,
+                has_red_card=has_red,
+                is_injured=is_injured,
+                is_motm=is_motm,
+                fixture_index=fix_idx
+            ))
+
+    elif match:
+        h_name = match.home_team.team.name
+        a_name = match.away_team.team.name
+        if h_name == found_team_name or a_name == found_team_name:
+            is_home = (h_name == found_team_name)
+            opp_name = a_name if is_home else h_name
+            is_fin = match.current_second >= 5400
+            my_score = match.home_score if is_home else match.away_score
+            opp_score = match.away_score if is_home else match.home_score
+            res = "W" if my_score > opp_score else ("D" if my_score == opp_score else "L") if is_fin else "-"
+
+            match_team = match.home_team if is_home else match.away_team
+            for mp in match_team.match_players:
+                if mp.player == player_obj or mp.name == player_obj.name or mp.full_name == player_obj.full_name:
+                    is_motm = (match.man_of_the_match and (match.man_of_the_match == mp or match.man_of_the_match.player == player_obj))
+                    played = (mp.is_starter or mp.minutes_played > 0 or mp in match_team.played_players)
+                    match_history.append(PlayerMatchLogSchema(
+                        round_number=1,
+                        home_team_name=h_name,
+                        away_team_name=a_name,
+                        home_score=match.home_score,
+                        away_score=match.away_score,
+                        is_home=is_home,
+                        opponent_name=opp_name,
+                        result=res,
+                        is_finished=is_fin,
+                        played_in_match=played,
+                        is_starter=mp.is_starter,
+                        is_on_field=mp.is_on_field,
+                        was_subbed_in=(not mp.is_starter and played),
+                        was_subbed_off=(mp.is_starter and not mp.is_on_field),
+                        minutes_played=mp.minutes_played,
+                        rating=mp.rating,
+                        goals=mp.goals,
+                        assists=mp.assists,
+                        passes=mp.passes,
+                        yellow_cards=mp.yellow_cards,
+                        has_red_card=mp.has_red_card,
+                        is_injured=mp.is_injured,
+                        is_motm=bool(is_motm),
+                        fixture_index=None
+                    ))
+                    break
+
+    is_gk = isinstance(player_obj, Goalkeeper)
+    return PlayerProfileResponse(
+        player_name=player_obj.name,
+        full_name=player_obj.full_name,
+        short_name=player_obj.short_name,
+        team_name=found_team_name or "Brak drużyny",
+        position=player_obj.position.name if hasattr(player_obj.position, "name") else str(player_obj.position),
+        age=getattr(player_obj, "age", 20),
+        nationality=getattr(player_obj, "nationality", "Unknown"),
+        height=getattr(player_obj, "height", 180),
+        overall=getattr(player_obj, "overall", 50),
+        fitness=getattr(player_obj, "fitness", 1.0),
+        form=getattr(player_obj, "form", 1.0),
+        is_goalkeeper=is_gk,
+        attributes=season_stats_obj.attributes,
+        season_stats=season_stats_obj,
+        match_history=match_history
+    )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
