@@ -21,6 +21,7 @@ class GoalWithAssist(Goal):
 class ShotSave(MatchEvent):
     goalkeeper: str
     team: str
+    shooter: str = ""
 
 @dataclass(frozen=True)
 class Foul(MatchEvent):
@@ -112,6 +113,11 @@ class BuildUpEvent(MatchEvent):
 @dataclass(frozen=True)
 class InterceptionEvent(MatchEvent):
     interceptor: str
+    team: str
+
+@dataclass(frozen=True)
+class DispossessedEvent(MatchEvent):
+    player: str
     team: str
 
 

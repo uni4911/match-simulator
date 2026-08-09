@@ -18,6 +18,7 @@ class TeamStatsMatchSchema(BaseModel):
     red_cards: int = Field(default=0, ge=0)
     corners: int = Field(default=0, ge=0)
     saves: int = Field(default=0, ge=0)
+    average_rating: float = Field(default=6.0, ge=1.0, le=10.0)
 
 class MatchEventSchema(BaseModel):
     second: int
@@ -34,6 +35,7 @@ class MatchStatusSchema(BaseModel):
     events: list[MatchEventSchema] = []
     home_team_stats: Optional[TeamStatsMatchSchema] = None
     away_team_stats: Optional[TeamStatsMatchSchema] = None
+    man_of_the_match: Optional[MatchPlayerStatsSchema] = None
 
 class MatchPlayerStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -49,6 +51,7 @@ class MatchPlayerStatsSchema(BaseModel):
     is_starter: bool = False
     is_on_field: bool = False
     is_injured: bool = False
+    rating: float = Field(default=6.0, ge=1.0, le=10.0)
 
 class MatchFullStatsSchema(BaseModel):
     home_team_name: str
@@ -57,6 +60,7 @@ class MatchFullStatsSchema(BaseModel):
     away_players: list[MatchPlayerStatsSchema]
     home_team_stats: Optional[TeamStatsMatchSchema] = None
     away_team_stats: Optional[TeamStatsMatchSchema] = None
+    man_of_the_match: Optional[MatchPlayerStatsSchema] = None
 
 class PlayerSeasonStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -71,6 +75,8 @@ class PlayerSeasonStatsSchema(BaseModel):
     red_cards: int = Field(default=0, ge=0)
     passes: int = Field(default=0, ge=0)
     clean_sheets: int = Field(default=0, ge=0)
+    average_rating: float = Field(default=0.0, ge=0.0, le=10.0)
+    motm_awards: int = Field(default=0, ge=0)
 
 class LeagueTeamStatsSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -107,6 +113,7 @@ class LeagueMatchSchema(BaseModel):
     events: list[MatchEventSchema] = []
     home_players: list[MatchPlayerStatsSchema] = []
     away_players: list[MatchPlayerStatsSchema] = []
+    man_of_the_match: Optional[MatchPlayerStatsSchema] = None
 
 class LeagueTableResponse(BaseModel):
     name: str

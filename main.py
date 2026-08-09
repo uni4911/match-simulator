@@ -99,8 +99,9 @@ def get_match_status_report():
         'current_minute': match.current_second // 60,
         'is_finished': match.current_second >= 5400,
         'events': api_events,
-        'home_team_stats': match.home_team.stats.to_dict(match.away_team.stats),
-        'away_team_stats': match.away_team.stats.to_dict(match.home_team.stats)
+        'home_team_stats': match.home_team.stats.to_dict(match.away_team.stats, average_rating=match.home_team.average_rating),
+        'away_team_stats': match.away_team.stats.to_dict(match.home_team.stats, average_rating=match.away_team.average_rating),
+        'man_of_the_match': match.man_of_the_match
     }
 
 
@@ -215,8 +216,9 @@ def team_stats():
                    'away_team_name': match.away_team.team.name,
                    'home_players': match.home_team.match_players,
                    'away_players': match.away_team.match_players,
-                   'home_team_stats': match.home_team.stats.to_dict(match.away_team.stats),
-                   'away_team_stats': match.away_team.stats.to_dict(match.home_team.stats)}
+                   'home_team_stats': match.home_team.stats.to_dict(match.away_team.stats, average_rating=match.home_team.average_rating),
+                   'away_team_stats': match.away_team.stats.to_dict(match.home_team.stats, average_rating=match.away_team.average_rating),
+                   'man_of_the_match': match.man_of_the_match}
     
     return teams_stats
 
@@ -256,9 +258,12 @@ def _get_league_response(league_obj):
         home_players_list = []
         away_players_list = []
 
+        motm = None
         if is_fin and hasattr(m, "home_team") and hasattr(m.home_team, "stats"):
-            home_t_stats = m.home_team.stats.to_dict(m.away_team.stats)
-            away_t_stats = m.away_team.stats.to_dict(m.home_team.stats)
+            home_avg = getattr(m.home_team, "average_rating", 6.0)
+            away_avg = getattr(m.away_team, "average_rating", 6.0)
+            home_t_stats = m.home_team.stats.to_dict(m.away_team.stats, average_rating=home_avg)
+            away_t_stats = m.away_team.stats.to_dict(m.home_team.stats, average_rating=away_avg)
             for ev in getattr(m, "match_events", []):
                 ev_name = type(ev).__name__
                 if ev_name in IMPORTANT_EVENT_NAMES:
@@ -268,6 +273,7 @@ def _get_league_response(league_obj):
                 home_players_list = [p for p in m.home_team.match_players]
             if hasattr(m.away_team, "match_players"):
                 away_players_list = [p for p in m.away_team.match_players]
+            motm = getattr(m, "man_of_the_match", None)
 
         fixtures_data.append({
             "home_team_name": getattr(m.home_team, "team", m.home_team).name,
@@ -280,7 +286,8 @@ def _get_league_response(league_obj):
             "away_team_stats": away_t_stats,
             "events": events_list,
             "home_players": home_players_list,
-            "away_players": away_players_list
+            "away_players": away_players_list,
+            "man_of_the_match": motm
         })
 
     # Ensure all players from league teams are tracked in player_stats

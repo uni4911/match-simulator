@@ -245,6 +245,19 @@
                                 </div>
                                 <div class="stat-team-val away" id="stat-away-saves">0</div>
                             </div>
+
+                            <!-- Średnia ocena drużyny -->
+                            <div class="team-stat-row">
+                                <div class="stat-team-val home" id="stat-home-rating">6.0</div>
+                                <div class="stat-center">
+                                    <span class="stat-title">ŚREDNIA OCENA DRUŻYNY</span>
+                                    <div class="dual-bar">
+                                        <div class="dual-bar-fill home" id="bar-home-rating" style="width: 50%;"></div>
+                                        <div class="dual-bar-fill away" id="bar-away-rating" style="width: 50%;"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-team-val away" id="stat-away-rating">6.0</div>
+                            </div>
                         </div>
                     </section>
 
@@ -268,6 +281,27 @@
                         <button id="refresh-stats-btn" type="button" class="stats-refresh-btn" title="Odśwież statystyki">
                             <span class="refresh-icon">🔄</span>
                         </button>
+                    </div>
+
+                    <!-- MOTM Card -->
+                    <div id="stats-motm-card" class="stats-motm-card">
+                        <div class="motm-header">
+                            <span class="motm-crown">👑</span>
+                            <span class="motm-title">ZAWODNIK MECZU (MOTM)</span>
+                        </div>
+                        <div class="motm-body">
+                            <div class="motm-player-info">
+                                <span id="stats-motm-pos" class="pos-badge fw">---</span>
+                                <span id="stats-motm-name" class="motm-player-name">---</span>
+                            </div>
+                            <div id="stats-motm-rating" class="stat-pill rating high">⭐ 6.0</div>
+                        </div>
+                    </div>
+
+                    <!-- Team Summary Bar -->
+                    <div class="stats-team-summary-bar">
+                        <span class="summary-label">ŚREDNIA OCENA:</span>
+                        <span id="stats-team-avg-rating" class="stat-pill rating high">⭐ 6.0</span>
                     </div>
 
                     <div class="stats-team-tabs">
@@ -528,6 +562,8 @@
                                 <div class="modal-tab-buttons">
                                     <button type="button" class="modal-tab-btn active" data-category="goals">⚽ Strzelcy</button>
                                     <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asysty</button>
+                                    <button type="button" class="modal-tab-btn" data-category="rating">⭐ Śr. ocen (>5)</button>
+                                    <button type="button" class="modal-tab-btn" data-category="motm">👑 MOTM</button>
                                     <button type="button" class="modal-tab-btn" data-category="cards">🟨 Kartki</button>
                                     <button type="button" class="modal-tab-btn" data-category="cleansheets">🧤 Czyste Konta</button>
                                     <button type="button" class="modal-tab-btn" data-category="all">📋 Wszyscy</button>
@@ -544,6 +580,8 @@
                                             <th class="text-center sortable-header" data-sort="matches" title="Mecze rozegrane">MECZE</th>
                                             <th class="text-center sortable-header highlight-col" data-sort="goals">BRAMKI</th>
                                             <th class="text-center sortable-header" data-sort="assists">ASYSTY</th>
+                                            <th class="text-center sortable-header" data-sort="rating">ŚR. OCENA</th>
+                                            <th class="text-center sortable-header" data-sort="motm">MOTM (👑)</th>
                                             <th class="text-center sortable-header" data-sort="cards">KARTKI (🟨/🟥)</th>
                                             <th class="text-center sortable-header" data-sort="cleansheets">CZYSTE KONTA</th>
                                             <th class="text-center sortable-header" data-sort="passes">PODANIA</th>
@@ -574,6 +612,8 @@
                         <div class="modal-tab-buttons">
                             <button type="button" class="modal-tab-btn active" data-category="goals">⚽ Strzelcy</button>
                             <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asysty</button>
+                            <button type="button" class="modal-tab-btn" data-category="rating">⭐ Śr. ocen (>5)</button>
+                            <button type="button" class="modal-tab-btn" data-category="motm">👑 MOTM</button>
                             <button type="button" class="modal-tab-btn" data-category="cards">🟨 Kartki</button>
                             <button type="button" class="modal-tab-btn" data-category="cleansheets">🧤 Czyste Konta</button>
                             <button type="button" class="modal-tab-btn" data-category="all">📋 Wszyscy</button>
@@ -589,6 +629,8 @@
                                     <th class="text-center sortable-header" data-sort="matches" title="Mecze rozegrane">MECZE</th>
                                     <th class="text-center sortable-header" data-sort="goals">BRAMKI</th>
                                     <th class="text-center sortable-header" data-sort="assists">ASYSTY</th>
+                                    <th class="text-center sortable-header" data-sort="rating">ŚR. OCENA</th>
+                                    <th class="text-center sortable-header" data-sort="motm">MOTM (👑)</th>
                                     <th class="text-center sortable-header" data-sort="cards">KARTKI (🟨/🟥)</th>
                                     <th class="text-center sortable-header" data-sort="cleansheets">CZYSTE KONTA</th>
                                     <th class="text-center sortable-header" data-sort="passes">PODANIA</th>

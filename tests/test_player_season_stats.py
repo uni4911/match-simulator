@@ -70,4 +70,35 @@ def test_league_engine_player_stats_integration():
     top_scorers = league_engine.get_top_scorers()
     assert len(top_scorers) > 0
     assert top_scorers[0].matches_played == 1
+    
+    top_ratings = league_engine.get_top_ratings()
+    assert len(top_ratings) > 0
+    assert top_ratings[0].average_rating >= 1.0
+
+    top_motm = league_engine.get_top_motm()
+    assert len(top_motm) > 0
+    # There should be exactly 1 MOTM from the played match
+    motm_total = sum(p.motm_awards for p in league.player_stats.values())
+    assert motm_total == 1
+
+
+def test_player_season_stats_rating_and_motm_accumulation():
+    player = FieldPlayer("Robert Lewandowski", Position.STRIKER, 85, 91, 78, 86, 44, 82, 78, 185)
+    season_stats = PlayerSeasonStats(player)
+
+    mp1 = MatchPlayer(player)
+    mp1.rating = 8.5
+    season_stats.register_match_player(mp1, is_motm=True)
+
+    assert season_stats.matches_played == 1
+    assert season_stats.average_rating == 8.5
+    assert season_stats.motm_awards == 1
+
+    mp2 = MatchPlayer(player)
+    mp2.rating = 6.5
+    season_stats.register_match_player(mp2, is_motm=False)
+
+    assert season_stats.matches_played == 2
+    assert season_stats.average_rating == 7.5
+    assert season_stats.motm_awards == 1
 

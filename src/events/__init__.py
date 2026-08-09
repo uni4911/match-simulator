@@ -4,8 +4,10 @@ from .events import (
     MatchEndEvent, Substitution, CornerKickEvent, HalfTimeEvent,
     InjuryEvent, LongShotGoal, LongShotEvent, WingPlayEvent,
     BuildUpEvent, InterceptionEvent, PossessionTimeEvent, PassEvent,
-    ShotOffTargetEvent
+    ShotOffTargetEvent, DispossessedEvent
 )
 from .event_bus import EventBus
 from .commentator import Commentator
 from .stats_tracker import MatchStatsTracker
+from .rating_tracker import PlayerRatingTracker
+

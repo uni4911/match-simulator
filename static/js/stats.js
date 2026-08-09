@@ -133,6 +133,18 @@ export function createPlayerStatCard(player, index, forceBench = false) {
         pillsDiv.appendChild(redPill);
     }
 
+    // Rating pill
+    const ratingVal = player.rating !== undefined ? Number(player.rating).toFixed(1) : '6.0';
+    const ratingNum = parseFloat(ratingVal);
+    let ratingClass = 'medium';
+    if (ratingNum >= 7.0) ratingClass = 'high';
+    else if (ratingNum < 6.0) ratingClass = 'low';
+
+    const ratingPill = document.createElement('span');
+    ratingPill.className = `stat-pill rating ${ratingClass}`;
+    ratingPill.textContent = `⭐ ${ratingVal}`;
+    pillsDiv.appendChild(ratingPill);
+
     mainRow.appendChild(infoDiv);
     mainRow.appendChild(pillsDiv);
 
@@ -175,6 +187,11 @@ export function renderPlayerStats() {
     const awayBadgeEl = document.getElementById('stats-away-badge');
     const homeTab = document.getElementById('tab-home-stats');
     const awayTab = document.getElementById('tab-away-stats');
+    const motmEl = document.getElementById('stats-motm-card');
+    const motmNameEl = document.getElementById('stats-motm-name');
+    const motmPosEl = document.getElementById('stats-motm-pos');
+    const motmRatingEl = document.getElementById('stats-motm-rating');
+    const teamAvgEl = document.getElementById('stats-team-avg-rating');
 
     if (!container) return;
 
@@ -184,6 +201,9 @@ export function renderPlayerStats() {
         if (awayNameEl) awayNameEl.textContent = 'GOŚCIE';
         if (homeBadgeEl) homeBadgeEl.textContent = '---';
         if (awayBadgeEl) awayBadgeEl.textContent = '---';
+        if (motmNameEl) motmNameEl.textContent = '---';
+        if (motmRatingEl) motmRatingEl.textContent = '⭐ 6.0';
+        if (teamAvgEl) teamAvgEl.textContent = '⭐ 6.0';
         return;
     }
 
@@ -205,7 +225,60 @@ export function renderPlayerStats() {
         }
     }
 
+    const allPlayers = [
+        ...(currentStatsData.home_players || []),
+        ...(currentStatsData.away_players || [])
+    ];
+
+    // Calculate MOTM (Man of the Match)
+    let motm = currentStatsData.man_of_the_match;
+    if (!motm && allPlayers.length > 0) {
+        const played = allPlayers.filter(p => p.is_starter || p.is_on_field);
+        const candidates = played.length > 0 ? played : allPlayers;
+        motm = candidates.reduce((best, p) => {
+            if (!best) return p;
+            const pRating = p.rating ?? 6.0;
+            const bestRating = best.rating ?? 6.0;
+            if (pRating > bestRating) return p;
+            if (pRating === bestRating && (p.goals || 0) > (best.goals || 0)) return p;
+            return best;
+        }, null);
+    }
+
+    if (motm && motmNameEl) {
+        motmNameEl.textContent = motm.short_name || motm.name || motm.full_name || '---';
+        if (motmPosEl) {
+            const shortPos = getShortPosition(motm.position);
+            const posClass = getPositionClass(motm.position);
+            motmPosEl.className = `pos-badge ${posClass}`;
+            motmPosEl.textContent = shortPos;
+        }
+        if (motmRatingEl) {
+            const rVal = motm.rating !== undefined ? Number(motm.rating).toFixed(1) : '6.0';
+            const rNum = parseFloat(rVal);
+            let rClass = 'medium';
+            if (rNum >= 7.0) rClass = 'high';
+            else if (rNum < 6.0) rClass = 'low';
+            motmRatingEl.className = `stat-pill rating ${rClass}`;
+            motmRatingEl.textContent = `⭐ ${rVal}`;
+        }
+    }
+
     const players = activeStatsTab === 'home' ? (currentStatsData.home_players || []) : (currentStatsData.away_players || []);
+
+    // Calculate Team Average Rating for active tab
+    if (teamAvgEl && players.length > 0) {
+        const playedTeam = players.filter(p => p.is_starter || p.is_on_field);
+        const activeGroup = playedTeam.length > 0 ? playedTeam : players;
+        const avg = activeGroup.reduce((sum, p) => sum + (p.rating ?? 6.0), 0) / activeGroup.length;
+        const avgStr = avg.toFixed(1);
+        const avgNum = parseFloat(avgStr);
+        let avgClass = 'medium';
+        if (avgNum >= 7.0) avgClass = 'high';
+        else if (avgNum < 6.0) avgClass = 'low';
+        teamAvgEl.className = `stat-pill rating ${avgClass}`;
+        teamAvgEl.textContent = `⭐ ${avgStr}`;
+    }
 
     if (players.length === 0) {
         container.innerHTML = '<div class="empty-stats">Brak danych zawodników dla wybranej drużyny</div>';

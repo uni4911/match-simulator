@@ -134,6 +134,7 @@ export function renderTeamMatchStats(homeStats, awayStats) {
     setStatRow('passes', homeStats.passes ?? 0, awayStats.passes ?? 0);
     setStatRow('corners', homeStats.corners ?? 0, awayStats.corners ?? 0);
     setStatRow('saves', homeStats.saves ?? 0, awayStats.saves ?? 0);
+    setStatRow('rating', Number(homeStats.average_rating ?? 6.0).toFixed(1), Number(awayStats.average_rating ?? 6.0).toFixed(1));
 }
 
 export async function updateMatchState(url, userMethod = 'GET') {

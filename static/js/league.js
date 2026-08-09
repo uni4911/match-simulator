@@ -1143,20 +1143,40 @@ export function renderLeaguePlayerStats(playerStats) {
         .sort((a, b) => b.assists - a.assists || b.goals - a.goals || a.player_name.localeCompare(b.player_name))
         .slice(0, 5);
 
-    // 3. Most Cards (Kartki)
+    // 3. Top Ratings (Średnia ocen - gracze z >5 meczami)
+    let ratingPool = playerStats.filter(p => p.matches_played > 5);
+    const hasMin5 = ratingPool.length > 0;
+    if (!hasMin5) {
+        ratingPool = playerStats.filter(p => p.matches_played > 0);
+    }
+    const topRatings = [...ratingPool]
+        .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0) || (b.motm_awards || 0) - (a.motm_awards || 0) || a.player_name.localeCompare(b.player_name))
+        .slice(0, 5);
+
+    // 4. Top MOTM Awards (Zawodnik meczu)
+    const topMotm = [...playerStats]
+        .filter(p => (p.motm_awards || 0) > 0)
+        .sort((a, b) => (b.motm_awards || 0) - (a.motm_awards || 0) || (b.average_rating || 0) - (a.average_rating || 0) || a.player_name.localeCompare(b.player_name))
+        .slice(0, 5);
+
+    // 5. Most Cards (Kartki)
     const mostCards = [...playerStats]
         .sort((a, b) => (b.yellow_cards + b.red_cards * 2) - (a.yellow_cards + a.red_cards * 2) || a.player_name.localeCompare(b.player_name))
         .slice(0, 5);
 
-    // 4. Clean Sheets (Czyste Konta)
+    // 6. Clean Sheets (Czyste Konta)
     const cleanSheets = [...playerStats]
         .filter(p => p.position === 'GOALKEEPER')
         .sort((a, b) => b.clean_sheets - a.clean_sheets || a.player_name.localeCompare(b.player_name))
         .slice(0, 5);
 
+    const ratingCardTitle = hasMin5 ? '⭐ ŚREDNIA OCEN (>5 meczów)' : '⭐ ŚREDNIA OCEN';
+
     container.innerHTML = `
         ${createCategoryCard('⚽ NAJLEPSI STRZELCY', topScorers, p => `${p.goals} gol(i)`, 'goals')}
         ${createCategoryCard('🅰️ NAJLEPSI ASYSTENCI', topAssists, p => `${p.assists} asyst`, 'assists')}
+        ${createCategoryCard(ratingCardTitle, topRatings, p => `⭐ ${(p.average_rating || 0).toFixed(2)}`, 'rating')}
+        ${createCategoryCard('👑 ZAWODNIK MECZU', topMotm, p => `${p.motm_awards || 0}x 👑`, 'motm')}
         ${createCategoryCard('🟨 NAJWIĘCEJ KARTEK', mostCards, p => `${p.yellow_cards}🟨 ${p.red_cards}🟥`, 'cards')}
         ${createCategoryCard('🧤 CZYSTE KONTA', cleanSheets, p => `${p.clean_sheets} mecz(e)`, 'cleansheets')}
     `;
@@ -1222,6 +1242,12 @@ export async function openPlayerStatsModal(category = 'goals') {
     } else if (category === 'assists') {
         modalSortKey = 'assists';
         modalSortDir = 'desc';
+    } else if (category === 'rating') {
+        modalSortKey = 'rating';
+        modalSortDir = 'desc';
+    } else if (category === 'motm') {
+        modalSortKey = 'motm';
+        modalSortDir = 'desc';
     } else if (category === 'cards') {
         modalSortKey = 'cards';
         modalSortDir = 'desc';
@@ -1272,6 +1298,12 @@ export function setModalCategory(category) {
     } else if (category === 'assists') {
         modalSortKey = 'assists';
         modalSortDir = 'desc';
+    } else if (category === 'rating') {
+        modalSortKey = 'rating';
+        modalSortDir = 'desc';
+    } else if (category === 'motm') {
+        modalSortKey = 'motm';
+        modalSortDir = 'desc';
     } else if (category === 'cards') {
         modalSortKey = 'cards';
         modalSortDir = 'desc';
@@ -1294,7 +1326,7 @@ export function toggleModalSort(sortKey) {
         modalSortDir = (sortKey === 'name' || sortKey === 'position' || sortKey === 'rank') ? 'asc' : 'desc';
     }
 
-    if (['goals', 'assists', 'cards', 'cleansheets'].includes(sortKey)) {
+    if (['goals', 'assists', 'rating', 'motm', 'cards', 'cleansheets'].includes(sortKey)) {
         currentModalCategory = sortKey;
     } else {
         currentModalCategory = 'all';
@@ -1325,6 +1357,10 @@ export function renderModalTable() {
 
     if (currentModalCategory === 'cleansheets') {
         players = players.filter(p => p.position === 'GOALKEEPER');
+    } else if (currentModalCategory === 'rating') {
+        if (players.some(p => p.matches_played > 5)) {
+            players = players.filter(p => p.matches_played > 5);
+        }
     }
 
     players.sort((a, b) => {
@@ -1334,6 +1370,10 @@ export function renderModalTable() {
             cmp = (b.goals - a.goals) || (b.assists - a.assists) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'assists') {
             cmp = (b.assists - a.assists) || (b.goals - a.goals) || getPName(a).localeCompare(getPName(b));
+        } else if (modalSortKey === 'rating') {
+            cmp = ((b.average_rating || 0) - (a.average_rating || 0)) || ((b.motm_awards || 0) - (a.motm_awards || 0)) || getPName(a).localeCompare(getPName(b));
+        } else if (modalSortKey === 'motm') {
+            cmp = ((b.motm_awards || 0) - (a.motm_awards || 0)) || ((b.average_rating || 0) - (a.average_rating || 0)) || getPName(a).localeCompare(getPName(b));
         } else if (modalSortKey === 'cards') {
             const pointsA = (a.yellow_cards || 0) + (a.red_cards || 0) * 2;
             const pointsB = (b.yellow_cards || 0) + (b.red_cards || 0) * 2;
@@ -1367,6 +1407,8 @@ export function renderModalTable() {
         'matches': 'MECZE',
         'goals': 'BRAMKI',
         'assists': 'ASYSTY',
+        'rating': 'ŚR. OCENA',
+        'motm': 'MOTM (👑)',
         'cards': 'KARTKI (🟨/🟥)',
         'cleansheets': 'CZYSTE KONTA',
         'passes': 'PODANIA'
@@ -1383,7 +1425,7 @@ export function renderModalTable() {
     });
 
     if (players.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty-table-msg">Brak zawodników spełniających kryteria.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-table-msg">Brak zawodników spełniających kryteria.</td></tr>';
         return;
     }
 
@@ -1397,9 +1439,17 @@ export function renderModalTable() {
         const isMatches = modalSortKey === 'matches';
         const isGoals = modalSortKey === 'goals';
         const isAssists = modalSortKey === 'assists';
+        const isRating = modalSortKey === 'rating';
+        const isMotm = modalSortKey === 'motm';
         const isCards = modalSortKey === 'cards';
         const isClean = modalSortKey === 'cleansheets';
         const isPasses = modalSortKey === 'passes';
+
+        const avgVal = (p.average_rating || 0).toFixed(2);
+        const avgNum = parseFloat(avgVal);
+        let ratingBadgeClass = 'medium';
+        if (avgNum >= 7.0) ratingBadgeClass = 'high';
+        else if (avgNum > 0 && avgNum < 6.0) ratingBadgeClass = 'low';
 
         return `
             <tr class="table-row">
@@ -1409,6 +1459,8 @@ export function renderModalTable() {
                 <td class="text-center ${isMatches ? 'highlight-col font-bold' : ''}">${p.matches_played}</td>
                 <td class="text-center ${isGoals ? 'highlight-col font-bold points-cell' : ''}">${p.goals}</td>
                 <td class="text-center ${isAssists ? 'highlight-col font-bold points-cell' : 'text-green font-semibold'}">${p.assists}</td>
+                <td class="text-center ${isRating ? 'highlight-col font-bold' : ''}"><span class="stat-pill rating ${ratingBadgeClass}" style="display:inline-flex;">⭐ ${avgVal}</span></td>
+                <td class="text-center ${isMotm ? 'highlight-col font-bold text-gold' : ''}">${p.motm_awards > 0 ? `${p.motm_awards} 👑` : '-'}</td>
                 <td class="text-center ${isCards ? 'highlight-col font-bold' : ''}">${p.yellow_cards} 🟨 / ${p.red_cards} 🟥</td>
                 <td class="text-center ${isClean ? 'highlight-col font-bold points-cell' : 'text-gold font-bold'}">${p.clean_sheets}</td>
                 <td class="text-center ${isPasses ? 'highlight-col font-bold' : 'text-sub'}">${p.passes}</td>
@@ -1481,6 +1533,7 @@ export function openMatchDetailsModal(fixture) {
             ${createStatRow('PODANIA', homeStats.passes ?? 0, awayStats.passes ?? 0)}
             ${createStatRow('RZUTY ROŻNE', homeStats.corners ?? 0, awayStats.corners ?? 0)}
             ${createStatRow('INTERWENCJE BRAMKARZY', homeStats.saves ?? 0, awayStats.saves ?? 0)}
+            ${createStatRow('ŚREDNIA OCENA DRUŻYNY', Number(homeStats.average_rating ?? 6.0).toFixed(1), Number(awayStats.average_rating ?? 6.0).toFixed(1))}
         `;
     }
 

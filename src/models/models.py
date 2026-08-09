@@ -442,6 +442,7 @@ class MatchPlayer:
         self.is_forced_off: bool = False
         self.is_starter: bool = False
         self.is_on_field: bool = False
+        self.rating: float = 6.0
 
 
 
@@ -581,7 +582,7 @@ class TeamStatsMatch:
         self.corners = 0
         self.saves = 0
 
-    def to_dict(self, opponent_stats: Optional[TeamStatsMatch] = None) -> dict[str, float | int]:
+    def to_dict(self, opponent_stats: Optional[TeamStatsMatch] = None, average_rating: Optional[float] = None) -> dict[str, float | int]:
         return {
             "possession_time": round(self.possession_time, 1),
             "possession_percentage": self.get_possession_percentage(opponent_stats),
@@ -595,6 +596,7 @@ class TeamStatsMatch:
             "red_cards": self.red_cards,
             "corners": self.corners,
             "saves": self.saves,
+            "average_rating": average_rating if average_rating is not None else getattr(self, "average_rating", 6.0),
         }
 
 class MatchTeam:
@@ -614,6 +616,14 @@ class MatchTeam:
         self.played_players: set[MatchPlayer] = set(self.players_on_field)
         self.stats: TeamStatsMatch = TeamStatsMatch()
         self.last_substitution_second: int = -999
+
+    @property
+    def average_rating(self) -> float:
+        participants = [p for p in self.match_players if p.is_starter or p.is_on_field or p in self.played_players]
+        candidates = participants if participants else self.match_players
+        if not candidates:
+            return 6.0
+        return round(sum(p.rating for p in candidates) / len(candidates), 1)
 
     @property
     def starting_goalkeeper(self) -> Goalkeeper:
@@ -889,6 +899,7 @@ class League:
     def register_match_player_stats(self, match: Match) -> None:
         home_team = match.home_team
         away_team = match.away_team
+        motm = match.man_of_the_match
 
         for match_team, conceded in [(home_team, match.away_score), (away_team, match.home_score)]:
             clean_sheet = (conceded == 0)
@@ -896,7 +907,8 @@ class League:
             for mp in played:
                 if mp.player not in self.player_stats:
                     self.player_stats[mp.player] = PlayerSeasonStats(mp.player)
-                self.player_stats[mp.player].register_match_player(mp, team_conceded_zero=clean_sheet)
+                is_motm = (motm is not None and (mp == motm or mp.player == motm.player))
+                self.player_stats[mp.player].register_match_player(mp, team_conceded_zero=clean_sheet, is_motm=is_motm)
 
 
 class PlayerSeasonStats:
@@ -909,6 +921,8 @@ class PlayerSeasonStats:
         self.red_cards: int = 0
         self.passes: int = 0
         self.clean_sheets: int = 0
+        self.total_rating: float = 0.0
+        self.motm_awards: int = 0
 
     @property
     def player_name(self) -> str:
@@ -926,7 +940,13 @@ class PlayerSeasonStats:
     def position(self) -> str:
         return self.player.position.name
 
-    def register_match_player(self, match_player: MatchPlayer, team_conceded_zero: bool = False) -> None:
+    @property
+    def average_rating(self) -> float:
+        if self.matches_played <= 0:
+            return 0.0
+        return round(self.total_rating / self.matches_played, 2)
+
+    def register_match_player(self, match_player: MatchPlayer, team_conceded_zero: bool = False, is_motm: bool = False) -> None:
         self.matches_played += 1
         self.goals += match_player.goals
         self.assists += match_player.assists
@@ -936,6 +956,9 @@ class PlayerSeasonStats:
         self.passes += match_player.passes
         if isinstance(self.player, Goalkeeper) and team_conceded_zero:
             self.clean_sheets += 1
+        self.total_rating += getattr(match_player, "rating", 6.0)
+        if is_motm:
+            self.motm_awards += 1
 
 
 class LeagueTeamStats:

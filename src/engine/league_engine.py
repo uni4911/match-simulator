@@ -123,6 +123,15 @@ class LeagueEngine:
     def get_top_assists(self, limit: int = 10) -> list[PlayerSeasonStats]:
         return sorted(self.league.player_stats.values(), key=lambda stats: stats.assists, reverse=True)[:limit]
 
+    def get_top_ratings(self, limit: int = 10, min_matches: int = 5) -> list[PlayerSeasonStats]:
+        filtered = [s for s in self.league.player_stats.values() if s.matches_played > min_matches]
+        if not filtered:
+            filtered = [s for s in self.league.player_stats.values() if s.matches_played >= 1]
+        return sorted(filtered, key=lambda stats: (stats.average_rating, stats.motm_awards, stats.goals), reverse=True)[:limit]
+
+    def get_top_motm(self, limit: int = 10) -> list[PlayerSeasonStats]:
+        return sorted(self.league.player_stats.values(), key=lambda stats: (stats.motm_awards, stats.average_rating), reverse=True)[:limit]
+
     def get_sorted_player_stats(self, sort_by: str = "goals") -> list[PlayerSeasonStats]:
         key_func = lambda stats: getattr(stats, sort_by, stats.goals)
         return sorted(self.league.player_stats.values(), key=key_func, reverse=True)

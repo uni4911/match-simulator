@@ -918,6 +918,79 @@ body {
   box-shadow: 0 0 10px rgba(0, 180, 216, 0.4);
 }
 
+.stats-motm-card {
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.15), rgba(0, 0, 0, 0.3));
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.15);
+}
+
+.motm-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.motm-crown {
+  font-size: 0.9rem;
+}
+
+.motm-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--metro-gold);
+}
+
+.motm-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.motm-player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow: hidden;
+}
+
+.motm-player-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-team-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.4rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats-team-summary-bar .summary-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--metro-text-sub);
+  letter-spacing: 0.05em;
+}
+
 .stats-team-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1223,6 +1296,31 @@ body {
 
 .stat-pill.red.active {
   opacity: 1;
+  background: rgba(230, 57, 70, 0.25);
+  border-color: var(--metro-accent-red);
+  color: #f87171;
+}
+
+.stat-pill.rating {
+  opacity: 1;
+  font-size: 0.78rem;
+  padding: 0.1rem 0.4rem;
+  font-weight: 800;
+}
+
+.stat-pill.rating.high {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--metro-accent-green);
+  color: #34d399;
+}
+
+.stat-pill.rating.medium {
+  background: rgba(0, 180, 216, 0.2);
+  border-color: var(--metro-accent-teal);
+  color: #38bdf8;
+}
+
+.stat-pill.rating.low {
   background: rgba(230, 57, 70, 0.25);
   border-color: var(--metro-accent-red);
   color: #f87171;
