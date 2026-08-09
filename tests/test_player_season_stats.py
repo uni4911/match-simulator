@@ -102,3 +102,10 @@ def test_player_season_stats_rating_and_motm_accumulation():
     assert season_stats.average_rating == 7.5
     assert season_stats.motm_awards == 1
 
+
+def test_player_season_stats_team_name_propagation():
+    player = FieldPlayer("Vinicius Junior", Position.LEFT_WING, 95, 84, 81, 90, 30, 68, 60, 176)
+    season_stats = PlayerSeasonStats(player, team_name="Real Madrid")
+    assert season_stats.team_name == "Real Madrid"
+
+

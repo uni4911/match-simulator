@@ -293,8 +293,11 @@ def _get_league_response(league_obj):
     # Ensure all players from league teams are tracked in player_stats
     for team_obj in league_obj.teams:
         for player in team_obj.players:
-            if player not in league_obj.player_stats:
-                league_obj.player_stats[player] = PlayerSeasonStats(player)
+            actual_player = getattr(player, 'player', player)
+            if actual_player not in league_obj.player_stats:
+                league_obj.player_stats[actual_player] = PlayerSeasonStats(actual_player, team_name=team_obj.name)
+            elif not getattr(league_obj.player_stats[actual_player], "team_name", None):
+                league_obj.player_stats[actual_player].team_name = team_obj.name
 
     player_stats_sorted = sorted(league_obj.player_stats.values(), key=lambda s: s.goals, reverse=True)
     return {

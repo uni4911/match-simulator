@@ -654,7 +654,7 @@
                             </div>
 
                             <div class="modal-filter-row" style="padding: 0.8rem 1rem; background: rgba(0,0,0,0.25); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-                                <input type="text" id="modal-player-search" class="metro-select" placeholder="🔍 Szukaj zawodnika..." style="max-width: 280px; padding: 0.4rem 0.8rem;">
+                                <input type="text" id="modal-player-search" class="metro-select" placeholder="🔍 Szukaj zawodnika lub klubu..." style="max-width: 280px; padding: 0.4rem 0.8rem;">
                                 <div class="modal-tab-buttons">
                                     <button type="button" class="modal-tab-btn active" data-category="goals">⚽ Strzelcy</button>
                                     <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asysty</button>
@@ -670,17 +670,7 @@
                                 <table class="metro-table">
                                     <thead>
                                         <tr id="modal-player-stats-thead-row">
-                                            <th class="text-center sortable-header" data-sort="rank">#</th>
-                                            <th class="sortable-header" data-sort="name">ZAWODNIK</th>
-                                            <th class="text-center sortable-header" data-sort="position">POZYCJA</th>
-                                            <th class="text-center sortable-header" data-sort="matches" title="Mecze rozegrane">MECZE</th>
-                                            <th class="text-center sortable-header highlight-col" data-sort="goals">BRAMKI</th>
-                                            <th class="text-center sortable-header" data-sort="assists">ASYSTY</th>
-                                            <th class="text-center sortable-header" data-sort="rating">ŚR. OCENA</th>
-                                            <th class="text-center sortable-header" data-sort="motm">MOTM (👑)</th>
-                                            <th class="text-center sortable-header" data-sort="cards">KARTKI (🟨/🟥)</th>
-                                            <th class="text-center sortable-header" data-sort="cleansheets">CZYSTE KONTA</th>
-                                            <th class="text-center sortable-header" data-sort="passes">PODANIA</th>
+                                            <!-- Dynamicznie generowane nagłówki w zależności od wybranej statystyki -->
                                         </tr>
                                     </thead>
                                     <tbody id="modal-player-stats-tbody">
@@ -695,54 +685,6 @@
                 </div> <!-- /.workspace-inner -->
             </main> <!-- /.app-workspace -->
         </div> <!-- /.app-root -->
-
-        <!-- MODAL: PEŁNE STATYSTYKI GRACZY W LIDZE -->
-        <div id="player-stats-modal" class="metro-modal-overlay hidden">
-            <div class="metro-modal-content">
-                <div class="metro-modal-header">
-                    <div class="metro-modal-title">
-                        <span>📊 PEŁNA LISTA STATYSTYK GRACZY SEZONU</span>
-                    </div>
-                    <button id="close-player-stats-modal-btn" class="metro-modal-close" type="button">&times;</button>
-                </div>
-                <div class="metro-modal-body">
-                    <div class="modal-filter-row">
-                        <input type="text" id="modal-player-search" class="metro-select" placeholder="🔍 Szukaj zawodnika..." style="max-width: 280px; padding: 0.4rem 0.8rem;">
-                        <div class="modal-tab-buttons">
-                            <button type="button" class="modal-tab-btn active" data-category="goals">⚽ Strzelcy</button>
-                            <button type="button" class="modal-tab-btn" data-category="assists">🅰️ Asysty</button>
-                            <button type="button" class="modal-tab-btn" data-category="rating">⭐ Śr. ocen (>5)</button>
-                            <button type="button" class="modal-tab-btn" data-category="motm">👑 MOTM</button>
-                            <button type="button" class="modal-tab-btn" data-category="cards">🟨 Kartki</button>
-                            <button type="button" class="modal-tab-btn" data-category="cleansheets">🧤 Czyste Konta</button>
-                            <button type="button" class="modal-tab-btn" data-category="all">📋 Wszyscy</button>
-                        </div>
-                    </div>
-                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
-                        <table class="metro-table">
-                            <thead>
-                                <tr id="modal-player-stats-thead-row">
-                                    <th class="text-center sortable-header" data-sort="rank">#</th>
-                                    <th class="sortable-header" data-sort="name">ZAWODNIK</th>
-                                    <th class="text-center sortable-header" data-sort="position">POZYCJA</th>
-                                    <th class="text-center sortable-header" data-sort="matches" title="Mecze rozegrane">MECZE</th>
-                                    <th class="text-center sortable-header" data-sort="goals">BRAMKI</th>
-                                    <th class="text-center sortable-header" data-sort="assists">ASYSTY</th>
-                                    <th class="text-center sortable-header" data-sort="rating">ŚR. OCENA</th>
-                                    <th class="text-center sortable-header" data-sort="motm">MOTM (👑)</th>
-                                    <th class="text-center sortable-header" data-sort="cards">KARTKI (🟨/🟥)</th>
-                                    <th class="text-center sortable-header" data-sort="cleansheets">CZYSTE KONTA</th>
-                                    <th class="text-center sortable-header" data-sort="passes">PODANIA</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modal-player-stats-tbody">
-                                <!-- Wiersze z zawodnikami -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- MODAL: SZCZEGÓŁY I STATYSTYKI MECZU -->
         <div id="match-details-modal" class="metro-modal-overlay hidden">

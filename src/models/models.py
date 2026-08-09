@@ -968,6 +968,10 @@ class League:
         self.fixtures: list[Match] = []
         self.table: dict[Team, LeagueTeamStats] = {team: LeagueTeamStats(team) for team in self.teams}
         self.player_stats: dict[Player, PlayerSeasonStats] = {}
+        for team in self.teams:
+            for p in getattr(team, 'players', []):
+                actual_player = getattr(p, 'player', p)
+                self.player_stats[actual_player] = PlayerSeasonStats(actual_player, team_name=team.name)
 
     def register_match_player_stats(self, match: Match) -> None:
         home_team = match.home_team
@@ -976,17 +980,21 @@ class League:
 
         for match_team, conceded in [(home_team, match.away_score), (away_team, match.home_score)]:
             clean_sheet = (conceded == 0)
+            t_name = getattr(getattr(match_team, "team", match_team), "name", None)
             played = getattr(match_team, "played_players", match_team.players_on_field)
             for mp in played:
                 if mp.player not in self.player_stats:
-                    self.player_stats[mp.player] = PlayerSeasonStats(mp.player)
+                    self.player_stats[mp.player] = PlayerSeasonStats(mp.player, team_name=t_name)
+                elif not getattr(self.player_stats[mp.player], "team_name", None) and t_name:
+                    self.player_stats[mp.player].team_name = t_name
                 is_motm = (motm is not None and (mp == motm or mp.player == motm.player))
                 self.player_stats[mp.player].register_match_player(mp, team_conceded_zero=clean_sheet, is_motm=is_motm)
 
 
 class PlayerSeasonStats:
-    def __init__(self, player: Player):
+    def __init__(self, player: Player, team_name: Optional[str] = None):
         self.player: Player = player
+        self.team_name: Optional[str] = team_name
         self.matches_played: int = 0
         self.goals: int = 0
         self.assists: int = 0

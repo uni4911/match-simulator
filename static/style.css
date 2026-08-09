@@ -3034,9 +3034,21 @@ body.state-home .workspace-inner {
 
 .league-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.15rem;
   margin-top: 0.75rem;
+}
+
+@media (max-width: 1200px) {
+  .league-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .league-stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .league-stat-card {
@@ -3086,11 +3098,12 @@ body.state-home .workspace-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.45rem 0.65rem;
-  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.03);
   font-size: 0.85rem;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
+  gap: 0.5rem;
 }
 
 .stat-player-item:hover {
@@ -3105,15 +3118,17 @@ body.state-home .workspace-inner {
 .stat-player-left {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
 }
 
 .stat-player-rank {
   font-family: 'Oswald', sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
-  width: 22px;
+  width: 24px;
   text-align: center;
   flex-shrink: 0;
 }
@@ -3122,6 +3137,9 @@ body.state-home .workspace-inner {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .stat-player-name {
@@ -3130,6 +3148,50 @@ body.state-home .workspace-inner {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.88rem;
+}
+
+.stat-player-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.73rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-player-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--metro-accent-teal);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.stat-player-team-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-mini-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(0, 180, 216, 0.2);
+  border: 1px solid rgba(0, 180, 216, 0.4);
+  color: #ffffff;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
 .player-card-subpos {
@@ -3143,13 +3205,16 @@ body.state-home .workspace-inner {
 
 .stat-player-pos {
   font-family: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--metro-text-sub);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
-
 
 .stat-player-val {
   font-family: 'Oswald', sans-serif;
@@ -3160,6 +3225,38 @@ body.state-home .workspace-inner {
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+.stat-pill.stat-goals {
+  background: rgba(0, 180, 216, 0.18);
+  color: #00d4ff;
+  border: 1px solid rgba(0, 180, 216, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.stat-pill.stat-assists {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.stat-pill.stat-cleansheets {
+  background: rgba(255, 183, 3, 0.18);
+  color: #ffb703;
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.stat-pill.stat-motm {
+  background: rgba(255, 215, 0, 0.18);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
 }
 
 .stat-card-footer {

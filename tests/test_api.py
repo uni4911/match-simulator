@@ -90,6 +90,7 @@ def test_league_endpoints():
     from main import get_league_player_stats, start_league_match_live
     player_stats_resp = get_league_player_stats("goals")
     assert len(player_stats_resp) > 0
+    assert any(getattr(p, "team_name", None) for p in player_stats_resp)
 
     live_req = PlayLeagueMatch(match_index=1)
     live_resp = start_league_match_live(live_req)

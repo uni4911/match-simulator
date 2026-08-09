@@ -67,6 +67,7 @@ class PlayerSeasonStatsSchema(BaseModel):
     player_name: str
     full_name: Optional[str] = None
     short_name: Optional[str] = None
+    team_name: Optional[str] = None
     position: str
     matches_played: int = Field(default=0, ge=0)
     goals: int = Field(default=0, ge=0)
