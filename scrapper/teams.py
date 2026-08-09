@@ -8,6 +8,26 @@ from scrapper.fetcher import fetch_html
 
 BASE_URL = "https://sofifa.com/teams"
 
+SOFIFA_FORMATION_NAME_MAP = {
+    "4-3-3 Flat": "4-3-3",
+    "4-2-3-1 Wide": "4-2-3-1",
+    "4-4-2 Flat": "4-4-2",
+    "4-5-1 Flat": "4-5-1",
+    "3-4-3 Flat": "3-4-3",
+    "5-4-1 Flat": "5-4-1",
+    "4-4-1-1 Midfield": "4-4-1-1",
+    "4-1-2-1-2 Narrow": "4-1-2-1-2",
+}
+
+def normalize_sofifa_formation(raw: str) -> str:
+    """
+    Normalizes SoFIFA tactical formation names into standard domain formation names.
+    """
+    cleaned = raw.strip()
+    if not cleaned:
+        return "4-3-3"
+    return SOFIFA_FORMATION_NAME_MAP.get(cleaned, cleaned)
+
 def parse_teams_page(html: str) -> list[dict]:
     """
     Parses a single page of SoFIFA teams table and returns a list of team dicts (with in-memory sofifa_id).
@@ -43,11 +63,15 @@ def parse_teams_page(html: str) -> list[dict]:
         at_td = row.select_one('td[data-col="at"]')
         md_td = row.select_one('td[data-col="md"]')
         df_td = row.select_one('td[data-col="df"]')
+        fm_td = row.select_one('td[data-col="fm"]')
 
         overall = int(oa_td.get_text(strip=True)) if oa_td and oa_td.get_text(strip=True).isdigit() else None
         attack = int(at_td.get_text(strip=True)) if at_td and at_td.get_text(strip=True).isdigit() else None
         midfield = int(md_td.get_text(strip=True)) if md_td and md_td.get_text(strip=True).isdigit() else None
         defense = int(df_td.get_text(strip=True)) if df_td and df_td.get_text(strip=True).isdigit() else None
+        
+        raw_formation = fm_td.get_text(strip=True) if fm_td else ""
+        formation = normalize_sofifa_formation(raw_formation) if raw_formation else "4-3-3"
 
         teams.append({
             "sofifa_id": sofifa_id,
@@ -58,7 +82,8 @@ def parse_teams_page(html: str) -> list[dict]:
             "overall": overall,
             "attack": attack,
             "midfield": midfield,
-            "defense": defense
+            "defense": defense,
+            "formation": formation
         })
 
     return teams
@@ -238,7 +263,7 @@ def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams
     all_teams = []
     page = 0
     pages_limit_str = f"up to {max_pages} page(s)" if max_pages is not None else "all available pages"
-    print(f"Starting to scrape {pages_limit_str} of teams from SoFIFA...")
+    print(f"Starting to scrape {pages_limit_str} of teams from SoFIFA (with formations)...")
 
     while True:
         if max_pages is not None and page >= max_pages:
@@ -246,7 +271,7 @@ def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams
             break
 
         offset = page * 60
-        url = f"{BASE_URL}?type=club&offset={offset}"
+        url = f"{BASE_URL}?type=club&showCol%5B%5D=ti&showCol%5B%5D=oa&showCol%5B%5D=at&showCol%5B%5D=md&showCol%5B%5D=df&showCol%5B%5D=fm&offset={offset}&hl=en-US"
         print(f"Fetching page {page + 1}: {url}")
         html = fetch_html(url)
         if not html:
@@ -259,20 +284,6 @@ def scrape_teams(max_pages: Optional[int] = None, output_file: str = "data/teams
             break
 
         print(f"Page {page + 1}: found {len(teams)} teams.")
-
-        if fetch_formations:
-            for idx, team in enumerate(teams, 1):
-                sofifa_id = team.get("sofifa_id")
-                if sofifa_id:
-                    team_url = f"https://sofifa.com/team/{sofifa_id}/"
-                    t_html = fetch_html(team_url, delay=0.2)
-                    if t_html:
-                        team["formation"] = detect_formation_from_squad_html(t_html)
-                    else:
-                        team["formation"] = "4-3-3"
-                else:
-                    team["formation"] = "4-3-3"
-
         all_teams.extend(teams)
         page += 1
 

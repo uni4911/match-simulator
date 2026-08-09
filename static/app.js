@@ -36,19 +36,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         startBtn.addEventListener('click', startNewMatch);
     }
 
-    // Navigation tab switches
-    const tabSetup = document.getElementById('nav-tab-setup');
+    // Setup section toggle in Match view
+    const toggleSetupBtn = document.getElementById('toggle-setup-btn');
+    const matchSetupBox = document.getElementById('match-setup-box');
+    const toggleSetupIcon = document.getElementById('toggle-setup-icon');
+    const toggleSetupText = document.getElementById('toggle-setup-text');
+
+    if (toggleSetupBtn && matchSetupBox) {
+        toggleSetupBtn.addEventListener('click', () => {
+            const isCollapsed = matchSetupBox.classList.toggle('collapsed');
+            if (toggleSetupIcon) toggleSetupIcon.textContent = isCollapsed ? '🔽' : '🔼';
+            if (toggleSetupText) toggleSetupText.textContent = isCollapsed ? 'Rozwiń konfigurację' : 'Zwiń';
+        });
+    }
+
+    // Navigation switches (Sidebar & Home Cards)
+    const tabHome = document.getElementById('nav-tab-home');
     const tabMatch = document.getElementById('nav-tab-match');
     const tabLeague = document.getElementById('nav-tab-league');
+    const sidebarBrandBtn = document.getElementById('sidebar-brand-btn');
+    const mobileLogoBtn = document.getElementById('mobile-logo-btn');
+    const mobileToggleBtn = document.getElementById('mobile-menu-toggle-btn');
+    const appSidebar = document.getElementById('app-sidebar');
 
-    if (tabSetup) {
-        tabSetup.addEventListener('click', () => switchView('setup'));
+    const homeCardMatch = document.getElementById('home-card-match');
+    const homeCardLeague = document.getElementById('home-card-league');
+
+    if (tabHome) tabHome.addEventListener('click', () => switchView('home'));
+    if (sidebarBrandBtn) sidebarBrandBtn.addEventListener('click', () => switchView('home'));
+    if (mobileLogoBtn) mobileLogoBtn.addEventListener('click', () => switchView('home'));
+
+    if (tabMatch) tabMatch.addEventListener('click', () => switchView('match'));
+    if (tabLeague) tabLeague.addEventListener('click', () => switchView('league'));
+
+    if (homeCardMatch) {
+        homeCardMatch.addEventListener('click', () => switchView('match'));
+        homeCardMatch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchView('match'); }
+        });
     }
-    if (tabMatch) {
-        tabMatch.addEventListener('click', () => switchView('match'));
+    if (homeCardLeague) {
+        homeCardLeague.addEventListener('click', () => switchView('league'));
+        homeCardLeague.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchView('league'); }
+        });
     }
-    if (tabLeague) {
-        tabLeague.addEventListener('click', () => switchView('league'));
+
+    if (mobileToggleBtn && appSidebar) {
+        mobileToggleBtn.addEventListener('click', () => {
+            appSidebar.classList.toggle('mobile-open');
+        });
     }
 
     // League sub-tab switches (Tabela i Terminarz vs Statystyki Zawodników)

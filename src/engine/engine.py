@@ -1,6 +1,6 @@
 from __future__ import annotations
 import random 
-from src.models import Team, FieldPlayer, Goalkeeper, Player, MatchTeam, MatchPlayer, TeamStatsMatch, DEFENCE_POSITIONS
+from src.models import Team, FieldPlayer, Goalkeeper, Player, MatchTeam, MatchPlayer, TeamStatsMatch, DEFENCE_POSITIONS, MIDFIELD_POSITIONS, ATTACKING_POSITIONS
 from enum import Enum, auto
 from typing import Optional, Final, Type
 from abc import ABC, abstractmethod
@@ -33,7 +33,7 @@ PENALTY_KICK_MODIFIER: Final[int] = 3
 MIDFIELDPLAY_OPTIONS: Final[list[str]] = ['long_shot', 'pass', 'shot_inside']
 PASS_RECEIVERS = ["attacker", "winger", "cam", "midfielder"]
 PASS_RECIEVRS = PASS_RECEIVERS
-PASS_RECEIVERS_WEIGHTS = [50, 22, 18, 10]
+PASS_RECEIVERS_WEIGHTS = [60, 25, 10, 5]
 PASS_RECIVERS_WEIGHTS = PASS_RECEIVERS_WEIGHTS
 
 
@@ -238,6 +238,15 @@ class Attack(State):
         if match.player_with_ball.assigned_position in DEFENCE_POSITIONS:
             receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
             match.pass_ball(receiver)
+        elif match.player_with_ball.assigned_position in MIDFIELD_POSITIONS:
+            # Midfielders advancing into attack feed forwards/wingers 65% of the time
+            if random.random() < 0.65:
+                pass_target = random.choices(["attacker", "winger"], [70, 30], k=1)[0]
+                if pass_target == "winger":
+                    receiver = match.team_with_ball.get_winger(excluded_player=match.player_with_ball)
+                else:
+                    receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
+                match.pass_ball(receiver)
 
         attacking_player: MatchPlayer = match.player_with_ball
         defending_player: MatchPlayer = match.defending_team.get_defender()
@@ -250,7 +259,10 @@ class Attack(State):
 
         if winner:
             roll = random.random()
-            if roll < 0.38:
+            is_attacker = attacking_player.assigned_position in ATTACKING_POSITIONS
+            pass_prob = 0.28 if is_attacker else 0.58
+
+            if roll < pass_prob:
                 pass_recipient_type = random.choices(PASS_RECEIVERS, PASS_RECEIVERS_WEIGHTS, k=1)[0]
                 if pass_recipient_type == "winger":
                     receiver = match.team_with_ball.get_winger(excluded_player=match.player_with_ball)
@@ -264,7 +276,7 @@ class Attack(State):
                     receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
                 return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball), MidfieldPlay()], [55, 15, 30])[0]
-            elif roll < 0.70:
+            elif roll < 0.72:
                 return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball), MidfieldPlay()], [55, 15, 30])[0]
             else:
                 receiver = match.team_with_ball.get_midfielder(excluded_player=match.player_with_ball)

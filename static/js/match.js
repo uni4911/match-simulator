@@ -4,21 +4,40 @@ import { fetchPlayerStats } from './stats.js';
 let liveEventSource = null;
 
 export function switchView(viewName) {
-    const setupView = document.getElementById('setup-view');
+    if (viewName === 'setup') viewName = 'match';
+
+    const homeView = document.getElementById('home-view');
     const matchView = document.getElementById('match-view');
     const leagueView = document.getElementById('league-view');
 
-    const tabSetup = document.getElementById('nav-tab-setup');
+    const tabHome = document.getElementById('nav-tab-home');
     const tabMatch = document.getElementById('nav-tab-match');
     const tabLeague = document.getElementById('nav-tab-league');
 
-    if (setupView) setupView.classList.toggle('hidden', viewName !== 'setup');
+    // Close mobile drawer if open
+    const appSidebar = document.getElementById('app-sidebar');
+    if (appSidebar && appSidebar.classList.contains('mobile-open')) {
+        appSidebar.classList.remove('mobile-open');
+    }
+
+    // Toggle body state class for layout & transitions
+    if (viewName === 'home') {
+        document.body.classList.add('state-home');
+        document.body.classList.remove('state-app');
+    } else {
+        document.body.classList.remove('state-home');
+        document.body.classList.add('state-app');
+    }
+
+    if (homeView) homeView.classList.toggle('hidden', viewName !== 'home');
     if (matchView) matchView.classList.toggle('hidden', viewName !== 'match');
     if (leagueView) leagueView.classList.toggle('hidden', viewName !== 'league');
 
-    if (tabSetup) tabSetup.classList.toggle('active', viewName === 'setup');
+    if (tabHome) tabHome.classList.toggle('active', viewName === 'home');
     if (tabMatch) tabMatch.classList.toggle('active', viewName === 'match');
     if (tabLeague) tabLeague.classList.toggle('active', viewName === 'league');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 export function renderMatchData(data) {

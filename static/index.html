@@ -6,109 +6,205 @@
         <title>Match Simulator</title>
         <link rel="stylesheet" href="/static/style.css?v=3">
     </head>
-    <body>
-        <div class="metro-wrapper">
-            <header class="metro-topbar">
-                <div class="metro-logo">
+    <body class="state-home">
+        <div class="app-root" id="app-root">
+            <!-- Mobile Header (shown only on small screens) -->
+            <header class="mobile-header">
+                <button type="button" class="mobile-logo-btn" id="mobile-logo-btn">
                     <span class="metro-logo-badge">MATCH</span>
-                    <span>SIMULATOR</span>
-                </div>
-                <div class="metro-nav-tabs">
-                    <button id="nav-tab-setup" type="button" class="metro-tab active">⚙️ KONFIGURACJA</button>
-                    <button id="nav-tab-match" type="button" class="metro-tab">⚽ MECZ NA ŻYWO</button>
-                    <button id="nav-tab-league" type="button" class="metro-tab">🏆 LIGA</button>
-                </div>
-                <div id="status-badge" class="metro-status">
-                    <span class="status-dot"></span>
-                    <span id="status-badge-text">LIVE</span>
-                </div>
+                    <span class="metro-logo-text">SIMULATOR</span>
+                </button>
+                <button type="button" id="mobile-menu-toggle-btn" class="mobile-menu-toggle" aria-label="Menu">
+                    <span>☰</span>
+                </button>
             </header>
 
-            <!-- PRIMARY MENU: KONFIGURACJA MECZU -->
-            <div id="setup-view" class="metro-setup-view">
-                <section class="tile-box tile-setup primary-setup-menu">
-                    <div class="tile-header">
-                        <div class="tile-header-title">
-                            <span class="header-icon">⚙️</span> KONFIGURACJA MECZU
+            <!-- LEFT SIDEBAR NAVIGATION -->
+            <aside class="app-sidebar" id="app-sidebar">
+                <div class="sidebar-header">
+                    <button type="button" class="sidebar-brand-btn" id="sidebar-brand-btn" title="Powrót do Menu Głównego">
+                        <div class="metro-logo">
+                            <span class="metro-logo-badge">MATCH</span>
+                            <span class="metro-logo-text">SIMULATOR</span>
                         </div>
-                        <div class="tile-badge-info">PRZYGOTOWANIE SPOTKANIA</div>
+                    </button>
+                    <!-- Match Live / Finished Status Badge -->
+                    <div id="status-badge" class="metro-status sidebar-status">
+                        <span class="status-dot"></span>
+                        <span id="status-badge-text">LIVE</span>
                     </div>
+                </div>
 
-                    <div class="setup-arena">
-                        <!-- Gospodarze Setup Card -->
-                        <div class="setup-card home-card">
-                            <div class="setup-card-header">
-                                <div id="setup-home-badge" class="setup-team-badge home">---</div>
-                                <div class="setup-card-title">
-                                    <span class="card-tag">GOSPODARZE</span>
-                                    <span id="setup-home-name" class="card-team-name">Wybierz drużynę</span>
-                                </div>
-                            </div>
-                            <div class="setup-field-group">
-                                <label for="home-team-select" class="metro-label">
-                                    <span class="label-icon">🛡️</span> DRUŻYNA GOSPODARZY
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="home-team-select" class="metro-select"></select>
-                                </div>
-                            </div>
-                            <div class="setup-field-group">
-                                <label for="home-formation-select" class="metro-label">
-                                    <span class="label-icon">📋</span> TAKTYKA / FORMACJA
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="home-formation-select" class="metro-select"></select>
-                                </div>
-                            </div>
-                        </div>
+                <nav class="sidebar-nav">
+                    <div class="nav-section-title">NAWIGACJA</div>
+                    <button id="nav-tab-home" type="button" class="sidebar-tab active">
+                        <span class="tab-icon">🏠</span>
+                        <span class="tab-label">Menu Główne</span>
+                    </button>
 
-                        <!-- VS Divider -->
-                        <div class="setup-vs-container">
-                            <div class="vs-glow-circle">VS</div>
-                        </div>
+                    <div class="nav-section-title">TRYBY ROZGRYWKI</div>
+                    <button id="nav-tab-match" type="button" class="sidebar-tab">
+                        <span class="tab-icon">⚽</span>
+                        <span class="tab-label">Pojedynczy Mecz</span>
+                    </button>
+                    <button id="nav-tab-league" type="button" class="sidebar-tab">
+                        <span class="tab-icon">🏆</span>
+                        <span class="tab-label">Rozgrywki Ligowe</span>
+                    </button>
+                </nav>
 
-                        <!-- Goście Setup Card -->
-                        <div class="setup-card away-card">
-                            <div class="setup-card-header">
-                                <div class="setup-card-title text-right">
-                                    <span class="card-tag away">GOŚCIE</span>
-                                    <span id="setup-away-name" class="card-team-name">Wybierz drużynę</span>
-                                </div>
-                                <div id="setup-away-badge" class="setup-team-badge away">---</div>
-                            </div>
-                            <div class="setup-field-group">
-                                <label for="away-team-select" class="metro-label">
-                                    <span class="label-icon">🛡️</span> DRUŻYNA GOŚCI
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="away-team-select" class="metro-select"></select>
-                                </div>
-                            </div>
-                            <div class="setup-field-group">
-                                <label for="away-formation-select" class="metro-label">
-                                    <span class="label-icon">📋</span> TAKTYKA / FORMACJA
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="away-formation-select" class="metro-select"></select>
-                                </div>
-                            </div>
+                <div class="sidebar-footer">
+                    <div class="sidebar-engine-card">
+                        <div class="engine-pulse-dot"></div>
+                        <div class="engine-info">
+                            <span class="engine-version">Silnik v2.5 PRO</span>
+                            <span class="engine-status">Gotowy do gry</span>
                         </div>
                     </div>
+                </div>
+            </aside>
 
-                    <div class="setup-footer">
-                        <button id="start-match-btn" type="button" class="metro-btn primary setup-start-btn">
-                            <span class="btn-icon">⚽</span>
-                            <span>ROZPOCZNIJ NOWY MECZ</span>
-                        </button>
-                    </div>
-                </section>
-            </div>
+            <!-- MAIN WORKSPACE -->
+            <main class="app-workspace" id="app-workspace">
+                <div class="workspace-inner">
 
-            <!-- LIVE MATCH VIEW: SCOREBOARD, ZDARZENIA, STATYSTYKI ZAWODNIKÓW -->
-            <div id="match-view" class="metro-layout hidden">
-                <!-- LEWY PANEL: Główna zawartość meczowa -->
-                <main class="metro-main-content">
-                    <h1 id="score-board" class="sr-only">Match loading...</h1>
+                    <!-- 1. HOME / MAIN MENU HUB (SEEN FIRST WHEN OPENING SITE) -->
+                    <section id="home-view" class="home-hero-menu">
+                        <div class="home-hero-badge">
+                            <span class="hero-dot"></span> PIŁKARSKI SYMULATOR PRO
+                        </div>
+                        <h1 class="home-hero-title">
+                            <span class="title-highlight">MATCH</span> SIMULATOR
+                        </h1>
+                        <p class="home-hero-subtitle">
+                            Zaawansowany symulator meczów i sezonów ligowych z dynamiczną symulacją zdarzeń na żywo oraz szczegółowymi statystykami graczy.
+                        </p>
+
+                        <div class="home-modes-grid modes-grid-duo">
+                            <!-- Mode Card 1: Single Match & Live Center -->
+                            <div class="home-mode-card" id="home-card-match" role="button" tabindex="0">
+                                <div class="mode-card-header">
+                                    <div class="mode-card-icon-box match-icon">⚽</div>
+                                    <span class="mode-card-tag live">CENTRUM MECZOWE</span>
+                                </div>
+                                <h2 class="mode-card-title">Pojedynczy Mecz</h2>
+                                <p class="mode-card-desc">
+                                    Skonfiguruj składy drużyn, wybierz formacje taktyczne i rozegraj pojedynczy mecz z relacją na żywo, statystykami i ocenami zawodników.
+                                </p>
+                                <div class="mode-card-footer">
+                                    <span class="mode-card-btn-text">Centrum meczowe</span>
+                                    <span class="mode-card-arrow">➔</span>
+                                </div>
+                            </div>
+
+                            <!-- Mode Card 2: League Mode -->
+                            <div class="home-mode-card" id="home-card-league" role="button" tabindex="0">
+                                <div class="mode-card-header">
+                                    <div class="mode-card-icon-box league-icon">🏆</div>
+                                    <span class="mode-card-tag gold">SEZON LIGOWY</span>
+                                </div>
+                                <h2 class="mode-card-title">Rozgrywki Ligowe</h2>
+                                <p class="mode-card-desc">
+                                    Stwórz ligę z wybranymi klubami, zarządzaj terminarzem kolejek, symuluj cały sezon i sprawdzaj tabele.
+                                </p>
+                                <div class="mode-card-footer">
+                                    <span class="mode-card-btn-text">Przejdź do ligi</span>
+                                    <span class="mode-card-arrow">➔</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- UNITED MATCH VIEW: KONFIGURACJA ORAZ MECZ NA ŻYWO -->
+                    <div id="match-view" class="metro-layout hidden">
+                        <!-- LEWY PANEL: Główna zawartość meczowa -->
+                        <div class="metro-main-content">
+                            <h1 id="score-board" class="sr-only">Match loading...</h1>
+
+                            <!-- MATCH CONFIGURATION SECTION (ZINTEGROWANA KONFIGURACJA W WIDOKU MECZU) -->
+                            <section class="tile-box tile-setup primary-setup-menu" id="match-setup-box">
+                                <div class="tile-header">
+                                    <div class="tile-header-title">
+                                        <span class="header-icon">⚙️</span> KONFIGURACJA SPOTKANIA
+                                    </div>
+                                    <div class="tile-header-actions">
+                                        <button type="button" id="toggle-setup-btn" class="metro-btn-sm" title="Zwiń/rozwiń konfigurację">
+                                            <span id="toggle-setup-icon">🔼</span>
+                                            <span id="toggle-setup-text">Zwiń</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="setup-collapsible-body" class="setup-collapsible-body">
+                                    <div class="setup-arena">
+                                        <!-- Gospodarze Setup Card -->
+                                        <div class="setup-card home-card">
+                                            <div class="setup-card-header">
+                                                <div id="setup-home-badge" class="setup-team-badge home">---</div>
+                                                <div class="setup-card-title">
+                                                    <span class="card-tag">GOSPODARZE</span>
+                                                    <span id="setup-home-name" class="card-team-name">Wybierz drużynę</span>
+                                                </div>
+                                            </div>
+                                            <div class="setup-field-group">
+                                                <label for="home-team-select" class="metro-label">
+                                                    <span class="label-icon">🛡️</span> DRUŻYNA GOSPODARZY
+                                                </label>
+                                                <div class="select-wrapper">
+                                                    <select id="home-team-select" class="metro-select"></select>
+                                                </div>
+                                            </div>
+                                            <div class="setup-field-group">
+                                                <label for="home-formation-select" class="metro-label">
+                                                    <span class="label-icon">📋</span> TAKTYKA / FORMACJA
+                                                </label>
+                                                <div class="select-wrapper">
+                                                    <select id="home-formation-select" class="metro-select"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- VS Divider -->
+                                        <div class="setup-vs-container">
+                                            <div class="vs-glow-circle">VS</div>
+                                        </div>
+
+                                        <!-- Goście Setup Card -->
+                                        <div class="setup-card away-card">
+                                            <div class="setup-card-header">
+                                                <div class="setup-card-title text-right">
+                                                    <span class="card-tag away">GOŚCIE</span>
+                                                    <span id="setup-away-name" class="card-team-name">Wybierz drużynę</span>
+                                                </div>
+                                                <div id="setup-away-badge" class="setup-team-badge away">---</div>
+                                            </div>
+                                            <div class="setup-field-group">
+                                                <label for="away-team-select" class="metro-label">
+                                                    <span class="label-icon">🛡️</span> DRUŻYNA GOŚCI
+                                                </label>
+                                                <div class="select-wrapper">
+                                                    <select id="away-team-select" class="metro-select"></select>
+                                                </div>
+                                            </div>
+                                            <div class="setup-field-group">
+                                                <label for="away-formation-select" class="metro-label">
+                                                    <span class="label-icon">📋</span> TAKTYKA / FORMACJA
+                                                </label>
+                                                <div class="select-wrapper">
+                                                    <select id="away-formation-select" class="metro-select"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="setup-footer">
+                                        <button id="start-match-btn" type="button" class="metro-btn primary setup-start-btn">
+                                            <span class="btn-icon">⚽</span>
+                                            <span>ROZPOCZNIJ NOWY MECZ</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
 
                     <section class="tile-box tile-scoreboard">
                         <div class="scoreboard-inner">
@@ -270,7 +366,7 @@
                             <div class="empty-events">Oczekiwanie na pierwszy gwizdek...</div>
                         </div>
                     </section>
-                </main>
+                </div>
 
                 <!-- PRAWY PANEL: Statystyki graczy -->
                 <aside class="tile-box tile-stats" id="player-stats-section">
@@ -596,6 +692,9 @@
                     </div>
                 </div>
             </div>
+                </div> <!-- /.workspace-inner -->
+            </main> <!-- /.app-workspace -->
+        </div> <!-- /.app-root -->
 
         <!-- MODAL: PEŁNE STATYSTYKI GRACZY W LIDZE -->
         <div id="player-stats-modal" class="metro-modal-overlay hidden">

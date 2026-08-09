@@ -483,9 +483,12 @@ def scrape_players_for_teams(teams_file: str = "data/teams.json", output_file: s
             print(f"Skipping {team_name} due to fetch error.")
             continue
 
-        formation = detect_formation_from_squad_html(html)
-        team["formation"] = formation
-        print(f"  Found {team_name} formation: {formation}")
+        # Preserve existing formation from teams.json (scraped directly from SoFIFA)
+        formation = team.get("formation")
+        if not formation:
+            formation = detect_formation_from_squad_html(html) if html else "4-3-3"
+            team["formation"] = formation
+        print(f"  Team {team_name} formation: {team.get('formation', formation)}")
 
         players = parse_players_from_table(html, team_name=team_name)
         print(f"  Found {len(players)} players for {team_name}.")
