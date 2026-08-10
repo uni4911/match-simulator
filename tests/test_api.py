@@ -96,3 +96,14 @@ def test_league_endpoints():
     live_resp = start_league_match_live(live_req)
     assert "home_team_name" in live_resp
     assert "away_team_name" in live_resp
+
+    from main import get_league_team_of_the_week, get_league_team_of_the_season
+    totw_data = get_league_team_of_the_week(round_number=1, formation="4-3-3")
+    assert totw_data["round_number"] == 1
+    assert "starting_xi" in totw_data
+    assert "bench" in totw_data
+
+    tots_data = get_league_team_of_the_season(formation="4-3-3")
+    assert tots_data["league_name"] == "Testowa Liga"
+    assert "starting_xi" in tots_data
+    assert "bench" in tots_data

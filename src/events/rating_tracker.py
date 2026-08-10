@@ -143,14 +143,17 @@ class PlayerRatingTracker:
             self._apply_delta(event.passer, +0.008)
 
         elif isinstance(event, MatchEndEvent):
-            # Reward clean sheet to participating defenders and goalkeepers
+            # Reward clean sheet to participating defenders, wing-backs, CDMs and goalkeepers
             home_conceded = self.match.away_score
             away_conceded = self.match.home_score
             for team, conceded in [(self.match.home_team, home_conceded), (self.match.away_team, away_conceded)]:
                 if team and conceded == 0:
                     for p in team.match_players:
                         if p.is_on_field or p.is_starter or p in team.played_players:
-                            if p.assigned_position in [Position.GOALKEEPER, Position.CENTRE_BACK, Position.LEFT_BACK, Position.RIGHT_BACK]:
+                            if p.assigned_position in [
+                                Position.GOALKEEPER, Position.CENTRE_BACK, Position.LEFT_BACK, Position.RIGHT_BACK,
+                                Position.LEFT_WING_BACK, Position.RIGHT_WING_BACK, Position.CENTRAL_DEFENSIVE_MIDFIELDER
+                            ]:
                                 self._apply_delta(p, +0.20)
             # Reward winning team
             if self.match.home_score > self.match.away_score and self.match.home_team:

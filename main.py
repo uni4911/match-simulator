@@ -16,7 +16,8 @@ from src.engine.engine import MatchTeam, Match, MatchEngine, EVENT_OR_STATE_DURA
 from src.events.commentator import Commentator
 from api.schemas import (MatchStatusSchema, StartMatchRequest, MatchOptionsResponse, MatchFullStatsSchema, 
                          MatchPlayerStatsSchema, LeagueTableResponse, CreateLeagueRequest, LeagueTeamStats,
-                         PlayLeagueMatch, PlayerSeasonStatsSchema, PlayerProfileResponse, PlayerMatchLogSchema)
+                         PlayLeagueMatch, PlayerSeasonStatsSchema, PlayerProfileResponse, PlayerMatchLogSchema,
+                         TeamOfTheWeekResponse, TeamOfTheSeasonResponse, TotwPlayerSchema)
 
 try:
     run_migration()
@@ -411,6 +412,33 @@ def start_league_match_live(req: PlayLeagueMatch):
     engine = MatchEngine(commentator=commentator, speed_factor=0.1, event_bus=event_bus)
 
     return get_match_status_report()
+
+@app.get("/league/team-of-the-week", response_model=TeamOfTheWeekResponse)
+def get_league_team_of_the_week(round_number: Optional[int] = None, formation: str = "4-3-3"):
+    global league, league_engine
+    if league is None or league_engine is None:
+        raise HTTPException(400, "Liga nie została utworzona")
+    
+    num_teams = len(league.teams)
+    matches_per_round = max(1, num_teams // 2)
+
+    if round_number is None:
+        finished_rounds = [
+            (idx // matches_per_round) + 1
+            for idx, m in enumerate(league.fixtures)
+            if getattr(m, "is_finished", False)
+        ]
+        round_number = max(finished_rounds) if finished_rounds else 1
+
+    return league_engine.get_team_of_the_round(round_number=round_number, formation=formation)
+
+@app.get("/league/team-of-the-season", response_model=TeamOfTheSeasonResponse)
+def get_league_team_of_the_season(formation: str = "4-3-3"):
+    global league, league_engine
+    if league is None or league_engine is None:
+        raise HTTPException(400, "Liga nie została utworzona")
+
+    return league_engine.get_team_of_the_season(formation=formation)
 
 def _find_player_in_all_teams(name: str, team_name: str | None = None) -> tuple[Player | None, str | None]:
     clean_name = name.strip()

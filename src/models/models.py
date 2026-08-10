@@ -771,18 +771,46 @@ class MatchTeam:
             starting_players.append(best_gk)
 
         field_candidates = [p for p in self.match_players if is_field_player(p)]
+        assigned_players: set[MatchPlayer] = set(starting_players)
+        slot_assignments: list[tuple[Position, Optional[MatchPlayer]]] = []
 
+        # Pass 1: Exact position matches (best player whose natural position matches the slot)
+        unfilled_positions = []
         for position in self.formation:
-            available = [p for p in field_candidates if p not in starting_players]
+            exact_matches = [
+                p for p in field_candidates 
+                if p not in assigned_players and p.player.position == position
+            ]
+            if exact_matches:
+                best_exact = max(exact_matches, key=lambda p: (p.effective_overall, p.player.overall))
+                best_exact.assigned_position = position
+                best_exact.is_starter = True
+                best_exact.is_on_field = True
+                assigned_players.add(best_exact)
+                starting_players.append(best_exact)
+            else:
+                unfilled_positions.append(position)
+
+        # Pass 2: Fallback position matches (preferred fallbacks or same category)
+        still_unfilled = []
+        for position in unfilled_positions:
+            available = [p for p in field_candidates if p not in assigned_players]
             if not available:
                 break
-            selected_player = max(available, key=lambda p: (
+            # Prefer players with good suitability (>0.75)
+            suitable_candidates = [
+                p for p in available 
+                if position_suitability(p.player.position, position) >= 0.80
+            ]
+            candidates_pool = suitable_candidates if suitable_candidates else available
+            selected_player = max(candidates_pool, key=lambda p: (
                 p.effective_overall * position_suitability(p.player.position, position),
                 p.player.overall
             ))
             selected_player.assigned_position = position
             selected_player.is_starter = True
             selected_player.is_on_field = True
+            assigned_players.add(selected_player)
             starting_players.append(selected_player)
 
         return starting_players

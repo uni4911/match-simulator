@@ -559,6 +559,14 @@
                             <span class="subtab-icon">📈</span>
                             <span>STATYSTYKI ZAWODNIKÓW</span>
                         </button>
+                        <button type="button" id="league-subtab-totw" class="league-subtab-btn">
+                            <span class="subtab-icon">⭐</span>
+                            <span>JEDENASTKA KOLEJKI</span>
+                        </button>
+                        <button type="button" id="league-subtab-tots" class="league-subtab-btn">
+                            <span class="subtab-icon">🏆</span>
+                            <span>JEDENASTKA SEZONU</span>
+                        </button>
                         <button type="button" id="league-subtab-player" class="league-subtab-btn hidden">
                             <span class="subtab-icon">👤</span>
                             <span id="league-subtab-player-label">PROFIL ZAWODNIKA</span>
@@ -691,7 +699,229 @@
                         </section>
                     </div>
 
-                    <!-- ZAKŁADKA 3: PROFIL I STATYSTYKI WYBRANEGO ZAWODNIKA -->
+                    <!-- ZAKŁADKA 3: JEDENASTKA KOLEJKI (TOTW) -->
+                    <div id="league-panel-totw" class="league-subpanel hidden">
+                        <div class="totw-header-toolbar tile-box">
+                            <div class="totw-toolbar-left">
+                                <div class="tile-header-title">
+                                    <span class="header-icon">⭐</span>
+                                    <span>JEDENASTKA KOLEJKI (TOTW)</span>
+                                </div>
+                                <div id="totw-round-badge" class="tile-badge-info">KOLEJKA 1</div>
+                                <div id="totw-status-badge" class="totw-status-pill">ROZEGRANA</div>
+                            </div>
+
+                            <div class="totw-toolbar-right">
+                                <!-- Nawigacja kolejkami w TOTW -->
+                                <div class="totw-round-nav">
+                                    <button type="button" id="totw-prev-round-btn" class="round-nav-arrow" title="Poprzednia kolejka">◀</button>
+                                    <div class="round-select-wrapper">
+                                        <select id="totw-round-select" class="round-select-element totw-round-dropdown"></select>
+                                    </div>
+                                    <button type="button" id="totw-next-round-btn" class="round-nav-arrow" title="Następna kolejka">▶</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="totw-main-layout">
+                            <!-- Boisko z wyjściową jedenastką -->
+                            <div class="totw-pitch-card tile-box">
+                                <div class="pitch-top-bar">
+                                    <div class="pitch-stat-summary">
+                                        <span>Średnia ocena XI: <strong id="totw-avg-rating" class="text-accent">0.00</strong></span>
+                                        <span>Gole XI: <strong id="totw-total-goals">0</strong></span>
+                                        <span>Asysty XI: <strong id="totw-total-assists">0</strong></span>
+                                    </div>
+
+                                    <!-- Wybór formacji TOTW w nagłówku boiska -->
+                                    <div class="pitch-formation-picker">
+                                        <span class="picker-label">Formacja:</span>
+                                        <div class="formation-pills-group" id="totw-formation-pills">
+                                            <button type="button" class="formation-pill-btn active" data-formation="4-3-3">4-3-3</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="4-4-2">4-4-2</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="4-2-3-1">4-2-3-1</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="3-5-2">3-5-2</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="3-4-3">3-4-3</button>
+                                        </div>
+                                        <select id="totw-formation-select" class="metro-select-sm" style="display: none;">
+                                            <option value="4-3-3">4-3-3</option>
+                                            <option value="4-4-2">4-4-2</option>
+                                            <option value="4-2-3-1">4-2-3-1</option>
+                                            <option value="3-5-2">3-5-2</option>
+                                            <option value="3-4-3">3-4-3</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="soccer-pitch-wrapper">
+                                    <div id="totw-soccer-pitch" class="soccer-pitch">
+                                        <!-- Linie boiska -->
+                                        <div class="pitch-halfway-line"></div>
+                                        <div class="pitch-center-circle"></div>
+                                        <div class="pitch-center-spot"></div>
+                                        <div class="pitch-penalty-area top"></div>
+                                        <div class="pitch-penalty-arc top"></div>
+                                        <div class="pitch-goal-area top"></div>
+                                        <div class="pitch-penalty-area bottom"></div>
+                                        <div class="pitch-penalty-arc bottom"></div>
+                                        <div class="pitch-goal-area bottom"></div>
+                                        <div class="pitch-corner-arc top-left"></div>
+                                        <div class="pitch-corner-arc top-right"></div>
+                                        <div class="pitch-corner-arc bottom-left"></div>
+                                        <div class="pitch-corner-arc bottom-right"></div>
+
+                                        <!-- Dynamiczna warstwa zawodników -->
+                                        <div id="totw-pitch-players-layer" class="pitch-players-layer">
+                                            <!-- Dynamicznie wstawiane karty graczy na boisku -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Panel boczny: Zawodnik kolejki, wyróżnienia, ławka -->
+                            <aside class="totw-sidebar">
+                                <!-- Zawodnik Kolejki MVP -->
+                                <div id="totw-mvp-card-container" class="tile-box totw-mvp-spotlight">
+                                    <!-- Dynamicznie wstawiana karta MVP -->
+                                </div>
+
+                                <!-- Wyróżnienia kolejki -->
+                                <div class="tile-box totw-honors-card">
+                                    <div class="tile-header">
+                                        <div class="tile-header-title">
+                                            <span class="header-icon">🏅</span> WYRÓŻNIENIA KOLEJKI
+                                        </div>
+                                    </div>
+                                    <div id="totw-honors-list" class="totw-honors-grid">
+                                        <!-- Dynamicznie wstawiane kafelki nagród -->
+                                    </div>
+                                </div>
+
+                                <!-- Ławka rezerwowych -->
+                                <div class="tile-box totw-bench-card">
+                                    <div class="tile-header">
+                                        <div class="tile-header-title">
+                                            <span class="header-icon">🪑</span> ŁAWKA REZERWOWYCH
+                                        </div>
+                                        <span class="tile-badge-info">7 ZAWODNIKÓW</span>
+                                    </div>
+                                    <div id="totw-bench-list" class="totw-bench-list">
+                                        <!-- Dynamicznie wstawiani rezerwowi -->
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+
+                    <!-- ZAKŁADKA 4: JEDENASTKA SEZONU (TOTS) -->
+                    <div id="league-panel-tots" class="league-subpanel hidden">
+                        <div class="totw-header-toolbar tots-header-toolbar tile-box tots-theme">
+                            <div class="totw-toolbar-left">
+                                <div class="tile-header-title">
+                                    <span class="header-icon">🏆</span>
+                                    <span>JEDENASTKA SEZONU (TOTS)</span>
+                                </div>
+                                <div id="tots-league-badge" class="tile-badge-tots">SEZON LIGOWY</div>
+                                <div id="tots-status-badge" class="tots-status-pill">W TRAKCIE SEZONU</div>
+                            </div>
+
+                            <div class="totw-toolbar-right">
+                                <div id="tots-summary-meta" class="tile-badge-tots">🏆 GALA LIGOWA</div>
+                            </div>
+                        </div>
+
+                        <div class="totw-main-layout tots-theme">
+                            <!-- Boisko z wyjściową jedenastką sezonu -->
+                            <div class="totw-pitch-card tile-box tots-pitch-box">
+                                <div class="pitch-top-bar">
+                                    <div class="pitch-stat-summary">
+                                        <span>Średnia ocena XI: <strong id="tots-avg-rating" class="text-indigo">0.00</strong></span>
+                                        <span>Gole XI: <strong id="tots-total-goals" class="text-indigo">0</strong></span>
+                                        <span>Asysty XI: <strong id="tots-total-assists" class="text-indigo">0</strong></span>
+                                    </div>
+
+                                    <!-- Wybór formacji TOTS w nagłówku boiska -->
+                                    <div class="pitch-formation-picker">
+                                        <span class="picker-label">Formacja:</span>
+                                        <div class="formation-pills-group tots-pills" id="tots-formation-pills">
+                                            <button type="button" class="formation-pill-btn active" data-formation="4-3-3">4-3-3</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="4-4-2">4-4-2</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="4-2-3-1">4-2-3-1</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="3-5-2">3-5-2</button>
+                                            <button type="button" class="formation-pill-btn" data-formation="3-4-3">3-4-3</button>
+                                        </div>
+                                        <select id="tots-formation-select" class="metro-select-sm" style="display: none;">
+                                            <option value="4-3-3">4-3-3</option>
+                                            <option value="4-4-2">4-4-2</option>
+                                            <option value="4-2-3-1">4-2-3-1</option>
+                                            <option value="3-5-2">3-5-2</option>
+                                            <option value="3-4-3">3-4-3</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="soccer-pitch-wrapper">
+                                    <div id="tots-soccer-pitch" class="soccer-pitch tots-pitch">
+                                        <!-- Linie boiska -->
+                                        <div class="pitch-halfway-line"></div>
+                                        <div class="pitch-center-circle"></div>
+                                        <div class="pitch-center-spot"></div>
+                                        <div class="pitch-penalty-area top"></div>
+                                        <div class="pitch-penalty-arc top"></div>
+                                        <div class="pitch-goal-area top"></div>
+                                        <div class="pitch-penalty-area bottom"></div>
+                                        <div class="pitch-penalty-arc bottom"></div>
+                                        <div class="pitch-goal-area bottom"></div>
+                                        <div class="pitch-corner-arc top-left"></div>
+                                        <div class="pitch-corner-arc top-right"></div>
+                                        <div class="pitch-corner-arc bottom-left"></div>
+                                        <div class="pitch-corner-arc bottom-right"></div>
+
+                                        <!-- Dynamiczna warstwa zawodników -->
+                                        <div id="tots-pitch-players-layer" class="pitch-players-layer">
+                                            <!-- Dynamicznie wstawiane karty graczy na boisku -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Panel boczny TOTS: Zawodnik Sezonu MVP, Nagrody Sezonu, Ławka Rezerwowych -->
+                            <aside class="totw-sidebar">
+                                <!-- Zawodnik Sezonu MVP -->
+                                <div id="tots-mvp-card-container" class="tile-box totw-mvp-spotlight tots-mvp-spotlight">
+                                    <!-- Dynamicznie wstawiana karta MVP Sezonu -->
+                                </div>
+
+                                <!-- Nagrody i laury sezonu -->
+                                <div class="tile-box tots-awards-card">
+                                    <div class="tile-header">
+                                        <div class="tile-header-title">
+                                            <span class="header-icon">👑</span> NAGRODY I LAURY SEZONU
+                                        </div>
+                                        <span class="tile-badge-tots">TOTS HONORS</span>
+                                    </div>
+                                    <div id="tots-awards-list" class="totw-honors-grid">
+                                        <!-- Dynamicznie wstawiane laury sezonu -->
+                                    </div>
+                                </div>
+
+                                <!-- Ławka rezerwowych sezonu -->
+                                <div class="tile-box totw-bench-card tots-bench-card">
+                                    <div class="tile-header">
+                                        <div class="tile-header-title">
+                                            <span class="header-icon">⭐</span> REZERWOWI SEZONU (TOTS BENCH)
+                                        </div>
+                                        <span class="tile-badge-tots">7 ZAWODNIKÓW</span>
+                                    </div>
+                                    <div id="tots-bench-list" class="totw-bench-list">
+                                        <!-- Dynamicznie wstawiani rezerwowi TOTS -->
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+
+                    <!-- ZAKŁADKA 5: PROFIL I STATYSTYKI WYBRANEGO ZAWODNIKA -->
                     <div id="league-panel-player" class="league-subpanel hidden">
                         <div class="tile-box tile-player-profile-view">
                             <!-- Top Navigation Toolbar -->
@@ -861,6 +1091,6 @@
             </div> <!-- /.match-details-modal-content -->
         </div> <!-- /#match-details-modal -->
 
-        <script type="module" src="/static/app.js?v=11"></script>
+        <script type="module" src="/static/app.js?v=15"></script>
     </body>
 </html>

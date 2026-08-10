@@ -2,6 +2,7 @@ import { getTeamInitials, getShortPosition, getPositionClass, getEventIcon } fro
 import { renderMatchData, switchView, startLiveStream } from './match.js';
 import { fetchPlayerStats, createPlayerStatCard } from './stats.js';
 import { openPlayerProfile } from './player-profile.js';
+import { loadTeamOfTheWeek, loadTeamOfTheSeason, initTotwEventListeners } from './totw.js';
 
 let currentLeagueData = null;
 let currentFilter = 'all'; // 'all', 'pending', 'finished'
@@ -21,6 +22,7 @@ let isTeamEventsBound = false;
 export async function initLeagueView() {
     await loadLeagueTeamOptions();
     bindLeagueStatsTableEvents();
+    initTotwEventListeners();
     await fetchLeagueTable();
 }
 
@@ -628,6 +630,13 @@ export function renderLeagueView(data) {
     // Render Player Season Stats
     renderLeaguePlayerStats(data.player_stats);
     renderModalTable();
+
+    // Reload TOTW / TOTS if active
+    if (currentLeagueSubTab === 'totw') {
+        loadTeamOfTheWeek(currentSelectedRound);
+    } else if (currentLeagueSubTab === 'tots') {
+        loadTeamOfTheSeason();
+    }
 }
 
 let currentLeagueSubTab = 'table';
@@ -649,14 +658,20 @@ export function switchLeagueSubTab(tabName) {
 
     const tableTabBtn = document.getElementById('league-subtab-table');
     const statsTabBtn = document.getElementById('league-subtab-stats');
+    const totwTabBtn = document.getElementById('league-subtab-totw');
+    const totsTabBtn = document.getElementById('league-subtab-tots');
     const playerTabBtn = document.getElementById('league-subtab-player');
 
     const tableView = document.getElementById('league-panel-table');
     const statsView = document.getElementById('league-panel-stats');
+    const totwView = document.getElementById('league-panel-totw');
+    const totsView = document.getElementById('league-panel-tots');
     const playerView = document.getElementById('league-panel-player');
 
     if (tableTabBtn) tableTabBtn.classList.toggle('active', tabName === 'table');
     if (statsTabBtn) statsTabBtn.classList.toggle('active', tabName === 'stats');
+    if (totwTabBtn) totwTabBtn.classList.toggle('active', tabName === 'totw');
+    if (totsTabBtn) totsTabBtn.classList.toggle('active', tabName === 'tots');
     if (playerTabBtn) {
         playerTabBtn.classList.toggle('active', tabName === 'player');
         if (tabName === 'player') {
@@ -666,6 +681,8 @@ export function switchLeagueSubTab(tabName) {
 
     if (tableView) tableView.classList.toggle('hidden', tabName !== 'table');
     if (statsView) statsView.classList.toggle('hidden', tabName !== 'stats');
+    if (totwView) totwView.classList.toggle('hidden', tabName !== 'totw');
+    if (totsView) totsView.classList.toggle('hidden', tabName !== 'tots');
     if (playerView) playerView.classList.toggle('hidden', tabName !== 'player');
 
     if (tabName === 'stats') {
@@ -673,6 +690,10 @@ export function switchLeagueSubTab(tabName) {
             renderLeaguePlayerStats(currentLeagueData.player_stats);
         }
         renderModalTable();
+    } else if (tabName === 'totw') {
+        loadTeamOfTheWeek(currentSelectedRound);
+    } else if (tabName === 'tots') {
+        loadTeamOfTheSeason();
     }
 }
 

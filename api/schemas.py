@@ -203,3 +203,66 @@ class MatchOptionsResponse(BaseModel):
     teams_detailed: list[TeamDetailSchema] = []
     leagues: list[str] = []
     formations: list[str]
+
+class TotwPlayerSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    player_name: str
+    full_name: Optional[str] = None
+    short_name: Optional[str] = None
+    team_name: str
+    position: str
+    slot_position: str
+    slot_id: str = "SLOT"
+    slot_name: str = "Pozycja"
+    grid_row: int = 0
+    grid_col: int = 0
+    category: str = "MID"
+    rating: float = Field(default=6.0, ge=1.0, le=10.0)
+    goals: int = Field(default=0, ge=0)
+    assists: int = Field(default=0, ge=0)
+    passes: int = Field(default=0, ge=0)
+    yellow_cards: int = Field(default=0, ge=0)
+    has_red_card: bool = False
+    clean_sheet: bool = False
+    clean_sheets: int = Field(default=0, ge=0)
+    is_motm: bool = False
+    overall: int = Field(default=50, ge=1, le=99)
+    age: int = Field(default=20, ge=15, le=50)
+    nationality: str = "Unknown"
+    minutes_played: int = Field(default=0, ge=0)
+    matches_played: int = Field(default=1, ge=0)
+    is_bench: bool = False
+    is_mvp: bool = False
+
+class TeamOfTheWeekResponse(BaseModel):
+    round_number: int
+    total_rounds: int
+    formation: str = "4-3-3"
+    available_formations: list[str] = []
+    is_round_finished: bool = False
+    matches_played_in_round: int = 0
+    total_matches_in_round: int = 0
+    starting_xi: list[TotwPlayerSchema] = []
+    bench: list[TotwPlayerSchema] = []
+    mvp: Optional[TotwPlayerSchema] = None
+    top_scorer: Optional[TotwPlayerSchema] = None
+    top_assister: Optional[TotwPlayerSchema] = None
+    top_goalkeeper: Optional[TotwPlayerSchema] = None
+    best_team_name: Optional[str] = None
+    average_rating: float = 0.0
+
+class TeamOfTheSeasonResponse(BaseModel):
+    league_name: str
+    total_rounds: int
+    rounds_played: int
+    formation: str = "4-3-3"
+    available_formations: list[str] = []
+    is_season_finished: bool = False
+    starting_xi: list[TotwPlayerSchema] = []
+    bench: list[TotwPlayerSchema] = []
+    mvp: Optional[TotwPlayerSchema] = None
+    top_scorer: Optional[TotwPlayerSchema] = None
+    top_assister: Optional[TotwPlayerSchema] = None
+    top_goalkeeper: Optional[TotwPlayerSchema] = None
+    best_team_name: Optional[str] = None
+    average_rating: float = 0.0

@@ -94,9 +94,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // League sub-tab switches (Tabela i Terminarz vs Statystyki Zawodników)
+    // League sub-tab switches (Tabela i Terminarz vs Statystyki vs TOTW vs TOTS)
     const leagueSubTabTable = document.getElementById('league-subtab-table');
     const leagueSubTabStats = document.getElementById('league-subtab-stats');
+    const leagueSubTabTotw = document.getElementById('league-subtab-totw');
+    const leagueSubTabTots = document.getElementById('league-subtab-tots');
     const leagueSubTabPlayer = document.getElementById('league-subtab-player');
 
     if (leagueSubTabTable) {
@@ -104,6 +106,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (leagueSubTabStats) {
         leagueSubTabStats.addEventListener('click', () => switchLeagueSubTab('stats'));
+    }
+    if (leagueSubTabTotw) {
+        leagueSubTabTotw.addEventListener('click', () => switchLeagueSubTab('totw'));
+    }
+    if (leagueSubTabTots) {
+        leagueSubTabTots.addEventListener('click', () => switchLeagueSubTab('tots'));
     }
     if (leagueSubTabPlayer) {
         leagueSubTabPlayer.addEventListener('click', () => switchLeagueSubTab('player'));

@@ -407,6 +407,10 @@ export function getNationalityBadge(nat) {
     return { flag: '🌍', name: n };
 }
 
+export function getCountryFlag(nat) {
+    return getNationalityBadge(nat).flag;
+}
+
 export function getAttributeLabel(key) {
     const labels = {
         'pace': 'Tempo (PAC)',

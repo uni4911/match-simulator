@@ -135,3 +135,11 @@ class LeagueEngine:
     def get_sorted_player_stats(self, sort_by: str = "goals") -> list[PlayerSeasonStats]:
         key_func = lambda stats: getattr(stats, sort_by, stats.goals)
         return sorted(self.league.player_stats.values(), key=key_func, reverse=True)
+
+    def get_team_of_the_round(self, round_number: int, formation: str = "4-3-3") -> dict:
+        from src.engine.team_of_the_round import get_team_of_the_round
+        return get_team_of_the_round(self.league, round_number=round_number, formation=formation)
+
+    def get_team_of_the_season(self, formation: str = "4-3-3", min_matches: int = 1) -> dict:
+        from src.engine.team_of_the_round import get_team_of_the_season
+        return get_team_of_the_season(self.league, formation=formation, min_matches=min_matches)
