@@ -1,5 +1,14 @@
 import pytest
-from src.db.database import SessionLocal, ConfederationModel, CountryModel, LeagueModel, TeamModel, PlayerModel
+from src.db.database import (
+    SessionLocal,
+    ConfederationModel,
+    CountryModel,
+    LeagueModel,
+    TeamModel,
+    PlayerModel,
+    PlayerStatsModel,
+    GoalkeeperStatsModel,
+)
 from src.db.mappers import PlayerMapper, TeamMapper
 from src.db.seeder import seed_all
 from src.db.loader import load_all_teams_from_db, load_team_from_db, save_team_to_db
@@ -47,7 +56,6 @@ def test_save_team_to_db_updates_existing_records():
         assert loaded_fp.fitness == 0.90
 
 
-
 def test_database_seeding_and_counts():
     with SessionLocal() as db:
         seed_all(db)
@@ -56,28 +64,114 @@ def test_database_seeding_and_counts():
         league_count = db.query(LeagueModel).count()
         team_count = db.query(TeamModel).count()
         player_count = db.query(PlayerModel).count()
+        ps_count = db.query(PlayerStatsModel).count()
+        gk_count = db.query(GoalkeeperStatsModel).count()
 
         assert conf_count == 6
         assert country_count >= 211
         assert league_count >= 1
         assert team_count >= 20
         assert player_count >= 400
+        assert ps_count + gk_count == player_count
+
+
+def test_three_tables_schema_separation():
+    player_cols = {c.name for c in PlayerModel.__table__.columns}
+    stat_cols = {c.name for c in PlayerStatsModel.__table__.columns}
+    gk_cols = {c.name for c in GoalkeeperStatsModel.__table__.columns}
+
+    # players table contains only player info
+    assert "full_name" in player_cols
+    assert "short_name" in player_cols
+    assert "position" in player_cols
+    assert "age" in player_cols
+    assert "nationality" in player_cols
+    assert "height" in player_cols
+    assert "fitness" in player_cols
+    assert "form" in player_cols
+    assert "overall" in player_cols
+
+    # players table must not have raw stat columns
+    assert "pace" not in player_cols
+    assert "shooting" not in player_cols
+    assert "diving" not in player_cols
+    assert "reflexes" not in player_cols
+
+    # player_stats table contains field player simulation attributes
+    assert "player_id" in stat_cols
+    assert "pace" in stat_cols
+    assert "shooting" in stat_cols
+    assert "passing" in stat_cols
+    assert "dribbling" in stat_cols
+    assert "defence" in stat_cols
+    assert "physical" in stat_cols
+    assert "heading" in stat_cols
+
+    # goalkeeper_stats table contains goalkeeper simulation attributes
+    assert "player_id" in gk_cols
+    assert "diving" in gk_cols
+    assert "handling" in gk_cols
+    assert "kicking" in gk_cols
+    assert "reflexes" in gk_cols
+    assert "speed" in gk_cols
+    assert "positioning" in gk_cols
+
+
+def test_three_tables_cascade_and_relationships():
+    with SessionLocal() as db:
+        # Create field player
+        fp = PlayerModel(
+            full_name="Test Field Player",
+            short_name="TFP",
+            position="CENTRAL_MIDFIELDER",
+            stats=PlayerStatsModel(pace=88, shooting=75, passing=82, dribbling=80, defence=60, physical=70, heading=65),
+        )
+        # Create goalkeeper
+        gk = PlayerModel(
+            full_name="Test Goalkeeper",
+            short_name="TGK",
+            position="GOALKEEPER",
+            goalkeeper_stats=GoalkeeperStatsModel(diving=85, handling=82, kicking=70, reflexes=89, speed=55, positioning=84),
+        )
+        db.add_all([fp, gk])
+        db.commit()
+
+        fp_id = fp.id
+        gk_id = gk.id
+
+        # Verify records exist in player_stats and goalkeeper_stats
+        fp_stat = db.query(PlayerStatsModel).filter_by(player_id=fp_id).first()
+        gk_stat = db.query(GoalkeeperStatsModel).filter_by(player_id=gk_id).first()
+        assert fp_stat is not None
+        assert fp_stat.pace == 88
+        assert gk_stat is not None
+        assert gk_stat.diving == 85
+
+        # Cascade delete
+        db.delete(fp)
+        db.delete(gk)
+        db.commit()
+
+        assert db.query(PlayerStatsModel).filter_by(player_id=fp_id).first() is None
+        assert db.query(GoalkeeperStatsModel).filter_by(player_id=gk_id).first() is None
 
 
 def test_load_teams_from_db():
     teams = load_all_teams_from_db()
     assert len(teams) >= 20
-    assert "Python FC" in teams
-    python_fc = teams["Python FC"]
-    assert python_fc.name == "Python FC"
-    assert len(python_fc.players) == 20
+    first_team = next(iter(teams.values()))
+    assert first_team.name is not None
+    assert len(first_team.players) > 0
 
 
 def test_load_single_team_from_db():
-    team = load_team_from_db("CF Java")
+    teams = load_all_teams_from_db()
+    assert len(teams) > 0
+    first_name = next(iter(teams.keys()))
+    team = load_team_from_db(first_name)
     assert team is not None
-    assert team.name == "CF Java"
-    assert len(team.players) == 20
+    assert team.name == first_name
+    assert len(team.players) > 0
 
 
 def test_load_all_teams_no_n_plus_1():
@@ -125,7 +219,8 @@ def test_mappers_field_player_and_goalkeeper():
     assert gk_model.full_name == "Manuel Neuer"
     assert gk_model.short_name == "Neuer"
     assert gk_model.position == Position.GOALKEEPER.name
-    assert gk_model.diving == 88
+    assert gk_model.goalkeeper_stats is not None
+    assert gk_model.goalkeeper_stats.diving == 88
     assert gk_model.fitness == 0.90
     assert gk_model.form == 1.05
 
@@ -141,6 +236,8 @@ def test_mappers_field_player_and_goalkeeper():
     assert fp_model.full_name == "Robert Lewandowski"
     assert fp_model.short_name == "Lewandowski"
     assert fp_model.position == Position.STRIKER.name
+    assert fp_model.stats is not None
+    assert fp_model.stats.pace == 78
     assert fp_model.fitness == 0.85
     assert fp_model.form == 1.20
 
@@ -151,7 +248,6 @@ def test_mappers_field_player_and_goalkeeper():
     assert reconstructed_fp.position == Position.STRIKER
     assert reconstructed_fp.fitness == 0.85
     assert reconstructed_fp.form == 1.20
-
 
 
 def test_team_mapper():

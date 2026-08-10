@@ -1,7 +1,16 @@
 import json
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
-from src.db.database import SessionLocal, ConfederationModel, CountryModel, LeagueModel, TeamModel, PlayerModel
+from sqlalchemy.orm import Session, selectinload, joinedload
+from src.db.database import (
+    SessionLocal,
+    ConfederationModel,
+    CountryModel,
+    LeagueModel,
+    TeamModel,
+    PlayerModel,
+    PlayerStatsModel,
+    GoalkeeperStatsModel,
+)
 
 CONFEDERATIONS_DATA = [
     {"name": "Union of European Football Associations", "code": "UEFA"},
@@ -331,7 +340,10 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
     existing_teams = {
         t.name: t
         for t in db.scalars(
-            select(TeamModel).options(selectinload(TeamModel.players))
+            select(TeamModel).options(
+                selectinload(TeamModel.players).joinedload(PlayerModel.stats),
+                selectinload(TeamModel.players).joinedload(PlayerModel.goalkeeper_stats),
+            )
         ).all()
     }
 
@@ -340,7 +352,6 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
         for l in db.scalars(select(LeagueModel)).all()
     }
 
-    # Check if separated teams.json and players.json exist
     if os.path.exists(teams_path) and os.path.exists(players_path):
         with open(teams_path, "r", encoding="utf-8") as f:
             teams_data = json.load(f)
@@ -393,6 +404,7 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
             player_country = country_map.get(clean_nationality, team_model.country)
             player_country_id = player_country.id if player_country else team_model.country_id
             overall_val = p_data.get("overall")
+            position_str = p_data.get("position", "CENTRAL_MIDFIELDER")
 
             if full_name in existing_players_map:
                 existing_p = existing_players_map[full_name]
@@ -401,49 +413,93 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
                 existing_p.overall = overall_val
                 existing_p.age = p_data.get("age", 24)
                 existing_p.height = p_data.get("height", 180)
-                existing_p.pace = p_data.get("pace")
-                existing_p.shooting = p_data.get("shooting")
-                existing_p.passing = p_data.get("passing")
-                existing_p.dribbling = p_data.get("dribbling")
-                existing_p.defence = p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence")
-                existing_p.physical = p_data.get("physical")
-                existing_p.heading = p_data.get("heading")
-                existing_p.diving = p_data.get("diving")
-                existing_p.handling = p_data.get("handling")
-                existing_p.kicking = p_data.get("kicking")
-                existing_p.reflexes = p_data.get("reflexes")
-                existing_p.speed = p_data.get("speed")
-                existing_p.positioning = p_data.get("positioning")
+                if position_str == "GOALKEEPER":
+                    if existing_p.goalkeeper_stats:
+                        existing_p.goalkeeper_stats.diving = p_data.get("diving") or 50
+                        existing_p.goalkeeper_stats.handling = p_data.get("handling") or 50
+                        existing_p.goalkeeper_stats.kicking = p_data.get("kicking") or 50
+                        existing_p.goalkeeper_stats.reflexes = p_data.get("reflexes") or 50
+                        existing_p.goalkeeper_stats.speed = p_data.get("speed") or 50
+                        existing_p.goalkeeper_stats.positioning = p_data.get("positioning") or 50
+                    else:
+                        existing_p.goalkeeper_stats = GoalkeeperStatsModel(
+                            diving=p_data.get("diving") or 50,
+                            handling=p_data.get("handling") or 50,
+                            kicking=p_data.get("kicking") or 50,
+                            reflexes=p_data.get("reflexes") or 50,
+                            speed=p_data.get("speed") or 50,
+                            positioning=p_data.get("positioning") or 50,
+                        )
+                    existing_p.stats = None
+                else:
+                    def_val = (p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence")) or 50
+                    if existing_p.stats:
+                        existing_p.stats.pace = p_data.get("pace") or 50
+                        existing_p.stats.shooting = p_data.get("shooting") or 50
+                        existing_p.stats.passing = p_data.get("passing") or 50
+                        existing_p.stats.dribbling = p_data.get("dribbling") or 50
+                        existing_p.stats.defence = def_val
+                        existing_p.stats.physical = p_data.get("physical") or 50
+                        existing_p.stats.heading = p_data.get("heading") or 50
+                    else:
+                        existing_p.stats = PlayerStatsModel(
+                            pace=p_data.get("pace") or 50,
+                            shooting=p_data.get("shooting") or 50,
+                            passing=p_data.get("passing") or 50,
+                            dribbling=p_data.get("dribbling") or 50,
+                            defence=def_val,
+                            physical=p_data.get("physical") or 50,
+                            heading=p_data.get("heading") or 50,
+                        )
+                    existing_p.goalkeeper_stats = None
                 continue
 
-            position_str = p_data.get("position", "CENTRAL_MIDFIELDER")
-
-            player_model = PlayerModel(
-                team=team_model,
-                country_id=player_country_id,
-                full_name=full_name,
-                short_name=short_name,
-                position=position_str,
-                age=p_data.get("age", 24),
-                nationality=clean_nationality,
-                overall=overall_val,
-                fitness=1.0,
-                form=1.0,
-                height=p_data.get("height", 180),
-                pace=p_data.get("pace"),
-                shooting=p_data.get("shooting"),
-                passing=p_data.get("passing"),
-                dribbling=p_data.get("dribbling"),
-                defence=p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence"),
-                physical=p_data.get("physical"),
-                heading=p_data.get("heading"),
-                diving=p_data.get("diving"),
-                handling=p_data.get("handling"),
-                kicking=p_data.get("kicking"),
-                reflexes=p_data.get("reflexes"),
-                speed=p_data.get("speed"),
-                positioning=p_data.get("positioning")
-            )
+            if position_str == "GOALKEEPER":
+                player_model = PlayerModel(
+                    team=team_model,
+                    country_id=player_country_id,
+                    full_name=full_name,
+                    short_name=short_name,
+                    position=position_str,
+                    age=p_data.get("age", 24),
+                    nationality=clean_nationality,
+                    overall=overall_val,
+                    fitness=1.0,
+                    form=1.0,
+                    height=p_data.get("height", 180),
+                    goalkeeper_stats=GoalkeeperStatsModel(
+                        diving=p_data.get("diving") or 50,
+                        handling=p_data.get("handling") or 50,
+                        kicking=p_data.get("kicking") or 50,
+                        reflexes=p_data.get("reflexes") or 50,
+                        speed=p_data.get("speed") or 50,
+                        positioning=p_data.get("positioning") or 50,
+                    ),
+                )
+            else:
+                def_val = (p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence")) or 50
+                player_model = PlayerModel(
+                    team=team_model,
+                    country_id=player_country_id,
+                    full_name=full_name,
+                    short_name=short_name,
+                    position=position_str,
+                    age=p_data.get("age", 24),
+                    nationality=clean_nationality,
+                    overall=overall_val,
+                    fitness=1.0,
+                    form=1.0,
+                    height=p_data.get("height", 180),
+                    stats=PlayerStatsModel(
+                        pace=p_data.get("pace") or 50,
+                        shooting=p_data.get("shooting") or 50,
+                        passing=p_data.get("passing") or 50,
+                        dribbling=p_data.get("dribbling") or 50,
+                        defence=def_val,
+                        physical=p_data.get("physical") or 50,
+                        heading=p_data.get("heading") or 50,
+                    ),
+                )
             db.add(player_model)
             seeded_players_count += 1
 
@@ -479,39 +535,107 @@ def seed_teams_and_players(db: Session, file_name: str = "data.json") -> tuple[i
         for p_data in players_list:
             full_name = p_data.get("full_name") or p_data.get("name", "Unknown")
             short_name = p_data.get("short_name") or p_data.get("name", full_name)
-
-            if full_name in existing_players_map:
-                continue
-
-            player_country = country_map.get(p_data.get("nationality"), team_country)
+            raw_nationality = p_data.get("nationality", "Unknown")
+            clean_nationality = NATIONALITY_CLEAN_MAP.get(raw_nationality, raw_nationality)
+            player_country = country_map.get(clean_nationality, team_country)
             player_country_id = player_country.id if player_country else team_country_id
             position_str = p_data.get("position", "CENTRAL_MIDFIELDER")
+            overall_val = p_data.get("overall", 50)
 
-            player_model = PlayerModel(
-                team=team_model,
-                country_id=player_country_id,
-                full_name=full_name,
-                short_name=short_name,
-                position=position_str,
-                age=p_data.get("age", 20),
-                nationality=p_data.get("nationality", "Unknown"),
-                fitness=1.0,
-                form=1.0,
-                height=p_data.get("height", 180),
-                pace=p_data.get("pace"),
-                shooting=p_data.get("shooting"),
-                passing=p_data.get("passing"),
-                dribbling=p_data.get("dribbling"),
-                defence=p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence"),
-                physical=p_data.get("physical"),
-                heading=p_data.get("heading"),
-                diving=p_data.get("diving"),
-                handling=p_data.get("handling"),
-                kicking=p_data.get("kicking"),
-                reflexes=p_data.get("reflexes"),
-                speed=p_data.get("speed"),
-                positioning=p_data.get("positioning")
-            )
+            if full_name in existing_players_map:
+                existing_p = existing_players_map[full_name]
+                existing_p.nationality = clean_nationality
+                existing_p.country_id = player_country_id
+                existing_p.overall = overall_val
+                existing_p.age = p_data.get("age", 20)
+                existing_p.height = p_data.get("height", 180)
+                if position_str == "GOALKEEPER":
+                    if existing_p.goalkeeper_stats:
+                        existing_p.goalkeeper_stats.diving = p_data.get("diving") or 50
+                        existing_p.goalkeeper_stats.handling = p_data.get("handling") or 50
+                        existing_p.goalkeeper_stats.kicking = p_data.get("kicking") or 50
+                        existing_p.goalkeeper_stats.reflexes = p_data.get("reflexes") or 50
+                        existing_p.goalkeeper_stats.speed = p_data.get("speed") or 50
+                        existing_p.goalkeeper_stats.positioning = p_data.get("positioning") or 50
+                    else:
+                        existing_p.goalkeeper_stats = GoalkeeperStatsModel(
+                            diving=p_data.get("diving") or 50,
+                            handling=p_data.get("handling") or 50,
+                            kicking=p_data.get("kicking") or 50,
+                            reflexes=p_data.get("reflexes") or 50,
+                            speed=p_data.get("speed") or 50,
+                            positioning=p_data.get("positioning") or 50,
+                        )
+                    existing_p.stats = None
+                else:
+                    def_val = (p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence")) or 50
+                    if existing_p.stats:
+                        existing_p.stats.pace = p_data.get("pace") or 50
+                        existing_p.stats.shooting = p_data.get("shooting") or 50
+                        existing_p.stats.passing = p_data.get("passing") or 50
+                        existing_p.stats.dribbling = p_data.get("dribbling") or 50
+                        existing_p.stats.defence = def_val
+                        existing_p.stats.physical = p_data.get("physical") or 50
+                        existing_p.stats.heading = p_data.get("heading") or 50
+                    else:
+                        existing_p.stats = PlayerStatsModel(
+                            pace=p_data.get("pace") or 50,
+                            shooting=p_data.get("shooting") or 50,
+                            passing=p_data.get("passing") or 50,
+                            dribbling=p_data.get("dribbling") or 50,
+                            defence=def_val,
+                            physical=p_data.get("physical") or 50,
+                            heading=p_data.get("heading") or 50,
+                        )
+                    existing_p.goalkeeper_stats = None
+                continue
+
+            if position_str == "GOALKEEPER":
+                player_model = PlayerModel(
+                    team=team_model,
+                    country_id=player_country_id,
+                    full_name=full_name,
+                    short_name=short_name,
+                    position=position_str,
+                    age=p_data.get("age", 20),
+                    nationality=clean_nationality,
+                    overall=overall_val,
+                    fitness=1.0,
+                    form=1.0,
+                    height=p_data.get("height", 180),
+                    goalkeeper_stats=GoalkeeperStatsModel(
+                        diving=p_data.get("diving") or 50,
+                        handling=p_data.get("handling") or 50,
+                        kicking=p_data.get("kicking") or 50,
+                        reflexes=p_data.get("reflexes") or 50,
+                        speed=p_data.get("speed") or 50,
+                        positioning=p_data.get("positioning") or 50,
+                    ),
+                )
+            else:
+                def_val = (p_data.get("defending") if p_data.get("defending") is not None else p_data.get("defence")) or 50
+                player_model = PlayerModel(
+                    team=team_model,
+                    country_id=player_country_id,
+                    full_name=full_name,
+                    short_name=short_name,
+                    position=position_str,
+                    age=p_data.get("age", 20),
+                    nationality=clean_nationality,
+                    overall=overall_val,
+                    fitness=1.0,
+                    form=1.0,
+                    height=p_data.get("height", 180),
+                    stats=PlayerStatsModel(
+                        pace=p_data.get("pace") or 50,
+                        shooting=p_data.get("shooting") or 50,
+                        passing=p_data.get("passing") or 50,
+                        dribbling=p_data.get("dribbling") or 50,
+                        defence=def_val,
+                        physical=p_data.get("physical") or 50,
+                        heading=p_data.get("heading") or 50,
+                    ),
+                )
             db.add(player_model)
             seeded_players_count += 1
 
@@ -531,6 +655,8 @@ def seed_all(db: Session) -> None:
     print(f"League: {league.name}")
     print(f"Teams in DB: {db.query(TeamModel).count()} (Newly seeded: {teams_count})")
     print(f"Players in DB: {db.query(PlayerModel).count()} (Newly seeded: {players_count})")
+    print(f"Player Stats in DB: {db.query(PlayerStatsModel).count()}")
+    print(f"Goalkeeper Stats in DB: {db.query(GoalkeeperStatsModel).count()}")
 
 
 if __name__ == "__main__":

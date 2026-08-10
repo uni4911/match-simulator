@@ -8,6 +8,8 @@ from .database import (
     LeagueModel,
     TeamModel,
     PlayerModel,
+    PlayerStatsModel,
+    GoalkeeperStatsModel,
 )
 from .mappers import (
     PlayerMapper,

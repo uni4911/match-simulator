@@ -1,7 +1,18 @@
 import os
 import json
 from sqlalchemy import inspect, text, select
-from src.db.database import engine, Base, SessionLocal, ConfederationModel, CountryModel, PlayerModel, TeamModel
+from sqlalchemy.orm import joinedload
+from src.db.database import (
+    engine,
+    Base,
+    SessionLocal,
+    ConfederationModel,
+    CountryModel,
+    PlayerModel,
+    PlayerStatsModel,
+    GoalkeeperStatsModel,
+    TeamModel,
+)
 from src.db.seeder import seed_confederations_and_countries, NATIONALITY_CLEAN_MAP
 
 
@@ -9,12 +20,13 @@ def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     with engine.connect() as conn:
         inspector = inspect(engine)
-        if "teams" in inspector.get_table_names():
+        tables = inspector.get_table_names()
+        if "teams" in tables:
             columns = [c["name"] for c in inspector.get_columns("teams")]
             if "formation" not in columns:
                 conn.execute(text("ALTER TABLE teams ADD COLUMN formation VARCHAR(50) DEFAULT '4-3-3'"))
                 conn.commit()
-        if "players" in inspector.get_table_names():
+        if "players" in tables:
             columns = [c["name"] for c in inspector.get_columns("players")]
             if "full_name" not in columns:
                 conn.execute(text("ALTER TABLE players ADD COLUMN full_name VARCHAR(150)"))
@@ -25,7 +37,57 @@ def init_db() -> None:
             conn.execute(text("UPDATE players SET short_name = full_name WHERE short_name IS NULL OR short_name = ''"))
             conn.commit()
 
-    # Synchronize nationalities, countries and overalls from scraped data
+            # Migrate data from players to player_stats and goalkeeper_stats if legacy columns exist
+            if "pace" in columns or "diving" in columns:
+                if "player_stats" in tables:
+                    ps_count = conn.execute(text("SELECT COUNT(*) FROM player_stats")).scalar()
+                    if ps_count == 0:
+                        conn.execute(text("""
+                            INSERT INTO player_stats (player_id, pace, shooting, passing, dribbling, defence, physical, heading)
+                            SELECT id,
+                                   COALESCE(pace, 50),
+                                   COALESCE(shooting, 50),
+                                   COALESCE(passing, 50),
+                                   COALESCE(dribbling, 50),
+                                   COALESCE(defence, 50),
+                                   COALESCE(physical, 50),
+                                   COALESCE(heading, 50)
+                            FROM players
+                            WHERE position != 'GOALKEEPER'
+                        """))
+                        conn.commit()
+
+                if "goalkeeper_stats" in tables:
+                    gk_count = conn.execute(text("SELECT COUNT(*) FROM goalkeeper_stats")).scalar()
+                    if gk_count == 0:
+                        conn.execute(text("""
+                            INSERT INTO goalkeeper_stats (player_id, diving, handling, kicking, reflexes, speed, positioning)
+                            SELECT id,
+                                   COALESCE(diving, 50),
+                                   COALESCE(handling, 50),
+                                   COALESCE(kicking, 50),
+                                   COALESCE(reflexes, 50),
+                                   COALESCE(speed, 50),
+                                   COALESCE(positioning, 50)
+                            FROM players
+                            WHERE position = 'GOALKEEPER'
+                        """))
+                        conn.commit()
+
+                # Drop old stats columns from players table
+                stat_columns_to_drop = [
+                    "pace", "shooting", "passing", "dribbling", "defence", "physical", "heading",
+                    "diving", "handling", "kicking", "reflexes", "speed", "positioning"
+                ]
+                for col in stat_columns_to_drop:
+                    if col in columns:
+                        try:
+                            conn.execute(text(f"ALTER TABLE players DROP COLUMN {col}"))
+                            conn.commit()
+                        except Exception:
+                            pass
+
+    # Synchronize nationalities, countries, overalls and stats from scraped data
     sync_players_data_from_json()
 
 
@@ -59,7 +121,12 @@ def sync_players_data_from_json() -> None:
                     if fn:
                         by_fullname[fn.lower()] = p
 
-                db_players = db.scalars(select(PlayerModel)).all()
+                db_players = db.scalars(
+                    select(PlayerModel).options(
+                        joinedload(PlayerModel.stats),
+                        joinedload(PlayerModel.goalkeeper_stats),
+                    )
+                ).all()
                 updated_count = 0
 
                 for db_p in db_players:
@@ -89,9 +156,53 @@ def sync_players_data_from_json() -> None:
                                 db_p.country_id = c_obj.id
                             updated_count += 1
 
+                        if db_p.position == "GOALKEEPER":
+                            if db_p.goalkeeper_stats is None:
+                                db_p.goalkeeper_stats = GoalkeeperStatsModel(
+                                    player_id=db_p.id,
+                                    diving=match.get("diving") or 50,
+                                    handling=match.get("handling") or 50,
+                                    kicking=match.get("kicking") or 50,
+                                    reflexes=match.get("reflexes") or 50,
+                                    speed=match.get("speed") or 50,
+                                    positioning=match.get("positioning") or 50,
+                                )
+                                updated_count += 1
+                            else:
+                                db_p.goalkeeper_stats.diving = match.get("diving") or db_p.goalkeeper_stats.diving or 50
+                                db_p.goalkeeper_stats.handling = match.get("handling") or db_p.goalkeeper_stats.handling or 50
+                                db_p.goalkeeper_stats.kicking = match.get("kicking") or db_p.goalkeeper_stats.kicking or 50
+                                db_p.goalkeeper_stats.reflexes = match.get("reflexes") or db_p.goalkeeper_stats.reflexes or 50
+                                db_p.goalkeeper_stats.speed = match.get("speed") or db_p.goalkeeper_stats.speed or 50
+                                db_p.goalkeeper_stats.positioning = match.get("positioning") or db_p.goalkeeper_stats.positioning or 50
+                            db_p.stats = None
+                        else:
+                            def_val = (match.get("defending") if match.get("defending") is not None else match.get("defence")) or 50
+                            if db_p.stats is None:
+                                db_p.stats = PlayerStatsModel(
+                                    player_id=db_p.id,
+                                    pace=match.get("pace") or 50,
+                                    shooting=match.get("shooting") or 50,
+                                    passing=match.get("passing") or 50,
+                                    dribbling=match.get("dribbling") or 50,
+                                    defence=def_val,
+                                    physical=match.get("physical") or 50,
+                                    heading=match.get("heading") or 50,
+                                )
+                                updated_count += 1
+                            else:
+                                db_p.stats.pace = match.get("pace") or db_p.stats.pace or 50
+                                db_p.stats.shooting = match.get("shooting") or db_p.stats.shooting or 50
+                                db_p.stats.passing = match.get("passing") or db_p.stats.passing or 50
+                                db_p.stats.dribbling = match.get("dribbling") or db_p.stats.dribbling or 50
+                                db_p.stats.defence = def_val if match.get("defending") is not None or match.get("defence") is not None else (db_p.stats.defence or 50)
+                                db_p.stats.physical = match.get("physical") or db_p.stats.physical or 50
+                                db_p.stats.heading = match.get("heading") or db_p.stats.heading or 50
+                            db_p.goalkeeper_stats = None
+
                 if updated_count > 0:
                     db.commit()
-                    print(f"Synchronized {updated_count} players with scraped nationality and overall.")
+                    print(f"Synchronized {updated_count} players with scraped nationality, overall and stats.")
             except Exception as e:
                 print(f"Error syncing players from players.json: {e}")
 
@@ -108,7 +219,14 @@ def sync_players_data_from_json() -> None:
                         if p_name:
                             legacy_by_team_name[(t_name.lower(), p_name.lower())] = p
 
-                db_players = db.scalars(select(PlayerModel).where(PlayerModel.overall.is_(None))).all()
+                db_players = db.scalars(
+                    select(PlayerModel)
+                    .options(
+                        joinedload(PlayerModel.stats),
+                        joinedload(PlayerModel.goalkeeper_stats),
+                    )
+                    .where(PlayerModel.overall.is_(None))
+                ).all()
                 for db_p in db_players:
                     t_name = db_p.team.name if db_p.team else None
                     if t_name and db_p.full_name:
@@ -124,6 +242,30 @@ def sync_players_data_from_json() -> None:
                                     db_p.country_id = c_obj.id
                             if "overall" in p_info and p_info["overall"]:
                                 db_p.overall = p_info["overall"]
+                            if db_p.position == "GOALKEEPER":
+                                if db_p.goalkeeper_stats is None:
+                                    db_p.goalkeeper_stats = GoalkeeperStatsModel(
+                                        player_id=db_p.id,
+                                        diving=p_info.get("diving") or 50,
+                                        handling=p_info.get("handling") or 50,
+                                        kicking=p_info.get("kicking") or 50,
+                                        reflexes=p_info.get("reflexes") or 50,
+                                        speed=p_info.get("speed") or 50,
+                                        positioning=p_info.get("positioning") or 50,
+                                    )
+                            else:
+                                def_val = (p_info.get("defending") if p_info.get("defending") is not None else p_info.get("defence")) or 50
+                                if db_p.stats is None:
+                                    db_p.stats = PlayerStatsModel(
+                                        player_id=db_p.id,
+                                        pace=p_info.get("pace") or 50,
+                                        shooting=p_info.get("shooting") or 50,
+                                        passing=p_info.get("passing") or 50,
+                                        dribbling=p_info.get("dribbling") or 50,
+                                        defence=def_val,
+                                        physical=p_info.get("physical") or 50,
+                                        heading=p_info.get("heading") or 50,
+                                    )
                     if db_p.overall is None:
                         db_p.overall = 50
 

@@ -121,28 +121,70 @@ class PlayerModel(Base):
     full_name: Mapped[str] = mapped_column(String(150), nullable=False)
     short_name: Mapped[str] = mapped_column(String(50), nullable=False)
     position: Mapped[str] = mapped_column(String(50), nullable=False)
-    age: Mapped[int] = mapped_column(default=20)
+    age: Mapped[int] = mapped_column(Integer, default=20)
     nationality: Mapped[str] = mapped_column(String(100), default="Unknown")
-    fitness: Mapped[float] = mapped_column(default=1.0)
-    form: Mapped[float] = mapped_column(default=1.0)
-    height: Mapped[int] = mapped_column(default=180)
+    fitness: Mapped[float] = mapped_column(Float, default=1.0)
+    form: Mapped[float] = mapped_column(Float, default=1.0)
+    height: Mapped[int] = mapped_column(Integer, default=180)
+    overall: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    pace: Mapped[int] = mapped_column(nullable=True)
-    shooting: Mapped[int] = mapped_column(nullable=True)
-    passing: Mapped[int] = mapped_column(nullable=True)
-    dribbling: Mapped[int] = mapped_column(nullable=True)
-    defence: Mapped[int] = mapped_column(nullable=True)
-    physical: Mapped[int] = mapped_column(nullable=True)
-    heading: Mapped[int] = mapped_column(nullable=True)
-
-    diving: Mapped[int] = mapped_column(nullable=True)
-    handling: Mapped[int] = mapped_column(nullable=True)
-    kicking: Mapped[int] = mapped_column(nullable=True)
-    reflexes: Mapped[int] = mapped_column(nullable=True)
-    speed: Mapped[int] = mapped_column(nullable=True)
-    positioning: Mapped[int] = mapped_column(nullable=True)
-
-    overall: Mapped[int | None] = mapped_column(nullable=True)
+    stats: Mapped[PlayerStatsModel | None] = relationship(
+        "PlayerStatsModel",
+        back_populates="player",
+        uselist=False,
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+    goalkeeper_stats: Mapped[GoalkeeperStatsModel | None] = relationship(
+        "GoalkeeperStatsModel",
+        back_populates="player",
+        uselist=False,
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
 
     def __repr__(self) -> str:
         return f"<PlayerModel(id={self.id}, full_name='{self.full_name}', short_name='{self.short_name}', position='{self.position}', overall={self.overall})>"
+
+
+class PlayerStatsModel(Base):
+    __tablename__ = "player_stats"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    player_id: Mapped[int] = mapped_column(
+        ForeignKey("players.id", ondelete="CASCADE"), unique=True, nullable=False
+    )
+
+    pace: Mapped[int] = mapped_column(Integer, default=50)
+    shooting: Mapped[int] = mapped_column(Integer, default=50)
+    passing: Mapped[int] = mapped_column(Integer, default=50)
+    dribbling: Mapped[int] = mapped_column(Integer, default=50)
+    defence: Mapped[int] = mapped_column(Integer, default=50)
+    physical: Mapped[int] = mapped_column(Integer, default=50)
+    heading: Mapped[int] = mapped_column(Integer, default=50)
+
+    player: Mapped[PlayerModel] = relationship(back_populates="stats")
+
+    def __repr__(self) -> str:
+        return f"<PlayerStatsModel(id={self.id}, player_id={self.player_id}, pace={self.pace}, shooting={self.shooting}, passing={self.passing}, dribbling={self.dribbling}, defence={self.defence}, physical={self.physical}, heading={self.heading})>"
+
+
+class GoalkeeperStatsModel(Base):
+    __tablename__ = "goalkeeper_stats"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    player_id: Mapped[int] = mapped_column(
+        ForeignKey("players.id", ondelete="CASCADE"), unique=True, nullable=False
+    )
+
+    diving: Mapped[int] = mapped_column(Integer, default=50)
+    handling: Mapped[int] = mapped_column(Integer, default=50)
+    kicking: Mapped[int] = mapped_column(Integer, default=50)
+    reflexes: Mapped[int] = mapped_column(Integer, default=50)
+    speed: Mapped[int] = mapped_column(Integer, default=50)
+    positioning: Mapped[int] = mapped_column(Integer, default=50)
+
+    player: Mapped[PlayerModel] = relationship(back_populates="goalkeeper_stats")
+
+    def __repr__(self) -> str:
+        return f"<GoalkeeperStatsModel(id={self.id}, player_id={self.player_id}, diving={self.diving}, handling={self.handling}, kicking={self.kicking}, reflexes={self.reflexes}, speed={self.speed}, positioning={self.positioning})>"

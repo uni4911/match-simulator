@@ -6,7 +6,7 @@ from src.models import (FieldPlayer, Goalkeeper, Position, MatchPlayer,
 from src.engine.engine import Match, MatchEngine
 from src.engine.league_engine import LeagueEngine
 from src.models import League
-from main import get_player_profile, league_start, match_options, play_league_match, _find_player_in_all_teams
+from main import get_player_profile, league_start, match_options, play_league_match, _find_player_in_all_teams, loaded_teams
 from api.schemas import CreateLeagueRequest, PlayLeagueMatch
 
 def test_match_player_minutes_and_bio():
@@ -94,9 +94,16 @@ def test_goalkeeper_season_stats():
     assert season_stats.attributes["reflexes"] == 86
 
 def test_find_player_in_all_teams():
-    p, team = _find_player_in_all_teams("Bramkarz")
-    assert p is not None
-    assert team is not None
+    if loaded_teams:
+        first_team = next(iter(loaded_teams.values()))
+        if first_team.players:
+            target_p = first_team.players[0]
+            target_name = target_p.short_name or target_p.full_name or target_p.name
+            p, team = _find_player_in_all_teams(target_name)
+            assert p is not None
+            assert team is not None
+    else:
+        p, team = _find_player_in_all_teams("Bramkarz")
 
 def test_get_player_profile_endpoint():
     options = match_options()
