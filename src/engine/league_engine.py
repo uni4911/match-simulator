@@ -1,6 +1,6 @@
 import random
 from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats, get_formation_positions
-from src.engine.engine import Match, MatchEngine
+from src.engine.engine import Match, MatchEngine, KickOff
 
 class LeagueEngine:
     def __init__(self, league: League, match_engine: MatchEngine):
@@ -70,39 +70,60 @@ class LeagueEngine:
                 random.shuffle(leg2_r_matches)
                 second_round_matches.extend(leg2_r_matches)
 
+        # Reset player fitness and form at season start
+        for team in self.league.teams:
+            if team:
+                for player in getattr(team, "players", []):
+                    player.fitness = 1.0
+                    player.form = 1.0
+
         self.league.fixtures = first_round_matches + second_round_matches
         
     def play_match(self, match: Match) -> None:
-        # Re-select line-up right before kickoff using latest player fitness levels
+        # Re-select line-up right before kickoff using latest player fitness and form levels
         match.home_team = MatchTeam(match.home_team.team, match.home_team.formation)
         match.away_team = MatchTeam(match.away_team.team, match.away_team.formation)
+        # Properly re-synchronize KickOff state with the refreshed home/away team instances
+        match.current_state = KickOff(random.choice([match.home_team, match.away_team]))
+        match.player_with_ball = None
+        match.potential_assistant = None
 
         home_team = match.home_team
         away_team = match.away_team
 
-        if self.league and home_team.team in self.league.table:
-            home_team.form_modifier = self.league.table[home_team.team].form_modifier
-        if self.league and away_team.team in self.league.table:
-            away_team.form_modifier = self.league.table[away_team.team].form_modifier
+        if hasattr(self.league, "table") and self.league.table:
+            if home_team.team in self.league.table:
+                home_team.form_modifier = self.league.table[home_team.team].form_modifier
+            if away_team.team in self.league.table:
+                away_team.form_modifier = self.league.table[away_team.team].form_modifier
 
         self.match_engine.play_match(match)
 
-        # Update fitness across fixtures: mild fatigue loss for participants (~4-5%), recovery for rested players (+10-12%)
+        # Update player fitness and rest recovery post-match
         for mt in (home_team, away_team):
             played_player_ids = set()
             for mp in mt.match_players:
                 if mp in mt.played_players or mp.is_starter:
                     played_player_ids.add(id(mp.player))
-                    fatigue_loss = (1.0 - mp.current_stamina) * 0.12
-                    mp.player.fitness = max(0.55, round(mp.player.fitness - fatigue_loss, 3))
+                    # Minutes played scaling & physical attribute fatigue resistance
+                    mins = getattr(mp, 'minutes_played', 90)
+                    mins_ratio = min(1.0, max(0.1, mins / 90.0))
+                    phys = getattr(mp.player, 'base_physical', getattr(mp.player, 'physical', 50))
+                    phys_factor = 0.85 + (phys / 200.0)
+                    
+                    # Fatigue loss: between 0.04 and 0.08 per match start depending on minutes and physical
+                    fatigue_loss = (0.04 + 0.05 * (1.0 - mp.current_stamina)) * mins_ratio / phys_factor
+                    mp.player.fitness = max(0.68, round(mp.player.fitness - fatigue_loss, 3))
                 else:
-                    # Bench players who didn't play recover fitness
-                    mp.player.fitness = min(1.0, round(mp.player.fitness + 0.10, 3))
+                    # Rested bench players who didn't play recover +16%
+                    mp.player.fitness = min(1.0, round(mp.player.fitness + 0.16, 3))
 
-            # Non-match squad players recover full rest bonus (+12% per round)
+            # Non-playing squad players recover fitness (+20%) and normalize form towards 1.0
             for p in mt.team.players:
                 if id(p) not in played_player_ids:
-                    p.fitness = min(1.0, round(p.fitness + 0.12, 3))
+                    p.fitness = min(1.0, round(p.fitness + 0.20, 3))
+                    curr_f = getattr(p, "form", 1.0)
+                    p.form = max(0.80, min(1.20, round((curr_f * 0.85) + (1.0 * 0.15), 3)))
 
         home_score = match.home_score
         away_score = match.away_score

@@ -21,7 +21,7 @@ ATTACK_CHANCE: Final[float] = 0.70
 MIN_SECONDS_PASSED: Final[int] = 5
 MIN_SECONDS_PASSESD: Final[int] = MIN_SECONDS_PASSED
 MAX_SECONDS_PASSED: Final[int] = 15
-GOALKEEPER_SCORE_MODIFIER: Final[float] = 1.50
+GOALKEEPER_SCORE_MODIFIER: Final[float] = 1.38
 SHOT_ON_GOAL_CHANCE: Final[float] = 0.3
 FOUL_PUNISHMENTS: Final[list[str]] = ['yellow_card', 'red_card', 'normal_foul']
 FOUL_WEIGHTS_DURING_MIDPLAY: Final[list[float]] = [6.0, 0.1, 93.9]
@@ -99,18 +99,18 @@ class MidfieldPlay(State):
                 receiver = match.team_with_ball.get_midfielder(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
 
-            quality_factor = min(1.3, max(0.7, atk_mid_power))
+            quality_factor = min(1.25, max(0.75, atk_mid_power))
             roll = random.random()
             if roll < 0.02:
                 return LongShot()
-            elif roll < 0.02 + 0.16 * quality_factor:
+            elif roll < 0.02 + 0.17 * quality_factor:
                 return WingAttack()
-            elif roll < 0.02 + (0.16 + 0.35) * quality_factor:
-                return BuildUp()
-            elif roll < 0.88:
-                return MidfieldPlay()
-            else:
+            elif roll < 0.02 + (0.17 + 0.17) * quality_factor:
                 return Attack()
+            elif roll < 0.82:
+                return BuildUp()
+            else:
+                return MidfieldPlay()
         else:
             if random.random() < 0.05:
                 return AttackFoul(defending_midfielder, attacking_midfielder)
@@ -140,11 +140,11 @@ class BuildUp(State):
         if random.random() < 0.30:
             match.add_event(BuildUpEvent(match.current_second, match.team_with_ball.team.name, passer.player.name))
 
-        quality_factor = min(1.3, max(0.7, (match.team_with_ball.midfield_power / 70.0) if match.team_with_ball else 1.0))
+        quality_factor = min(1.25, max(0.75, (match.team_with_ball.midfield_power / 70.0) if match.team_with_ball else 1.0))
         roll = random.random()
-        if roll < 0.18 * quality_factor:
+        if roll < 0.20 * quality_factor:
             return Attack()
-        elif roll < (0.18 + 0.22) * quality_factor:
+        elif roll < (0.20 + 0.22) * quality_factor:
             return WingAttack()
         elif roll < 0.82:
             return MidfieldPlay()
@@ -170,17 +170,17 @@ class WingAttack(State):
 
         if winner:
             roll = random.random()
-            if roll < 0.40:
+            if roll < 0.42:
                 match.add_event(WingPlayEvent(match.current_second, winger.player.name, match.team_with_ball.team.name, "cross"))
                 receiver = match.team_with_ball.get_attacker(excluded_player=winger)
                 match.pass_ball(receiver)
                 if random.random() < 0.32:
                     return ShotOnGoal()
                 else:
-                    return random.choices([CornerKick(), MidfieldPlay()], [20, 80], k=1)[0]
-            elif roll < 0.65:
+                    return random.choices([CornerKick(), MidfieldPlay()], [25, 75], k=1)[0]
+            elif roll < 0.70:
                 match.add_event(WingPlayEvent(match.current_second, winger.player.name, match.team_with_ball.team.name, "cut_inside"))
-                if random.random() < 0.45:
+                if random.random() < 0.38:
                     return ShotOnGoal()
                 else:
                     return MidfieldPlay()
@@ -209,7 +209,7 @@ class LongShot(State):
         def_boost = match.get_team_boost(match.defending_team)
         winner = self.winner_choose(attack_score, goalkeeper_score, attack_boost=atk_boost, defence_boost=def_boost)
 
-        if random.random() < 0.25:
+        if random.random() < 0.16:
             if winner:
                 shooter.goals += 1
                 if match.potential_assistant:
@@ -275,9 +275,9 @@ class Attack(State):
                 else:
                     receiver = match.team_with_ball.get_attacker(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
-                return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball), MidfieldPlay()], [55, 15, 30])[0]
-            elif roll < 0.72:
-                return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball), MidfieldPlay()], [55, 15, 30])[0]
+                return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball), MidfieldPlay()], [42, 16, 42])[0]
+            elif roll < 0.74:
+                return random.choices([ShotOnGoal(), AttackFoul(defending_player, match.player_with_ball), MidfieldPlay()], [42, 16, 42])[0]
             else:
                 receiver = match.team_with_ball.get_midfielder(excluded_player=match.player_with_ball)
                 match.pass_ball(receiver)
@@ -302,8 +302,11 @@ class ShotOnGoal(State):
         def_boost = match.get_team_boost(match.defending_team)
         winner: bool = self.winner_choose(attack_score, goalkeeper_score, attack_boost=atk_boost, defence_boost=def_boost)
         
+        # Shot on target accuracy based on shooting stat
+        shooter_shooting = match.player_with_ball.shooting
+        on_target_prob = min(0.40, max(0.22, 0.20 + (shooter_shooting / 420.0)))
         roll = random.random()
-        if roll < 0.38:
+        if roll < on_target_prob:
             if winner:
                 match.player_with_ball.goals += 1
                 if match.potential_assistant:
@@ -322,8 +325,8 @@ class ShotOnGoal(State):
                 shooter_name = match.player_with_ball.player.name if match.player_with_ball else ""
                 match.add_event(ShotSave(match.current_second, goalkeeper.name, match.team_with_ball.team.name, shooter=shooter_name))
                 match.potential_assistant = None
-                return random.choices([CornerKick(), MidfieldPlay()], [15, 85], k=1)[0]
-        elif roll < 0.72:
+                return random.choices([CornerKick(), MidfieldPlay()], [20, 80], k=1)[0]
+        elif roll < 0.75:
             if match.team_with_ball:
                 match.add_event(ShotOffTargetEvent(match.current_second, match.player_with_ball.player.name, match.team_with_ball.team.name))
             match.potential_assistant = None
@@ -427,33 +430,33 @@ class DangerousFreekick(State):
 
 EVENT_OR_STATE_DURATIONS: dict[Type[MatchEvent] | Type[State], tuple[int, int]] = {
     KickoffEvent: (15, 30),
-    Goal: (30, 60),
-    GoalWithAssist: (35, 65),
-    LongShotGoal: (35, 65),
-    PenaltyKickGoal: (45, 90),
-    ShotSave: (10, 25),
-    LongShotEvent: (8, 18),
-    WingPlayEvent: (10, 20),
-    BuildUpEvent: (10, 20),
-    InterceptionEvent: (5, 12),
-    DispossessedEvent: (5, 12),
-    Foul: (10, 20),
-    YellowCardFoul: (20, 40),
-    RedCardFoul: (40, 80),
-    DoubleYellowCard: (40, 80),
-    InjuryEvent: (20, 40),
+    Goal: (35, 65),
+    GoalWithAssist: (40, 70),
+    LongShotGoal: (40, 70),
+    PenaltyKickGoal: (50, 90),
+    ShotSave: (15, 30),
+    LongShotEvent: (10, 20),
+    WingPlayEvent: (12, 24),
+    BuildUpEvent: (15, 30),
+    InterceptionEvent: (8, 16),
+    DispossessedEvent: (8, 16),
+    Foul: (15, 30),
+    YellowCardFoul: (25, 45),
+    RedCardFoul: (45, 85),
+    DoubleYellowCard: (45, 85),
+    InjuryEvent: (25, 50),
     HalfTimeEvent: (30, 60),
     MatchEndEvent: (0, 0), 
-    KickOff: (5, 10),          
-    MidfieldPlay: (12, 20),
-    BuildUp: (14, 24),
-    WingAttack: (10, 18),
-    LongShot: (4, 8),      
-    Attack: (8, 16),           
-    ShotOnGoal: (3, 6),    
-    AttackFoul: (2, 5),    
-    PenaltyKick: (20, 40),     
-    DangerousFreekick: (15, 35),
+    KickOff: (8, 15),          
+    MidfieldPlay: (24, 40),
+    BuildUp: (26, 46),
+    WingAttack: (18, 32),
+    LongShot: (8, 15),      
+    Attack: (16, 28),           
+    ShotOnGoal: (8, 16),    
+    AttackFoul: (4, 8),    
+    PenaltyKick: (25, 45),     
+    DangerousFreekick: (20, 40),
     Substitution: (30, 45)
 }
             
@@ -483,7 +486,7 @@ class MatchEngine:
 
             while match.current_second <= target_second:
                 for team in [match.home_team, match.away_team]:
-                    sub_result = team.check_and_make_auto_substitution(match.current_second)
+                    sub_result = team.check_and_make_auto_substitution(match.current_second, match=match)
                     if sub_result is not None:
                         player_off, player_in = sub_result
                         if match.player_with_ball == player_off:
