@@ -44,79 +44,14 @@ A realistic, event-driven football (soccer) simulation engine and league managem
 * **Built-in SoFIFA Scraper**: Extraction pipeline for real-world teams, tactical formations, player ratings, nationalities, and historical data.
 * **SQLAlchemy 2.0 ORM**: Clean relational data model with SQLite database, automated migrations, and JSON seeders.
 
----
+## ⚙️ How It Works
 
-## 🏛️ System Architecture
+The simulation runs on an event-driven, modular workflow:
 
-```
-                                  ┌────────────────────────┐
-                                  │   Web Browser (UI)     │
-                                  │  (Vanilla JS / CSS3)   │
-                                  └───────────▲────────────┘
-                                              │ HTTP / SSE Stream
-                                  ┌───────────▼────────────┐
-                                  │   FastAPI Web Server   │
-                                  │    (api/ & main.py)    │
-                                  └───────────▲────────────┘
-                                              │
-                      ┌───────────────────────┴───────────────────────┐
-                      │                                               │
-           ┌──────────▼──────────┐                         ┌──────────▼──────────┐
-           │     MatchEngine     │                         │    LeagueEngine     │
-           │  (FSM State Flow)   │                         │(Fixtures, Standings)│
-           └──────────▲──────────┘                         └──────────▲──────────┘
-                      │                                               │
-           ┌──────────▼──────────┐                         ┌──────────▼──────────┐
-           │      EventBus       │◄─────── RatingTracker   │  TeamOfTheRound     │
-           │   & Commentator     │◄─────── StatsTracker    │   (TOTW / TOTS)     │
-           └─────────────────────┘                         └─────────────────────┘
-                      │
-           ┌──────────▼──────────────────────────┐
-           │     Database & Storage Layer        │
-           │ (SQLAlchemy ORM + SQLite + JSON DB) │
-           └─────────────────────────────────────┘
-```
-
-### Match Simulation State Machine Flow
-
-```mermaid
-flowchart TD
-    Start([KickOff]) --> Midfield[MidfieldPlay]
-    
-    Midfield -->|Possession Won| BuildUp[BuildUp]
-    Midfield -->|Wing Transition| Wing[WingAttack]
-    Midfield -->|Foul Committed| Foul[AttackFoul]
-    
-    BuildUp --> Attack[Attack]
-    Wing --> Attack
-    BuildUp -->|Long Range Option| LongShot[LongShot]
-    
-    Attack --> Shot[ShotOnGoal]
-    Attack -->|Defensive Foul| Foul
-    Attack -->|Box Foul| Penalty[PenaltyKick]
-    
-    Foul -->|Free Kick Range| Freekick[DangerousFreekick]
-    Foul --> Midfield
-    
-    Shot -->|Scored| Goal([Goal])
-    Shot -->|Saved / Deflected| Corner[CornerKick]
-    Shot -->|Saved by GK| Midfield
-    Shot -->|Off Target| Midfield
-    
-    LongShot -->|Scored| Goal
-    LongShot -->|Saved / Deflected| Corner
-    LongShot --> Midfield
-    
-    Penalty -->|Scored| Goal
-    Penalty -->|Saved / Missed| Midfield
-    
-    Corner --> Shot
-    Corner --> Midfield
-    Freekick --> Shot
-    Freekick --> Midfield
-    
-    Goal --> Start
-```
+* **Phase Progression**: Matches advance through natural football phases (`KickOff` ➔ `Midfield` ➔ `Build-Up` / `Wing Play` ➔ `Attack` ➔ `Shot on Goal` / `Set-Piece`).
+* **Attribute-Driven Duels**: Realistic statistical duels (Pace, Passing, Finishing, Defending, Goalkeeping) determine the outcome of each play.
+* **Event Dispatching & Dynamic Ratings**: Match events (goals, fouls, cards, saves) trigger real-time commentary and dynamically adjust in-game player ratings.
+* **Live SSE Streaming**: The FastAPI backend pushes tick-by-tick updates to the frontend via Server-Sent Events for an interactive live match experience.
 
 ---
 
