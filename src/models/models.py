@@ -434,7 +434,13 @@ class Player:
         self.height: int = height
         self.fitness: float = 1.0
         self.form: float = 1.0
+        self.consecutive_matches_played: int = 0
+        self.suspension_matches_remaining: int = 0
         self._overall: Optional[int] = overall
+
+    @property
+    def is_suspended(self) -> bool:
+        return self.suspension_matches_remaining > 0
 
     @property
     def name(self) -> str:
@@ -444,10 +450,10 @@ class Player:
     def overall(self) -> int:
         if self._overall is not None and self._overall > 0:
             return self._overall
-        if hasattr(self, "base_pace") and hasattr(self, "base_shooting"):
-            return int((self.base_pace + self.base_shooting + self.base_passing + self.base_dribbling + self.base_defending + self.base_physical) / 6)
-        elif hasattr(self, "diving") and hasattr(self, "handling"):
+        if hasattr(self, "diving") and hasattr(self, "handling"):
             return int((self.diving + self.handling + self.kicking + self.reflexes + self.speed + self.positioning) / 6)
+        elif hasattr(self, "base_pace") and hasattr(self, "base_shooting"):
+            return int((self.base_pace + self.base_shooting + self.base_passing + self.base_dribbling + self.base_defending + self.base_physical) / 6)
         return 50
 
     @overall.setter
@@ -492,6 +498,27 @@ class Goalkeeper(Player):
         self.reflexes : int = reflexes
         self.speed : int = speed
         self.positioning : int = positioning
+        self.base_shooting: int = 50
+        self.base_dribbling: int = 50
+        self.base_defending: int = 50
+        self.base_physical: int = 50
+        self.heading: int = 50
+
+    @property
+    def base_pace(self) -> int:
+        return self.speed
+
+    @base_pace.setter
+    def base_pace(self, value: int) -> None:
+        self.speed = value
+
+    @property
+    def base_passing(self) -> int:
+        return self.kicking
+
+    @base_passing.setter
+    def base_passing(self, value: int) -> None:
+        self.kicking = value
 
     @property
     def goalkeeping_score(self) -> int:
@@ -540,7 +567,7 @@ class MatchPlayer:
     def stat_modifier(self) -> float:
         # Realistic fatigue curve + player form impact
         form_factor = 0.88 + 0.12 * self.form
-        base_mod = (0.70 + 0.30 * self.current_stamina) * self.position_penalty * form_factor
+        base_mod = (0.75 + 0.25 * self.current_stamina) * self.position_penalty * form_factor
         if self.is_injured and self.injury_severity == "minor":
             base_mod *= 0.80 
         return base_mod
@@ -566,49 +593,43 @@ class MatchPlayer:
         return self.yellow_card
     @property
     def minutes_played(self) -> int:
-        return min(90, max(0, round(getattr(self, "seconds_played", 0) / 60)))
+        return min(90, max(0, round(self.seconds_played / 60)))
     @property
     def age(self) -> int:
-        return getattr(self.player, "age", 20)
+        return self.player.age
     @property
     def nationality(self) -> str:
-        return getattr(self.player, "nationality", "Unknown")
+        return self.player.nationality
     @property
     def overall(self) -> int:
-        return getattr(self.player, "overall", 50)
+        return self.player.overall
     @property
     def fitness(self) -> float:
-        return getattr(self.player, "fitness", 1.0)
+        return self.player.fitness
     @property
     def form(self) -> float:
-        return getattr(self.player, "form", 1.0)
+        return self.player.form
     @property
     def pace(self) -> int:
-        b = getattr(self.player, "base_pace", getattr(self.player, "speed", 50))
-        return int(b * self.stat_modifier)
+        return int(self.player.base_pace * self.stat_modifier)
     @property
     def shooting(self) -> int:
-        b = getattr(self.player, "base_shooting", 50)
-        return int(b * self.stat_modifier)
+        return int(self.player.base_shooting * self.stat_modifier)
     @property
     def passing(self) -> int:
-        b = getattr(self.player, "base_passing", getattr(self.player, "kicking", 50))
-        return int(b * self.stat_modifier)
+        return int(self.player.base_passing * self.stat_modifier)
     @property
     def dribbling(self) -> int:
-        b = getattr(self.player, "base_dribbling", 50)
-        return int(b * self.stat_modifier)
+        return int(self.player.base_dribbling * self.stat_modifier)
     @property
     def defending(self) -> int:
-        b = getattr(self.player, "base_defending", 50)
-        return int(b * self.stat_modifier)
+        return int(self.player.base_defending * self.stat_modifier)
     @property
     def physical(self) -> int:
-        b = getattr(self.player, "base_physical", 50)
-        return int(b * self.stat_modifier)
+        return int(self.player.base_physical * self.stat_modifier)
     @property
     def heading(self) -> int:
-        return int(getattr(self.player, "heading", 50))
+        return int(self.player.heading)
     @property
     def height(self) -> int:
         return self.player.height
@@ -632,7 +653,7 @@ class MatchPlayer:
 
     def drain_stamina(self, seconds: int, is_active: bool = False) -> None:
         multiplier = 2.5 if is_active else 1.0
-        physical = getattr(self.player, "base_physical", getattr(self.player, "physical", 50))
+        physical = self.player.base_physical
         physical_factor: float = 1.0 - (physical / 200)
         drain_amount: float = seconds * BASE_DRAIN_RATE * physical_factor * multiplier
         self.current_stamina = max(0.0, self.current_stamina - drain_amount)
@@ -753,7 +774,9 @@ class MatchTeam:
 
 
     def _bench_players(self) -> list[MatchPlayer]:
-            return [player for player in self.match_players if player not in self.players_on_field]
+        unassigned = [player for player in self.match_players if player not in self.players_on_field and not getattr(player.player, "is_suspended", False)]
+        unassigned.sort(key=lambda p: p.effective_overall, reverse=True)
+        return unassigned
 
     def _starting_players(self) -> list[MatchPlayer]:
         starting_players: list[MatchPlayer] = []
@@ -763,6 +786,9 @@ class MatchTeam:
 
         def is_field_player(p: MatchPlayer) -> bool:
             return not is_gk(p)
+
+        def is_available(p: MatchPlayer) -> bool:
+            return not getattr(p.player, "is_suspended", False)
 
         def position_suitability(player_pos: Position, target_pos: Position) -> float:
             if player_pos == target_pos:
@@ -776,17 +802,22 @@ class MatchTeam:
             else:
                 return 0.65
 
-        gks = [p for p in self.match_players if is_gk(p)]
+        available_players = [p for p in self.match_players if is_available(p)]
+        candidates_pool = available_players if len(available_players) >= 11 else list(self.match_players)
+
+        gks = [p for p in candidates_pool if is_gk(p)]
+        if not gks:
+            gks = [p for p in self.match_players if is_gk(p)]
         if gks:
             scored_gks = []
             for p in gks:
-                form = getattr(p.player, "form", 1.0)
-                sc = (p.effective_overall ** 4.0) * (p.player.fitness ** 3.0) * (form ** 2.0)
+                form = p.player.form
+                sc = (p.effective_overall ** 2.0) * (p.player.fitness ** 2.2) * (form ** 1.2)
                 scored_gks.append((p, sc))
             top_gk_score = max(s[1] for s in scored_gks)
-            viable_gks = [p for p, sc in scored_gks if sc >= top_gk_score * 0.88]
+            viable_gks = [p for p, sc in scored_gks if sc >= top_gk_score * 0.85]
             if len(viable_gks) > 1:
-                weights = [sc for p, sc in scored_gks if p in viable_gks]
+                weights = [(sc / top_gk_score) ** 3.0 for p, sc in scored_gks if p in viable_gks]
                 chosen_gk = random.choices(viable_gks, weights=weights, k=1)[0]
             else:
                 chosen_gk = viable_gks[0]
@@ -795,26 +826,29 @@ class MatchTeam:
             chosen_gk.is_on_field = True
             starting_players.append(chosen_gk)
 
-        field_candidates = [p for p in self.match_players if is_field_player(p)]
+        field_candidates = [p for p in candidates_pool if is_field_player(p)]
+        if len(field_candidates) < 10:
+            field_candidates = [p for p in self.match_players if is_field_player(p)]
         assigned_players: set[MatchPlayer] = set(starting_players)
 
-        # Pass 1: Exact position matches (competitive score-weighted selection with form)
+        # Pass 1: Exact and primary fallback matches (suitability >= 0.90)
         unfilled_positions = []
         for position in self.formation:
             exact_matches = [
                 p for p in field_candidates 
-                if p not in assigned_players and p.player.position == position
+                if p not in assigned_players and position_suitability(p.player.position, position) >= 0.90
             ]
             if exact_matches:
                 scored = []
                 for p in exact_matches:
+                    suit = position_suitability(p.player.position, position)
                     form = getattr(p.player, "form", 1.0)
-                    sc = (p.effective_overall ** 4.0) * (p.player.fitness ** 3.0) * (form ** 2.0)
+                    sc = ((p.effective_overall * suit) ** 2.0) * (p.player.fitness ** 2.2) * (form ** 1.2)
                     scored.append((p, sc))
                 top_score = max(s[1] for s in scored)
-                viable = [p for p, sc in scored if sc >= top_score * 0.88]
+                viable = [p for p, sc in scored if sc >= top_score * 0.85]
                 if len(viable) > 1:
-                    weights = [sc for p, sc in scored if p in viable]
+                    weights = [(sc / top_score) ** 3.0 for p, sc in scored if p in viable]
                     chosen_player = random.choices(viable, weights=weights, k=1)[0]
                 else:
                     chosen_player = viable[0]
@@ -826,8 +860,7 @@ class MatchTeam:
             else:
                 unfilled_positions.append(position)
 
-        # Pass 2: Fallback position matches (preferred fallbacks or same sector with form)
-        still_unfilled = []
+        # Pass 2: Secondary fallback position matches (suitability >= 0.80)
         for position in unfilled_positions:
             available = [p for p in field_candidates if p not in assigned_players]
             if not available:
@@ -836,17 +869,17 @@ class MatchTeam:
                 p for p in available 
                 if position_suitability(p.player.position, position) >= 0.80
             ]
-            candidates_pool = suitable_candidates if suitable_candidates else available
+            candidates_p2 = suitable_candidates if suitable_candidates else available
             scored = []
-            for p in candidates_pool:
+            for p in candidates_p2:
                 suit = position_suitability(p.player.position, position)
                 form = getattr(p.player, "form", 1.0)
-                sc = ((p.effective_overall * suit) ** 4.0) * (p.player.fitness ** 3.0) * (form ** 2.0)
+                sc = ((p.effective_overall * suit) ** 2.0) * (p.player.fitness ** 2.2) * (form ** 1.2)
                 scored.append((p, sc))
             top_score = max(s[1] for s in scored)
-            viable = [p for p, sc in scored if sc >= top_score * 0.88]
+            viable = [p for p, sc in scored if sc >= top_score * 0.85]
             if len(viable) > 1:
-                weights = [sc for p, sc in scored if p in viable]
+                weights = [(sc / top_score) ** 3.0 for p, sc in scored if p in viable]
                 chosen_cand = random.choices(viable, weights=weights, k=1)[0]
             else:
                 chosen_cand = viable[0]
@@ -953,15 +986,20 @@ class MatchTeam:
         if not self.bench_players:
             return None
 
+        available_bench = [p for p in self.bench_players if not getattr(p.player, "is_suspended", False) and not p.is_injured]
+        if not available_bench:
+            return None
+        bench_pool = available_bench
+
         # Handle Goalkeepers separately
         if isinstance(player_off.player, Goalkeeper) or player_off.assigned_position == Position.GOALKEEPER:
-            gks = [p for p in self.bench_players if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER]
+            gks = [p for p in bench_pool if isinstance(p.player, Goalkeeper) or p.player.position == Position.GOALKEEPER]
             if gks:
                 return max(gks, key=lambda p: (p.effective_overall, p.player.overall))
-            return max(self.bench_players, key=lambda p: (p.effective_overall, p.player.overall))
+            return max(bench_pool, key=lambda p: (p.effective_overall, p.player.overall))
 
-        field_bench = [p for p in self.bench_players if not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER]
-        candidates = field_bench if field_bench else list(self.bench_players)
+        field_bench = [p for p in bench_pool if not isinstance(p.player, Goalkeeper) and p.player.position != Position.GOALKEEPER]
+        candidates = field_bench if field_bench else list(bench_pool)
 
         def suitability(c_pos: Position, t_pos: Position) -> float:
             if c_pos == t_pos:
@@ -1049,7 +1087,7 @@ class MatchTeam:
                 goal_diff = my_score - opp_score
                 if goal_diff < 0 and current_second >= 3600:
                     prefer_att = True
-                elif goal_diff >= 2 and current_second >= 3900:
+                elif goal_diff >= 2 and current_second >= 3600:
                     prefer_def = True
 
             # Calculate urgency score for each player with player form influence
@@ -1057,9 +1095,8 @@ class MatchTeam:
                 stamina_deficit = max(0.01, 1.0 - p.current_stamina)
                 player_form = max(0.60, getattr(p.player, "form", 1.0))
                 
-                # Form impact: In-form players have significantly lower sub urgency (they play longer)
-                # Out-of-form players have higher sub urgency (hooked off earlier)
-                urgency = stamina_deficit / (player_form ** 1.8)
+                # Form impact: In-form players have lower sub urgency (they play longer), but without extreme exhaustion trapping
+                urgency = stamina_deficit / (player_form ** 1.2)
                 
                 # Match rating context
                 if current_second >= 3300:
@@ -1072,26 +1109,26 @@ class MatchTeam:
                 if p.yellow_card >= 1 and current_second >= 3300:
                     urgency *= 1.20
 
-                # Tactical adjustments
+                # Tactical adjustments & lead preservation
                 if prefer_att and p.assigned_position in (Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRE_BACK):
                     urgency *= 1.25
-                elif prefer_def and p.assigned_position in (Position.STRIKER, Position.LEFT_WING, Position.RIGHT_WING):
+                elif prefer_def and (p.assigned_position in (Position.STRIKER, Position.LEFT_WING, Position.RIGHT_WING) or p.is_starter):
                     urgency *= 1.25
 
                 return urgency
 
             # Progressive 2nd half substitution thresholds adjusted for player form
             if current_second >= 4300: # ~71+ mins
-                base_threshold = 0.88
+                base_threshold = 0.90
             elif current_second >= 3400: # ~56+ mins
-                base_threshold = 0.83
+                base_threshold = 0.85
             else: # ~47-55 mins
-                base_threshold = 0.77
+                base_threshold = 0.79
 
-            # Players in good form need to be more exhausted to qualify for sub (play longer)
+            # Players in good form need to be slightly more exhausted to qualify for sub (play longer)
             def qualifies_for_sub(p: MatchPlayer) -> bool:
                 p_form = getattr(p.player, "form", 1.0)
-                effective_threshold = base_threshold - ((p_form - 1.0) * 0.12)
+                effective_threshold = base_threshold - ((p_form - 1.0) * 0.06)
                 return p.current_stamina <= effective_threshold or (getattr(p, 'rating', 6.0) <= 5.6 and current_second >= 3600)
 
             candidates_for_sub = [p for p in field_players_on_field if qualifies_for_sub(p)]
@@ -1180,27 +1217,31 @@ class PlayerSeasonStats:
 
     @property
     def age(self) -> int:
-        return getattr(self.player, "age", 20)
+        return self.player.age
 
     @property
     def nationality(self) -> str:
-        return getattr(self.player, "nationality", "Unknown")
+        return self.player.nationality
 
     @property
     def height(self) -> int:
-        return getattr(self.player, "height", 180)
+        return self.player.height
 
     @property
     def overall(self) -> int:
-        return getattr(self.player, "overall", 50)
+        return self.player.overall
 
     @property
     def fitness(self) -> float:
-        return getattr(self.player, "fitness", 1.0)
+        return self.player.fitness
 
     @property
     def form(self) -> float:
-        return getattr(self.player, "form", 1.0)
+        return self.player.form
+
+    @property
+    def is_suspended(self) -> bool:
+        return self.player.is_suspended
 
     @property
     def is_goalkeeper(self) -> bool:
@@ -1210,23 +1251,23 @@ class PlayerSeasonStats:
     def attributes(self) -> dict[str, int]:
         if isinstance(self.player, Goalkeeper):
             return {
-                "diving": getattr(self.player, "diving", 50),
-                "handling": getattr(self.player, "handling", 50),
-                "kicking": getattr(self.player, "kicking", 50),
-                "reflexes": getattr(self.player, "reflexes", 50),
-                "speed": getattr(self.player, "speed", 50),
-                "positioning": getattr(self.player, "positioning", 50),
-                "goalkeeping_score": getattr(self.player, "goalkeeping_score", 50)
+                "diving": self.player.diving,
+                "handling": self.player.handling,
+                "kicking": self.player.kicking,
+                "reflexes": self.player.reflexes,
+                "speed": self.player.speed,
+                "positioning": self.player.positioning,
+                "goalkeeping_score": self.player.goalkeeping_score
             }
         else:
             return {
-                "pace": getattr(self.player, "base_pace", 50),
-                "shooting": getattr(self.player, "base_shooting", 50),
-                "passing": getattr(self.player, "base_passing", 50),
-                "dribbling": getattr(self.player, "base_dribbling", 50),
-                "defending": getattr(self.player, "base_defending", 50),
-                "physical": getattr(self.player, "base_physical", 50),
-                "heading": getattr(self.player, "heading", 50)
+                "pace": self.player.base_pace,
+                "shooting": self.player.base_shooting,
+                "passing": self.player.base_passing,
+                "dribbling": self.player.base_dribbling,
+                "defending": self.player.base_defending,
+                "physical": self.player.base_physical,
+                "heading": self.player.heading
             }
 
     @property
@@ -1240,9 +1281,17 @@ class PlayerSeasonStats:
         self.minutes_played += getattr(match_player, "minutes_played", 0)
         self.goals += match_player.goals
         self.assists += match_player.assists
+        old_yellows = self.yellow_cards
         self.yellow_cards += match_player.yellow_card
         if match_player.has_red_card:
             self.red_cards += 1
+            self.player.suspension_matches_remaining = 1
+        elif match_player.yellow_card > 0:
+            for threshold in (5, 10, 15, 20):
+                if old_yellows < threshold <= self.yellow_cards:
+                    self.player.suspension_matches_remaining = 1
+                    break
+
         self.passes += match_player.passes
         if isinstance(self.player, Goalkeeper) and team_conceded_zero:
             self.clean_sheets += 1
@@ -1252,19 +1301,26 @@ class PlayerSeasonStats:
             self.motm_awards += 1
 
         # Dynamic form evolution based on match performance & momentum
-        rating_delta = (rating - 6.5) * 0.04
+        if rating >= 6.3:
+            rating_delta = (rating - 6.3) * 0.04
+        else:
+            # Steeper penalty for poor match performances
+            rating_delta = (rating - 6.3) * 0.075
+
         if is_motm:
             rating_delta += 0.03
         if match_player.goals > 0:
             rating_delta += min(0.06, match_player.goals * 0.025)
         if match_player.assists > 0:
             rating_delta += min(0.04, match_player.assists * 0.02)
+        if match_player.yellow_card > 0:
+            rating_delta -= min(0.04, match_player.yellow_card * 0.02)
         if match_player.has_red_card:
-            rating_delta -= 0.08
+            rating_delta -= 0.10
 
-        # Weighted momentum: 70% prior form + 30% baseline (1.0) + match delta
+        # Weighted momentum: 78% prior form + 22% baseline (1.0) + match delta
         prev_form = getattr(self.player, "form", 1.0)
-        new_form = (prev_form * 0.70) + (1.0 * 0.30) + rating_delta
+        new_form = (prev_form * 0.78) + (1.0 * 0.22) + rating_delta
         self.player.form = max(0.75, min(1.25, round(new_form, 3)))
 
 

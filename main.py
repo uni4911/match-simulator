@@ -120,7 +120,7 @@ async def match_event_generator():
         time_passed = random.randint(*time_range)
         match.advance_time(time_passed)
         report = get_match_status_report()
-        data_json = json.dumps(report)
+        data_json = MatchStatusSchema.model_validate(report).model_dump_json()
 
         yield f"data: {data_json}\n\n"
 
@@ -139,7 +139,7 @@ async def match_event_generator():
             league.register_match_player_stats(match)
 
         report = get_match_status_report()
-        data_json = json.dumps(report)
+        data_json = MatchStatusSchema.model_validate(report).model_dump_json()
         yield f"data: {data_json}\n\n"
 
 async def get_players_stats():
@@ -264,8 +264,16 @@ def read_root():
 @app.get("/match/stream")
 async def stream_match():
     if not match:
-        raise HTTPException(status_code=400,detail="Brak aktywnego meczu")
-    return StreamingResponse(match_event_generator(),media_type="text/event-stream")
+        raise HTTPException(status_code=400, detail="Brak aktywnego meczu")
+    return StreamingResponse(
+        match_event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 def _get_league_response(league_obj):
     num_teams = len(league_obj.teams)

@@ -116,3 +116,49 @@ def test_player_rotation_and_substitutions():
         assert 0.50 <= p.fitness <= 1.00
 
 
+def test_card_suspension_forces_bench_rotation():
+    gk = Goalkeeper("GK Team", 80, 80, 70, 85, 60, 80)
+    star = FieldPlayer("Star Striker", Position.CENTRAL_FORWARD, 90, 90, 85, 85, 40, 85, 80, 185)
+    backup = FieldPlayer("Backup Striker", Position.CENTRAL_FORWARD, 80, 80, 75, 75, 40, 75, 75, 180)
+    other_fps = [
+        FieldPlayer(f"Field {i}", pos, 75, 75, 75, 75, 75, 75, 75, 180)
+        for i, pos in enumerate([
+            Position.CENTRE_BACK, Position.CENTRE_BACK, Position.LEFT_BACK, Position.RIGHT_BACK,
+            Position.CENTRAL_DEFENSIVE_MIDFIELDER, Position.CENTRAL_MIDFIELDER, Position.CENTRAL_MIDFIELDER,
+            Position.LEFT_WING, Position.RIGHT_WING
+        ])
+    ]
+    bench_extra = [
+        FieldPlayer("Extra Sub 1", Position.CENTRE_BACK, 70, 70, 70, 70, 70, 70, 70, 180),
+        FieldPlayer("Extra Sub 2", Position.CENTRAL_MIDFIELDER, 70, 70, 70, 70, 70, 70, 70, 180)
+    ]
+    team = Team("Suspension FC", [gk, star, backup] + other_fps + bench_extra)
+
+    opp_gk = Goalkeeper("Opp GK", 80, 80, 70, 85, 60, 80)
+    opp_fps = [FieldPlayer(f"Opp {i}", pos, 75, 75, 75, 75, 75, 75, 75, 180) for i, pos in enumerate(Position)]
+    opp_team = Team("Opponent FC", [opp_gk] + opp_fps)
+
+    league = League(name="Suspension League", teams=[team, opp_team])
+    engine = LeagueEngine(league, MatchEngine())
+    engine.generate_fixture(double_round=False)
+
+    # Manually trigger a 1-match suspension on star player (e.g. red card)
+    star.suspension_matches_remaining = 1
+    assert star.is_suspended is True
+
+    # Play match while star is suspended
+    match = league.fixtures[0]
+    engine.play_match(match)
+
+    susp_match_team = match.home_team if match.home_team.team.name == "Suspension FC" else match.away_team
+    starters = [p.player.full_name for p in susp_match_team.match_players if p.is_starter]
+    # Star should NOT have started, and Backup should have started
+    assert "Star Striker" not in starters
+    assert "Backup Striker" in starters
+    
+    # After match, suspension should be cleared
+    assert star.suspension_matches_remaining == 0
+    assert star.is_suspended is False
+
+
+

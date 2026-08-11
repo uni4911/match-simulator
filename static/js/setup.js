@@ -152,8 +152,8 @@ export async function startNewMatch() {
         renderMatchData(data);
         await fetchPlayerStats();
         switchView('match');
+        startLiveStream();
     } catch (err) {
         console.error('Failed to start new match:', err);
     }
-    startLiveStream();
 }

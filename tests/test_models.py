@@ -258,8 +258,8 @@ def test_positional_substitutions_select_appropriate_replacement():
         FieldPlayer(f"Starter {i}", pos, 85, 85, 85, 85, 85, 85, 85, 180)
         for i, pos in enumerate(FORMATION_433)
     ]
-    # Set the forward to Kylian Mbappe
-    starters[-1] = FieldPlayer("Kylian Mbappe", Position.CENTRAL_FORWARD, 91, 91, 91, 91, 91, 91, 91, 178)
+    # Set the striker position (index 8 in 4-3-3) to Kylian Mbappe
+    starters[8] = FieldPlayer("Kylian Mbappe", Position.STRIKER, 91, 91, 91, 91, 91, 91, 91, 178)
     
     # Bench has Dean Huijsen (CB) listed FIRST, and Endrick (ST) listed SECOND
     huijsen = FieldPlayer("Dean Huijsen", Position.CENTRE_BACK, 78, 78, 78, 78, 78, 78, 78, 192)

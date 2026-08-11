@@ -109,3 +109,56 @@ def test_player_season_stats_team_name_propagation():
     assert season_stats.team_name == "Real Madrid"
 
 
+def test_player_form_evolution_and_sustainability():
+    # An average player in good form (1.20) should maintain high form across 3+ solid matches
+    player = FieldPlayer("Average Midfielder", Position.CENTRAL_MIDFIELDER, 70, 70, 70, 70, 70, 55, 70, 180)
+    player.form = 1.20
+    season_stats = PlayerSeasonStats(player)
+
+    # Match 1: solid performance (rating 6.8, 1 assist)
+    mp1 = MatchPlayer(player)
+    mp1.rating = 6.8
+    mp1.assists = 1
+    season_stats.register_match_player(mp1)
+
+    assert player.form >= 1.15, f"Form should remain high after solid match 1, got {player.form}"
+
+    # Match 2: decent performance (rating 6.5)
+    mp2 = MatchPlayer(player)
+    mp2.rating = 6.5
+    season_stats.register_match_player(mp2)
+
+    assert player.form >= 1.10, f"Form should remain solid after match 2, got {player.form}"
+
+    # Match 3: average performance (rating 6.2)
+    mp3 = MatchPlayer(player)
+    mp3.rating = 6.2
+    season_stats.register_match_player(mp3)
+
+    assert player.form >= 1.05, f"Form should remain positive after match 3 without collapsing, got {player.form}"
+
+
+def test_player_loses_form_on_poor_performances():
+    # A player in top form (1.20) should lose form quickly when putting in poor performances
+    player = FieldPlayer("Struggling Player", Position.STRIKER, 75, 75, 75, 75, 75, 70, 75, 180)
+    player.form = 1.20
+    season_stats = PlayerSeasonStats(player)
+
+    # Match 1: Poor performance (rating 5.5, yellow card)
+    mp1 = MatchPlayer(player)
+    mp1.rating = 5.5
+    mp1.yellow_card = 1
+    season_stats.register_match_player(mp1)
+
+    assert player.form <= 1.10, f"Form should drop noticeably after bad match, got {player.form}"
+
+    # Match 2: Another poor performance (rating 5.4)
+    mp2 = MatchPlayer(player)
+    mp2.rating = 5.4
+    season_stats.register_match_player(mp2)
+
+    assert player.form < 1.00, f"Form should drop below baseline (1.0) after 2 consecutive poor matches, got {player.form}"
+
+
+
+

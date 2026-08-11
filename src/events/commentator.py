@@ -222,18 +222,29 @@ class Commentator:
         event_bus.subscribe(MatchEvent, self.handle_event)
 
     def handle_event(self, event: MatchEvent) -> None:
-        comments_list = None
-        if isinstance(event, KickoffEvent) and getattr(event, 'half', 1) == 2:
-            comments_list = KICKOFF_2ND_HALF_COMMENTS
-        elif isinstance(event, InjuryEvent):
-            comments_list = INJURY_SEVERE_COMMENTS if getattr(event, 'severity', 'minor') == 'severe' else INJURY_MINOR_COMMENTS
-        else:
-            comments_list = EVENT_COMMENT_MAP.get(type(event))
+        if event not in self.commented_events:
+            comments_list = None
+            if isinstance(event, KickoffEvent) and getattr(event, 'half', 1) == 2:
+                comments_list = KICKOFF_2ND_HALF_COMMENTS
+            elif isinstance(event, InjuryEvent):
+                comments_list = INJURY_SEVERE_COMMENTS if getattr(event, 'severity', 'minor') == 'severe' else INJURY_MINOR_COMMENTS
+            else:
+                comments_list = EVENT_COMMENT_MAP.get(type(event))
 
-        if comments_list:
-            comment = random.choice(comments_list)
-            minute = event.second // 60
-            print(f"{minute}' min: {comment.format(event=event)}")
+            if comments_list:
+                try:
+                    comment = random.choice(comments_list)
+                    minute = event.second // 60
+                    formatted_comment = f"{minute}' min: {comment.format(event=event)}"
+                    self.commented_events[event] = formatted_comment
+                except Exception:
+                    pass
+
+        if event in self.commented_events:
+            try:
+                print(self.commented_events[event])
+            except Exception:
+                pass
 
     def comment(self, match: Match) -> None:
         if not match.match_events:
@@ -248,17 +259,5 @@ class Commentator:
 
     def get_comment_text(self, event: MatchEvent) -> str:
         if event not in self.commented_events:
-            comments_list = None
-            if isinstance(event, KickoffEvent) and getattr(event, 'half', 1) == 2:
-                comments_list = KICKOFF_2ND_HALF_COMMENTS
-            elif isinstance(event, InjuryEvent):
-                comments_list = INJURY_SEVERE_COMMENTS if getattr(event, 'severity', 'minor') == 'severe' else INJURY_MINOR_COMMENTS
-            else:
-                comments_list = EVENT_COMMENT_MAP.get(type(event))
-
-            if comments_list:
-                comment = random.choice(comments_list)
-                minute = event.second // 60
-                formated_comment = f"{minute}' min: {comment.format(event=event)}"
-                self.commented_events[event] = formated_comment
-        return self.commented_events.get(event)
+            self.handle_event(event)
+        return self.commented_events.get(event, "")

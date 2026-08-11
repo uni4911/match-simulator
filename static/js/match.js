@@ -180,20 +180,31 @@ export async function updateMatchState(url, userMethod = 'GET') {
 export function startLiveStream(){
     if (liveEventSource){
         liveEventSource.close();
+        liveEventSource = null;
     }
     const eventSource = new EventSource('/match/stream');
     liveEventSource = eventSource;
 
     eventSource.onmessage = function(event){
-        const data = JSON.parse(event.data);
-        renderMatchData(data);
-        fetchPlayerStats();
-        if (data.is_finished){
-            eventSource.close();
+        try {
+            const data = JSON.parse(event.data);
+            renderMatchData(data);
+            fetchPlayerStats();
+            if (data.is_finished){
+                eventSource.close();
+                if (liveEventSource === eventSource) {
+                    liveEventSource = null;
+                }
+            }
+        } catch (e) {
+            console.error("Błąd parsowania danych SSE:", e);
         }
     };
     eventSource.onerror = function(err) {
         console.error("Błąd strumieniowania SSE:", err);
         eventSource.close();
+        if (liveEventSource === eventSource) {
+            liveEventSource = null;
+        }
     };
 }

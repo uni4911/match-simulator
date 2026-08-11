@@ -91,6 +91,7 @@ class PlayerSeasonStatsSchema(BaseModel):
     overall: int = Field(default=50, ge=1, le=99)
     fitness: float = Field(default=1.0, ge=0.0, le=1.0)
     form: float = Field(default=1.0, ge=0.0, le=2.0)
+    is_suspended: bool = False
     attributes: dict[str, int] = Field(default_factory=dict)
 
 class PlayerMatchLogSchema(BaseModel):

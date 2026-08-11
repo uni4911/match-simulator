@@ -1,5 +1,5 @@
 import random
-from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats, get_formation_positions
+from src.models import League, LeagueTeamStats, MatchTeam, FORMATION_433, PlayerSeasonStats, get_formation_positions, Goalkeeper, Position
 from src.engine.engine import Match, MatchEngine, KickOff
 
 class LeagueEngine:
@@ -70,12 +70,15 @@ class LeagueEngine:
                 random.shuffle(leg2_r_matches)
                 second_round_matches.extend(leg2_r_matches)
 
-        # Reset player fitness and form at season start
+        # Reset player fitness, form, consecutive streaks, and suspensions at season start
         for team in self.league.teams:
             if team:
                 for player in getattr(team, "players", []):
-                    player.fitness = 1.0
-                    player.form = 1.0
+                    actual = getattr(player, "player", player)
+                    actual.fitness = 1.0
+                    actual.form = 1.0
+                    actual.consecutive_matches_played = 0
+                    actual.suspension_matches_remaining = 0
 
         self.league.fixtures = first_round_matches + second_round_matches
         
@@ -99,7 +102,7 @@ class LeagueEngine:
 
         self.match_engine.play_match(match)
 
-        # Update player fitness and rest recovery post-match
+        # Update player fitness, consecutive streaks, and rest recovery post-match
         for mt in (home_team, away_team):
             played_player_ids = set()
             for mp in mt.match_players:
@@ -109,21 +112,60 @@ class LeagueEngine:
                     mins = getattr(mp, 'minutes_played', 90)
                     mins_ratio = min(1.0, max(0.1, mins / 90.0))
                     phys = getattr(mp.player, 'base_physical', getattr(mp.player, 'physical', 50))
-                    phys_factor = 0.85 + (phys / 200.0)
-                    
-                    # Fatigue loss: between 0.04 and 0.08 per match start depending on minutes and physical
-                    fatigue_loss = (0.04 + 0.05 * (1.0 - mp.current_stamina)) * mins_ratio / phys_factor
-                    mp.player.fitness = max(0.68, round(mp.player.fitness - fatigue_loss, 3))
-                else:
-                    # Rested bench players who didn't play recover +16%
-                    mp.player.fitness = min(1.0, round(mp.player.fitness + 0.16, 3))
+                    age = getattr(mp.player, 'age', 25)
 
-            # Non-playing squad players recover fitness (+20%) and normalize form towards 1.0
+                    # Update consecutive matches played streak
+                    if mins >= 45:
+                        mp.player.consecutive_matches_played = getattr(mp.player, "consecutive_matches_played", 0) + 1
+                    else:
+                        mp.player.consecutive_matches_played = max(0, getattr(mp.player, "consecutive_matches_played", 0) - 1)
+
+                    consec = mp.player.consecutive_matches_played
+
+                    # Physical attribute resistance to fatigue and consecutive workload
+                    # High physical (85+) players resist consecutive match fatigue significantly
+                    phys_factor = 0.85 + (phys / 180.0)
+                    consec_fatigue_mult = 1.0 + max(0, consec - 2) * max(0.04, 0.22 - (phys / 450.0))
+
+                    # Age recovery factor: Prime (22-29) = 1.0, Veterans (30+) recover slower, Young (<21) slight penalty
+                    if age >= 30:
+                        age_recovery_mult = max(0.70, 1.0 - (age - 29) * 0.035)
+                    elif age < 21:
+                        age_recovery_mult = 0.95 + (age - 17) * 0.012
+                    else:
+                        age_recovery_mult = 1.0
+
+                    # Goalkeepers run much less and experience minimal in-match muscular fatigue
+                    is_gk = isinstance(mp.player, Goalkeeper) or mp.assigned_position == Position.GOALKEEPER
+                    gk_drain_mult = 0.20 if is_gk else 1.0
+
+                    # Match fatigue loss based on in-game exhaustion, minutes played, and consecutive matches
+                    fatigue_loss = (0.048 + 0.052 * (1.0 - mp.current_stamina)) * mins_ratio * consec_fatigue_mult * gk_drain_mult / phys_factor
+
+                    # Inter-match recovery (rest period between weekly league matchdays)
+                    weekly_recovery = (0.032 + 0.024 * (phys / 100.0)) * age_recovery_mult
+
+                    net_fitness = mp.player.fitness - fatigue_loss + weekly_recovery
+                    mp.player.fitness = max(0.68, min(1.0, round(net_fitness, 3)))
+                else:
+                    # Rested bench players who didn't play recover fitness & reset consecutive streak
+                    mp.player.consecutive_matches_played = 0
+                    mp.player.fitness = min(1.0, round(mp.player.fitness + 0.18, 3))
+
+            # Non-playing squad players recover fitness (+20%), reset streaks, and form cools down towards 1.0
             for p in mt.team.players:
-                if id(p) not in played_player_ids:
-                    p.fitness = min(1.0, round(p.fitness + 0.20, 3))
-                    curr_f = getattr(p, "form", 1.0)
-                    p.form = max(0.80, min(1.20, round((curr_f * 0.85) + (1.0 * 0.15), 3)))
+                actual = getattr(p, "player", p)
+                if id(actual) not in played_player_ids:
+                    actual.consecutive_matches_played = 0
+                    actual.fitness = min(1.0, round(actual.fitness + 0.20, 3))
+                    curr_f = getattr(actual, "form", 1.0)
+                    actual.form = max(0.80, min(1.20, round((curr_f * 0.80) + (1.0 * 0.20), 3)))
+
+            # Decrement suspension for banned players who served their match suspension in the stands
+            for p in mt.team.players:
+                actual = getattr(p, "player", p)
+                if getattr(actual, "suspension_matches_remaining", 0) > 0 and id(actual) not in played_player_ids:
+                    actual.suspension_matches_remaining -= 1
 
         home_score = match.home_score
         away_score = match.away_score
@@ -139,10 +181,10 @@ class LeagueEngine:
         return sorted(self.league.table.values(), key=lambda team: (-team.points, -team.goals_difference, -team.goals_scored))
 
     def get_top_scorers(self, limit: int = 10) -> list[PlayerSeasonStats]:
-        return sorted(self.league.player_stats.values(), key=lambda stats: stats.goals, reverse=True)[:limit]
+        return sorted(self.league.player_stats.values(), key=lambda stats: (stats.goals, stats.matches_played, stats.average_rating), reverse=True)[:limit]
 
     def get_top_assists(self, limit: int = 10) -> list[PlayerSeasonStats]:
-        return sorted(self.league.player_stats.values(), key=lambda stats: stats.assists, reverse=True)[:limit]
+        return sorted(self.league.player_stats.values(), key=lambda stats: (stats.assists, stats.matches_played, stats.average_rating), reverse=True)[:limit]
 
     def get_top_ratings(self, limit: int = 10, min_matches: int = 5) -> list[PlayerSeasonStats]:
         filtered = [s for s in self.league.player_stats.values() if s.matches_played > min_matches]
